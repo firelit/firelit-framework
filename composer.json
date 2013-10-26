@@ -1,0 +1,21 @@
+{
+    "name": "firelit/framework",
+    "type": "library",
+    "description": "Framework for Firelit projects",
+    "license": "MIT",
+    "require": {
+		"php": ">=5.3.0",
+		"ext-mbstring": "*"
+    },
+    "autoload": {
+        "psr-0": { "Firelit": "lib/" }
+    },
+    "authors": [
+		{
+			"name": "Eric Bigoness",
+			"email": "eric.bigoness@firelit.com",
+			"homepage": "http://www.firelit.com",
+			"role": "Developer"
+		}
+	]
+}
