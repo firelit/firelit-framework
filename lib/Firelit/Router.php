@@ -34,7 +34,7 @@ class Router {
 	public function __destruct() {
 
 		if ($this->match || !is_callable($this->default)) return;
-		
+
 		try {
 
 			$this->default();
@@ -48,6 +48,13 @@ class Router {
 		exit;
 	}
 
+	/**
+	 * Magic method used specifically for calling the default route
+	 *
+	 * @param  string $method
+	 * @param  array $args
+	 * @return mixed
+	 */
 	public function __call($method, $args) {
 		if (isset($this->$method) && is_callable($this->$method)) {
 			return call_user_func_array($this->$method, $args);
@@ -57,8 +64,8 @@ class Router {
 	/**
 	 * Check the method and uri and run the supplied function if match.
 	 *
-	 * @param  mixed $filterMethod
-	 * @param  mixed $regExpUrlMatch
+	 * @param  int|array $filterMethod
+	 * @param  string|bool $regExpUrlMatch
 	 * @param  function $execute
 	 * @return void
 	 */
@@ -98,6 +105,14 @@ class Router {
 		
 	}
 
+	/**
+	 * Set an error route for a specific error code (or 0 for default/catch-all)
+	 * Function to execute will be passed two parameters: the error code & an optional error message
+	 *
+	 * @param  int|array $errorCode
+	 * @param  function $execute
+	 * @return Firelit\Router
+	 */
 	public function errorRoute($errorCode, $execute) {
 		if (!is_array($errorCode)) $errorCode = array($errorCode);
 		foreach ($errorCode as $thisCode) $this->error[$thisCode] = $execute;
@@ -105,17 +120,35 @@ class Router {
 		return $this;
 	}
 
+	/**
+	 * Set the default route if no other routes match
+	 *
+	 * @param  function $execute
+	 * @return Firelit\Router
+	 */
 	public function defaultRoute($execute) {
 		$this->default = $execute;
 
 		return $this;
 	}
 
+	/**
+	 * Trigger an error route based on the error code and exit script with that error code
+	 *
+	 * @param  int $errorCode
+	 * @param  string $errorMessage
+	 * @return void
+	 */
 	public function triggerError($errorCode, $errorMessage = '') {
-		if (!isset($this->error[$errorCode]) || !is_callable($this->error[$errorCode])) exit($errorCode);
+		$callError = $errorCode;
+
+		if (!isset($this->error[$errorCode]) || !is_callable($this->error[$errorCode])) {
+			if (isset($this->error[0]) && is_callable($this->error[0])) $callError = 0;
+			else exit($errorCode);
+		}
 
 		//call_user_func_array($this->error[$errorCode], array($errorCode, $errorMessage));
-		$this->error[$errorCode]($errorCode, $errorMessage);
+		$this->error[$callError]($errorCode, $errorMessage);
 		// Or use call_user_func_array ?
 
 		$this->match = true;
