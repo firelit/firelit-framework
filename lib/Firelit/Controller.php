@@ -18,7 +18,7 @@ abstract class Controller {
 		$args = func_get_args();	
 		
 		// If parameters passed, be sure to pass them on:
-		if (sizeof($args)) array_shift($args);
+		array_shift($args);
 		if (sizeof($args)) array_shift($args);
 		
 		$reflect = new \ReflectionClass($controller);
