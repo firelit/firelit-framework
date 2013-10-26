@@ -20,7 +20,9 @@ class Request {
 		$this->secure = isset($_SERVER['HTTPS']) ? ($_SERVER['HTTPS'] == 'on') : false;
 		$this->host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : false;
 		$this->referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : false;
+		
 		$this->cli = (php_sapi_name() == 'cli');
+		if ($this->cli) $this->method = 'CLI';
 		
 		if (is_callable('apache_request_headers')) {
 			

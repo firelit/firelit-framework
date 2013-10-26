@@ -4,13 +4,14 @@ namespace Firelit;
 
 class Router {
 	
-	protected $method, $uri;
-	
+	protected $method, $uri, $match = false, $default, $error = array();
+	protected $testMode = false;
+
 	public $request, $response, $parameters = array();
 	
 	public static $proto = 'http', $domain = 'localhost', $rootPath = '/';
 	
-	public function __construct(Firelit\ServerRequest $request) {
+	public function __construct(Request $request) {
 	
 		$this->request = $request;
 		
@@ -24,37 +25,95 @@ class Router {
 		
 	}
 	
+	public function __destruct() {
+		if ($this->match || !is_callable($this->default)) return;
+
+		try {
+
+			$this->default();
+
+		} catch (RouteToError $e) {
+
+			$this->triggerError($e->getCode(), $e->getMessage());
+
+		}
+
+		exit;
+	}
+
+	public function __call($method, $args) {
+		if (isset($this->$method) && is_callable($this->$method)) {
+			return call_user_func_array($this->$method, $args);
+		}
+	}
+
 	/**
 	 * Check the method and uri and run the supplied function if match.
 	 *
-	 * @param  string $filterMethod
-	 * @param  string $regExpUrlMatch
+	 * @param  mixed $filterMethod
+	 * @param  mixed $regExpUrlMatch
 	 * @param  function $execute
 	 * @return void
 	 */
 	public function add($filterMethod, $regExpUrlMatch, $execute) {
 		
-		$filterMethods = explode(',', strtoupper($filterMethod));
+		if (!is_array($filterMethod)) $filterMethod = array($filterMethod);
 		
 		// (1) Does the request method match?
-		if (!in_array('*', $filterMethods) && !in_array($this->method, $filterMethods)) return;
+		if (!in_array('*', $filterMethod) && !in_array($this->method, $filterMethod)) return;
 		
 		$params = array();
-		
-		// (2) Does the URI match?
-		if (!preg_match($regExpUrlMatch, $this->uri, $params)) return;
+		 
+		// (2) Does the URI match? (set $regExpUrlMatch to false to skip)
+		if ($regExpUrlMatch && ($this->method == 'CLI')) return;
+		if ($regExpUrlMatch && !preg_match($regExpUrlMatch, $this->uri, $params)) return;
 		
 		// Method and URI match!
 		
 		// Remove the full text match from the match array
 		array_shift($params);
 		
-		// Go!
-		$execute($params);
+		try {
+
+			// Go!
+			$execute($params);
+
+		} catch (RouteToError $e) {
+			
+			$this->triggerError($e->getCode(), $e->getMessage());
+
+		}
 		
+		$this->match = true;
+
 		// End execution
 		exit;
 		
+	}
+
+	public function errorRoute($errorCode, $execute) {
+		if (!is_array($errorCode)) $errorCode = array($errorCode);
+		foreach ($errorCode as $thisCode) $this->error[$thisCode] = $execute;
+
+		return $this;
+	}
+
+	public function defaultRoute($execute) {
+		$this->default = $execute;
+
+		return $this;
+	}
+
+	public function triggerError($errorCode, $errorMessage = '') {
+		if (!isset($this->error[$errorCode]) || !is_callable($this->error[$errorCode])) exit($errorCode);
+
+		//call_user_func_array($this->error[$errorCode], array($errorCode, $errorMessage));
+		$this->error[$errorCode]($errorCode, $errorMessage);
+		// Or use call_user_func_array ?
+
+		$this->match = true;
+
+		exit($errorCode);
 	}
 	
 }

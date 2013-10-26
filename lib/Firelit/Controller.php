@@ -10,7 +10,7 @@ abstract class Controller {
 	
 	abstract public function __construct();
 	
-	static public function setup(Firelit\ServerRequest $request, Firelit\ServerResponse $response, Router $router = null, Authenticator $authenticator = null) {
+	static public function setup(Firelit\Request $request, Firelit\Response $response, Router $router = null, Authenticator $authenticator = null) {
 	
 		self::$request = $request;
 		self::$response = $response;
