@@ -22,12 +22,12 @@ abstract class Controller {
 		if (sizeof($args)) array_shift($args);
 		
 		$reflect = new \ReflectionClass($controller);
-		$return = $reflect->newInstanceArgs($args);
-
+		$newClass = $reflect->newInstanceArgs($args);
+		
 		// If method specified, return the result of that method call
-		if ($method) return $return->$method;
+		if ($method) return $newClass->$method();
 		// Else return the object itself
-		else return $return;
+		else return $newClass;
 		
 	}
 
