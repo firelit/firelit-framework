@@ -63,6 +63,7 @@ class Router {
 
 	/**
 	 * Check the method and uri and run the supplied function if match.
+	 * The $execute function is passed an array of matches from $regExpUrlMatch
 	 *
 	 * @param  int|array $filterMethod
 	 * @param  string|bool $regExpUrlMatch

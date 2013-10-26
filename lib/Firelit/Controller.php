@@ -21,7 +21,7 @@ abstract class Controller {
 		if (sizeof($args)) array_shift($args);
 		if (sizeof($args)) array_shift($args);
 		
-		$reflect  = new \ReflectionClass($controller);
+		$reflect = new \ReflectionClass($controller);
 		$return = $reflect->newInstanceArgs($args);
 
 		// If method specified, return the result of that method call
