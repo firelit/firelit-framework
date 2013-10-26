@@ -34,6 +34,9 @@ class Response extends InitExtendable {
 			
 		}
 		
+		// Set in registry
+		Registry::set('Response', $this);
+
 	}
 	
 	public function contentType($type = false) {

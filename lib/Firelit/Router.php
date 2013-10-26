@@ -11,7 +11,10 @@ class Router {
 	
 	public static $proto = 'http', $domain = 'localhost', $rootPath = '/';
 	
-	public function __construct(Request $request) {
+	public function __construct(Request $request = null) {
+
+		// Check registry for router, if not passed
+		if (is_null($request)) $request = Registry::get('Router');
 	
 		$this->request = $request;
 		
@@ -23,11 +26,15 @@ class Router {
 		$this->uri = preg_replace('!^'. preg_quote($rootPath) .'!', '', $request->path);
 		if (strpos($this->uri, '?')) $this->uri = substr($this->uri, 0, strpos($this->uri, '?'));
 		
+		// Set in registry
+		Registry::set('Router', $this);
+
 	}
 	
 	public function __destruct() {
-		if ($this->match || !is_callable($this->default)) return;
 
+		if ($this->match || !is_callable($this->default)) return;
+		
 		try {
 
 			$this->default();

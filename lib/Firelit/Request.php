@@ -78,6 +78,10 @@ class Request {
 			$_COOKIE = null;
 			
 		}
+
+		// Set in registry
+		Registry::set('Request', $this);
+
 	}
 	
 	public function filterInputs($filter = false) {

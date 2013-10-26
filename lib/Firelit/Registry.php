@@ -21,7 +21,10 @@ class Registry {
 
 	public function __set($name, $value) {
 		self::set($name, $value);
-		return $this;
+	}
+
+	static public function clear() {
+		self::$data = array();
 	}
 
 }

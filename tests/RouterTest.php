@@ -21,6 +21,8 @@ class RouterTest extends PHPUnit_Framework_TestCase {
 			throw new ExpectedException();
 		});
 
+		Firelit\Registry::clear();
+		unset($r);
 	}
 
 	public function testDefault() {
@@ -44,6 +46,7 @@ class RouterTest extends PHPUnit_Framework_TestCase {
 			throw new UnexpectedException();
 		});
 
+		Firelit\Registry::clear();
 		unset($r);
 
 	}
@@ -74,6 +77,9 @@ class RouterTest extends PHPUnit_Framework_TestCase {
 			throw new Firelit\RouteToError(500);
 		});
 
+		Firelit\Registry::clear();
+		unset($r);
+		
 	}
 
 }
