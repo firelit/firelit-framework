@@ -32,6 +32,10 @@ class View {
 		include($file);
 	}
 
+	protected function html($html) {
+		return htmlentities($html);
+	}
+	
 	public function render($data = array()) {
 		$this->data = $data;
 		extract($this->data, EXTR_SKIP);
