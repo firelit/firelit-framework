@@ -35,7 +35,14 @@ class View {
 	protected function html($html) {
 		return htmlentities($html);
 	}
-	
+
+	protected function includePart($name) {
+		extract($this->data, EXTR_SKIP);
+		
+		$file = $this->fileName($name);
+		include($file);
+	}
+
 	public function render($data = array()) {
 		$this->data = $data;
 		extract($this->data, EXTR_SKIP);
