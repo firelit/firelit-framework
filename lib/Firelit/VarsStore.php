@@ -1,6 +1,6 @@
 <?php
 
-namespace('Firelit');
+namespace Firelit;
 
 abstract class VarsStore extends InitExtendable {
 	

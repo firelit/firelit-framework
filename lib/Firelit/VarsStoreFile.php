@@ -1,6 +1,6 @@
 <?php
 
-namespace('Firelit');
+namespace Firelit;
 
 class VarsStoreFile extends VarsStore {
 	
