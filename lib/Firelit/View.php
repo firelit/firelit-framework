@@ -23,6 +23,11 @@ class View {
 		return $this;
 	}
 
+	public function setData($data) {
+		if (is_array($data)) $this->data = $data;
+		return $this;
+	}
+
 	protected function yieldNow() {
 		if (!$this->template) return;
 
@@ -43,8 +48,8 @@ class View {
 		include($file);
 	}
 
-	public function render($data = array()) {
-		$this->data = $data;
+	public function render($data = false) {
+		$this->setData($data);
 		extract($this->data, EXTR_SKIP);
 
 		if ($this->layout) {
@@ -63,7 +68,7 @@ class View {
 		return $file;
 	}
 
-	static public function quickRender($template, $layout = false, $data = array()) {
+	static public function quickRender($template, $layout = false, $data = false) {
 		$class = get_called_class();
 		$view = new $class($template, $layout);
 		$view->render($data);
