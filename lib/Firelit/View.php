@@ -38,7 +38,7 @@ class View {
 
 	protected function includePart($name) {
 		extract($this->data, EXTR_SKIP);
-		
+
 		$file = $this->fileName($name);
 		include($file);
 	}
@@ -63,7 +63,7 @@ class View {
 		return $file;
 	}
 
-	static public function quickRender($template, $layout, $data) {
+	static public function quickRender($template, $layout = false, $data = array()) {
 		$class = get_called_class();
 		$view = new $class($template, $layout);
 		$view->render($data);
