@@ -3,10 +3,11 @@
 class QueryTest extends PHPUnit_Framework_TestCase {
 	
 	protected $q, $res;
+	protected static $pdo;
 	
 	public static function setUpBeforeClass() {
 	
-		Firelit\Query::config(array(
+		Firelit\Registry::set('database', array(
 			'type' => 'other',
 			'dsn' => 'sqlite::memory:'
 		));
@@ -34,7 +35,7 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 		
 		$this->q->insert('Tester', array(
 			'name' => 'John',
-			'date' => array('SQL', "DATETIME('now')"),
+			'date' => Firelit\Query::SQL("DATETIME('now')"),
 			'state' => false
 		));
 		
@@ -51,7 +52,7 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 		
 		$this->q->replace('Tester', array(
 			'name' => 'Sally',
-			'date' => array('SQL', "DATETIME('now')"),
+			'date' => Firelit\Query::SQL("DATETIME('now')"),
 			'state' => true
 		));
 		
@@ -66,7 +67,8 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 	*/
 	public function testSelect() {
 
-		$this->q->select('Tester', '*', '`name`=:name', array( ':name' => 'Sally' ), 0, 1);
+		$sql = "SELECT * FROM `Tester` WHERE `name`=:name LIMIT 1";
+		$this->q->query($sql, array(':name' => 'Sally'));
 
 		$this->assertTrue( $this->q->success() );
 
@@ -89,7 +91,8 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 1, $this->q->getAffected() );
 		
 		// Verify that data was written
-		$this->q->select('Tester', '`state`', '`name`=:name', array( ':name' => 'John' ));
+		$sql = "SELECT * FROM `Tester` WHERE `name`=:name LIMIT 1";
+		$this->q->query($sql, array(':name' => 'John'));
 
 		$this->assertTrue( $this->q->success() );
 
@@ -104,13 +107,15 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 	*/
 	public function testDelete() {
 		
-		$this->q->delete('Tester', '`name`=:name', array( ':name' => 'John' ), 1);
-		
+		$sql = "DELETE FROM `Tester` WHERE `name`=:name LIMIT 1";
+		$this->q->query($sql, array(':name' => 'John'));
+
 		$this->assertTrue( $this->q->success() );
 		$this->assertEquals( 1, $this->q->getAffected() );
 		
 		// Verify that data was deleted
-		$this->q->select('Tester', '*', '`name`=:name', array( ':name' => 'John' ));
+		$sql = "SELECT * FROM `Tester` WHERE `name`=:name LIMIT 1";
+		$this->q->query($sql, array(':name' => 'John'));
 
 		$this->assertTrue( $this->q->success() );
 
@@ -119,11 +124,12 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 		$this->assertFalse( $row );
 		
 	}
-	
+
 	public static function tearDownAfterClass() {
+		try {
+			// Why no work with sqlite? "Database error: 6, database table is locked"
+			$q = new Firelit\Query("DROP TABLE `Tester`");
 		
-		$q = new Firelit\Query();
-		$q->query("DROP TABLE `Tester`");
-		
+		} catch (Exception $e) { }
 	}
 }

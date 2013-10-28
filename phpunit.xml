@@ -1,6 +1,7 @@
 <phpunit bootstrap="tests/bootstrap.php">
 	<testsuites>
 		<testsuite name="Only Active">
+			<file>./tests/QueryTest.php</file>
 			<file>./tests/RegistryTest.php</file>
 			<file>./tests/RequestTest.php</file>
 			<file>./tests/SessionTest.php</file>

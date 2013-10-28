@@ -1,5 +1,7 @@
 <?PHP
 
+namespace Firelit;
+
 class Query {
 	
 	/* Global connection & state variables */
@@ -20,7 +22,29 @@ class Query {
 	
 	public static function connect() {
 
-		self::$pdo = new PDO('mysql:host='. $_SERVER['DB_HOST'] .';port='. $_SERVER['DB_PORT'] .';dbname='. $_SERVER['DB_NAME'], $_SERVER['DB_USER'], $_SERVER['DB_PASS']);
+		$reg = Registry::get('database');
+
+		if ($reg) {
+			if ($reg['type'] == 'mysql') {
+
+				if (!isset($reg['port'])) $reg['port'] = 3306;
+
+				self::$pdo = new \PDO('mysql:host='. $reg['host'] .';port='. $reg['port'] .';dbname='. $reg['name'], $reg['user'], $reg['pass']);
+
+			} else {
+
+				self::$pdo = new \PDO($reg['dsn']);
+
+			}
+		} else {
+
+			if (!isset($_SERVER['DB_PORT'])) $_SERVER['DB_PORT'] = 3306;
+
+			self::$pdo = new \PDO('mysql:host='. $_SERVER['DB_HOST'] .';port='. $_SERVER['DB_PORT'] .';dbname='. $_SERVER['DB_NAME'], $_SERVER['DB_USER'], $_SERVER['DB_PASS']);
+
+		}
+
+		if (!self::$pdo) throw new \Exception('Could not connect to database.');
 
 		return self::$pdo;
 
@@ -35,14 +59,14 @@ class Query {
 		$this->convertDateTimes($binders);
 
 		if (!self::$pdo) self::connect();
-		
+
 		// $sql can be a PDOStatement or a SQL string
 		if (is_string($sql))	
 			$this->sql = self::$pdo->prepare($sql);
-		elseif ($sql instanceof PDOStatement)
+		elseif ($sql instanceof \PDOStatement)
 			$this->sql = $sql;
 		else
-			throw new Exception('Invalid parameter supplied to query method.');
+			throw new \Exception('Invalid parameter supplied to query method.');
 		
 		$this->res = $this->sql->execute($binders);
 
@@ -50,7 +74,7 @@ class Query {
 			
 			if (self::$errorCount++ > 10) die('ERROR Q'. __LINE__ .' <!-- TOO MANY QUERY ERRORS -->');
 
-			throw new Exception('Database error: '. $this->getErrorCode() .', '. $this->getError() .', '. $this->sql->queryString);
+			throw new \Exception('Database error: '. $this->getErrorCode() .', '. $this->getError() .', '. $this->sql->queryString);
 
 		}
 
@@ -190,7 +214,7 @@ class Query {
 	public static function splitArray($arrayIn) {
 
 		if (!is_array($arrayIn))
-			throw new Exception('Parameter is not an array.');
+			throw new \Exception('Parameter is not an array.');
 
 		$statement = array();
 		$binder = array();
@@ -201,7 +225,7 @@ class Query {
 			// having one of the following values, the second is assumed
 			// to need special attention.
 			if (is_array($value) && (sizeof($value) == 2)) {
-				switch (upper($value[0])) {
+				switch (strtoupper($value[0])) {
 					case 'SQL':
 						if (!is_string($value[1])) break;
 						$statement[$key] = $value[1];
@@ -267,7 +291,7 @@ class Query {
 			
 			return substr($sql, 2);
 			
-		} else throw new Exception("Invalid verb for toSQL();");
+		} else throw new \Exception("Invalid verb for toSQL();");
 	}
 	
 	public static function escapeLike($sql) {
