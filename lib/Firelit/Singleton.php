@@ -13,7 +13,7 @@ abstract class Singleton {
 		$args = func_get_args();
 		$class = get_called_class();
 
-		$r = new ReflectionClass($class);
+		$r = new \ReflectionClass($class);
 		static::$singleton = $r->newInstanceArgs($args);
 
 		return static::$singleton;
