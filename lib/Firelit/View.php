@@ -94,8 +94,8 @@ class View {
 		if (preg_match('/\.php$/', $name)) $ext = ''; else $ext = '.php'; 
 		$file = static::$viewFolder . $name . $ext;
 
-		if (!file_exists($file)) throw new \Exception('View file does not exist.');
-		if (!is_readable($file)) throw new \Exception('View file not readable.');
+		if (!file_exists($file)) throw new \Exception('View file does not exist: '. $name);
+		if (!is_readable($file)) throw new \Exception('View file not readable: '. $name);
 
 		return $file;
 	}

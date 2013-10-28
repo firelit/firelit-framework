@@ -19,7 +19,7 @@ class ViewTest extends PHPUnit_Framework_TestCase {
 
 		ob_start();
 		
-		$view->render(); // Runs code in ViewTestTemplate
+		$view->render(); // Runs code in ViewTestTemplate.php
 
 		$output = trim( ob_get_contents() );
 		ob_end_clean();
