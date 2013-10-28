@@ -47,27 +47,27 @@ class View {
 		$nameArray = explode('.', $name);
 		$ext = array_pop($nameArray);
 
-		switch ($name) {
+		switch ($ext) {
 			case 'js': 
-				echo '<script type="text/javascript" src="'. $this->html($this->assetDirectory . $name) .'"></script>'."\n";
+				echo '<script type="text/javascript" src="'. $this->html(self::$assetDirectory . $name) .'"></script>'."\n";
 				break;
 			case 'css':
 				if (!isset($attributes['rel'])) $attributes['rel'] = 'stylesheet';
 
-				echo '<link href="'. $this->html($this->assetDirectory . $name) .'"'; 
+				echo '<link href="'. $this->html(self::$assetDirectory . $name) .'"'; 
 				foreach ($attributes as $name => $value) echo ' '. $name .'="'. $this->html($value) .'"';
 				echo ">\n";
 
 				break;
 			case 'ico':
-			
-				echo '<link href="'. $this->html($this->assetDirectory . $name) .'"'; 
+
+				echo '<link href="'. $this->html(self::$assetDirectory . $name) .'"'; 
 				foreach ($attributes as $name => $value) echo ' '. $name .'="'. $this->html($value) .'"';
 				echo ">\n";
 
 				break;
-
 		}
+
 	}
 
 	protected function includePart($name) {
@@ -91,9 +91,12 @@ class View {
 	}
 
 	protected function fileName($name) {
-		$file = static::$viewFolder . $name .'.php';
-		if (!file_exists($file)) throw new Exception('View file does not exist.');
-		if (!is_readable($file)) throw new Exception('View file not readable.');
+		if (preg_match('/\.php$/', $name)) $ext = ''; else $ext = '.php'; 
+		$file = static::$viewFolder . $name . $ext;
+
+		if (!file_exists($file)) throw new \Exception('View file does not exist.');
+		if (!is_readable($file)) throw new \Exception('View file not readable.');
+
 		return $file;
 	}
 
