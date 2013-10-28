@@ -2,7 +2,7 @@
 
 namespace Firelit;
 
-class Response extends InitExtendable {
+class Response extends Singleton {
 	
 	protected $code = 200;
 	protected $outputBuffering = true;
@@ -34,11 +34,12 @@ class Response extends InitExtendable {
 			
 		}
 		
-		// Set in registry
-		Registry::set('Response', $this);
-
 	}
 	
+	public function __destruct() {
+		$this->endBuffer();
+	}
+
 	public function contentType($type = false) {
 			
 		if (headers_sent()) {
@@ -55,8 +56,10 @@ class Response extends InitExtendable {
 		
 	}
 	
-	public function code($code) {
+	public function code($code = false) {
 		
+		if (!$code) return http_response_code();
+
 		if (headers_sent()) {
 		
 			if (self::$exceptOnHeaders && (http_response_code() != $code))
@@ -67,7 +70,7 @@ class Response extends InitExtendable {
 		
 		$this->code = $code;
 		http_response_code($code);
-		
+
 	}
 
 	public function redirect($path, $type = 302, $end = true) {
@@ -84,11 +87,11 @@ class Response extends InitExtendable {
 				
 		}
 		
-		$this->code($type);
-		header('Location: '. $path);
-		
 		if ($this->outputBuffering)
 			ob_end_clean();
+
+		$this->code($type);
+		header('Location: '. $path);
 		
 		if ($end) exit;
 		
@@ -114,6 +117,34 @@ class Response extends InitExtendable {
 			ob_end_flush();
 			
 	}
+
+	static public function setCode($code) {
+
+		if (isset($this)) $respObj = $this;
+		else {
+
+			$class = __CLASS__;
+			$respObj = $class::init();
+
+		}
+
+		$respObj->code($code);
+	}
+
+	static public function setContentType($type) {
+
+		if (isset($this)) $respObj = $this;
+		else {
+
+			$class = __CLASS__;
+			$respObj = $class::init();
+
+		}
+		
+		$respObj->contentType($type);
+		
+	}
+
 }
 
 

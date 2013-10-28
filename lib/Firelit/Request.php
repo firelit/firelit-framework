@@ -2,7 +2,7 @@
 
 namespace Firelit;
 
-class Request {
+class Request extends Singleton {
 	
 	// All properties accessible via magic getter method
 	private $ip, $proxies, $host, $path, $method, $secure, $referer, $cli, $headers;
@@ -78,9 +78,6 @@ class Request {
 			$_COOKIE = null;
 			
 		}
-
-		// Set in registry
-		Registry::set('Request', $this);
 
 	}
 	

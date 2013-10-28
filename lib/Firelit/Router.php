@@ -2,7 +2,7 @@
 
 namespace Firelit;
 
-class Router {
+class Router extends Singleton {
 	
 	protected $method, $uri, $match = false, $default, $error = array();
 	protected $testMode = false;
@@ -26,9 +26,6 @@ class Router {
 		$this->uri = preg_replace('!^'. preg_quote($rootPath) .'!', '', $request->path);
 		if (strpos($this->uri, '?')) $this->uri = substr($this->uri, 0, strpos($this->uri, '?'));
 		
-		// Set in registry
-		Registry::set('Router', $this);
-
 	}
 	
 	public function __destruct() {
