@@ -5,6 +5,8 @@ namespace Firelit;
 class View {
 	
 	static public $viewFolder = 'views/';
+	static public $assetDirectory = '/assets/';
+
 	public $layout = false, $template = false;
 	public $data = array();
 
@@ -39,6 +41,33 @@ class View {
 
 	protected function html($html) {
 		return htmlentities($html);
+	}
+
+	protected function addAsset($name, $attributes = array()) {
+		$nameArray = explode('.', $name);
+		$ext = array_pop($nameArray);
+
+		switch ($name) {
+			case 'js': 
+				echo '<script type="text/javascript" src="'. $this->html($this->assetDirectory . $name) .'"></script>'."\n";
+				break;
+			case 'css':
+				if (!isset($attributes['rel'])) $attributes['rel'] = 'stylesheet';
+
+				echo '<link href="'. $this->html($this->assetDirectory . $name) .'"'; 
+				foreach ($attributes as $name => $value) echo ' '. $name .'="'. $this->html($value) .'"';
+				echo ">\n";
+
+				break;
+			case 'ico':
+			
+				echo '<link href="'. $this->html($this->assetDirectory . $name) .'"'; 
+				foreach ($attributes as $name => $value) echo ' '. $name .'="'. $this->html($value) .'"';
+				echo ">\n";
+
+				break;
+
+		}
 	}
 
 	protected function includePart($name) {
