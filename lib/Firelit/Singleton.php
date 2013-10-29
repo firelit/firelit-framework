@@ -4,19 +4,21 @@ namespace Firelit;
 
 abstract class Singleton {
 	
-	static protected $singleton = false;
+	static protected $singletons = array();
 
 	static public function init() {
 
-		if (static::$singleton) return static::$singleton;
-
-		$args = func_get_args();
 		$class = get_called_class();
 
-		$r = new \ReflectionClass($class);
-		static::$singleton = $r->newInstanceArgs($args);
+		if (!isset(static::$singletons[$class])) {
 
-		return static::$singleton;
+			$args = func_get_args();
+			$r = new \ReflectionClass($class);
+			static::$singletons[$class] = $r->newInstanceArgs($args);
+
+		}
+
+		return static::$singletons[$class];
 
 	}
 
