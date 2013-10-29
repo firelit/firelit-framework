@@ -7,6 +7,7 @@
 			<file>./tests/SessionTest.php</file>
 			<file>./tests/CacheTest.php</file>
 			<file>./tests/RouterTest.php</file>
+			<file>./tests/ResponseTest.php</file>
 			<file>./tests/ViewTest.php</file>
 		</testsuite>
 	</testsuites>

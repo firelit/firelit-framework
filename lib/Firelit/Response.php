@@ -15,7 +15,7 @@ class Response extends Singleton {
 		// $charset: Specify the charset?
 		$this->outputBuffering = $ob;
 		$this->charset = $charset;
-		
+
 		// UTF-8 output by default
 		if (!headers_sent())
 			mb_http_output($this->charset);
@@ -29,7 +29,6 @@ class Response extends Singleton {
 			// and ability to redirect at any time if there is an issue
 			
 			// Run output through muli-byte filter to match the above-specified output encoding
-			
 			ob_start("mb_output_handler");
 			
 		}
@@ -97,53 +96,59 @@ class Response extends Singleton {
 		
 	}
 	
-	public function flushBuffer() {
+	static public function getClass() {
+
+		$class = __CLASS__;
+		return $class::init();
+
+	}
+
+	static public function flushBuffer() {
 	
-		if ($this->outputBuffering)
+		$respObj = self::getClass();
+		if ($respObj->outputBuffering)
 			ob_flush();
 			
 	}
 	
-	public function cleanBuffer() {
+	static public function cleanBuffer() {
 	
-		if ($this->outputBuffering)
+		$respObj = self::getClass();
+		if ($respObj->outputBuffering)
 			ob_clean();
 			
 	}
 	
-	public function endBuffer() {
+	static public function clearBuffer() {
+		// Alias of cleanBuffer()
+
+		$respObj = self::getClass();
+		$respObj->cleanBuffer();
+		
+	}
+
+	static public function endBuffer() {
 		// Call cleanBuffer first if you don't want anything getting out
-		if ($this->outputBuffering)
+		$respObj = self::getClass();
+		if ($respObj->outputBuffering)
 			ob_end_flush();
-			
+
+		$respObj->outputBuffering = false;
 	}
 
 	static public function setCode($code) {
 
-		if (isset($this)) $respObj = $this;
-		else {
-
-			$class = __CLASS__;
-			$respObj = $class::init();
-
-		}
-
+		$respObj = self::getClass();
 		$respObj->code($code);
 	}
 
 	static public function setContentType($type) {
 
-		if (isset($this)) $respObj = $this;
-		else {
-
-			$class = __CLASS__;
-			$respObj = $class::init();
-
-		}
-		
+		$respObj = self::getClass();
 		$respObj->contentType($type);
 		
 	}
+
 
 }
 
