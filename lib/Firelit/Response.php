@@ -86,10 +86,8 @@ class Response extends Singleton {
 				
 		}
 		
-		if ($this->outputBuffering) {
+		if ($this->outputBuffering)
 			$this->cleanBuffer();
-			$this->endBuffer();
-		}
 
 		$this->code($type);
 		header('Location: '. $path);
