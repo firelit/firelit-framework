@@ -21,13 +21,19 @@ abstract class Controller {
 		array_shift($args);
 		if (sizeof($args)) array_shift($args);
 		
+		// Create a new instance of the class
 		$reflect = new \ReflectionClass($controller);
-		$newClass = $reflect->newInstanceArgs($args);
+		$newClass = $reflect->newInstanceArgs($method ? array() : $args);
 		
-		// If method specified, return the result of that method call
-		if ($method) return $newClass->$method();
+		if ($method) {
+			// Execute a method
+			$reflectMethod = new \ReflectionMethod($controller, $method);
+			return $reflectMethod->invokeArgs($newClass, $args);
+		}
+
+		// If method specified, return the result of that method call (above)
 		// Else return the object itself
-		else return $newClass;
+		return $newClass;
 		
 	}
 

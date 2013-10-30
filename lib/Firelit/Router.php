@@ -4,12 +4,12 @@ namespace Firelit;
 
 class Router extends Singleton {
 	
-	protected $method, $uri, $match = false, $default, $error = array();
+	protected $method, $uri, $match = false, $default, $error = array(), $exceptionHandler = false;
 	protected $testMode = false;
 
 	public $request, $response, $parameters = array();
 	
-	public static $proto = 'http', $domain = 'localhost', $rootPath = '/';
+	public static $proto = 'http', $domain = 'localhost', $rootPath = '/', $catchExceptions = false;
 	
 	public function __construct(Request $request = null) {
 
@@ -94,6 +94,12 @@ class Router extends Singleton {
 			
 			$this->triggerError($e->getCode(), $e->getMessage());
 
+		} catch (\Exception $e) {
+
+			if (is_callable($this->exceptionHandler)) $this->exceptionHandler($e);
+			elseif (self::$catchExceptions) $this->triggerError(500, 'Server error occured.');
+			else throw $e;
+
 		}
 		
 		$this->match = true;
@@ -126,6 +132,19 @@ class Router extends Singleton {
 	 */
 	public function defaultRoute($execute) {
 		$this->default = $execute;
+
+		return $this;
+	}
+
+	/**
+	 * A function to handle any exceptions that are caught
+	 * The passed function should take one parameter, an exception object
+	 *
+	 * @param  function $execute
+	 * @return Firelit\Router
+	 */
+	public function exceptionHandler($execute) {
+		$this->exceptionHandler = $execute;
 
 		return $this;
 	}
