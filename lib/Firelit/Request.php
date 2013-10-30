@@ -5,7 +5,7 @@ namespace Firelit;
 class Request extends Singleton {
 	
 	// All properties accessible via magic getter method
-	private $ip, $proxies, $host, $path, $method, $secure, $referer, $cli, $headers;
+	private $ip, $proxies, $host, $path, $method, $secure, $referer, $protocol, $cli, $headers, $uri;
 	private $post, $get, $cookie;
 	
 	public static $loadBalanced = false;
@@ -20,9 +20,12 @@ class Request extends Singleton {
 		$this->secure = isset($_SERVER['HTTPS']) ? ($_SERVER['HTTPS'] == 'on') : false;
 		$this->host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : false;
 		$this->referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : false;
-		
+		$this->protocol = isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : false;
+
 		$this->cli = (php_sapi_name() == 'cli');
 		if ($this->cli) $this->method = 'CLI';
+		
+		$this->uri = ($this->cli ? false : ($this->secure ? 'https' : 'http') .'://'. $this->host . $this->path);
 		
 		if (is_callable('apache_request_headers')) {
 			

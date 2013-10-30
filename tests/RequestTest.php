@@ -69,4 +69,12 @@ class RequestTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 'clean', $sr->get['shallow'], 'Shallow array value not cleaned.' );
 		
 	}
+
+	public function testCliDetection() {
+
+		$sr = new Firelit\Request();
+
+		$this->assertEquals('CLI', $sr->method);
+
+	}
 }
