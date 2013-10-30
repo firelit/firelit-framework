@@ -46,7 +46,7 @@ class Router extends Singleton {
 	}
 
 	/**
-	 * Magic method used specifically for calling the default route
+	 * Magic method used specifically for calling the default route and exception handler
 	 *
 	 * @param  string $method
 	 * @param  array $args
@@ -96,7 +96,7 @@ class Router extends Singleton {
 
 		} catch (\Exception $e) {
 
-			if (is_callable($this->exceptionHandler)) $this->exceptionHandler($e);
+			if (is_callable($this->exceptionHandler)) { $eh = $this->exceptionHandler; $eh($e); }
 			elseif (self::$catchExceptions) $this->triggerError(500, 'Server error occured.');
 			else throw $e;
 
