@@ -31,7 +31,7 @@ class Router extends Singleton {
 	public function __destruct() {
 
 		if ($this->match || !is_callable($this->default)) return; // Response already sent or no default set
-		if (in_array(http_response_code(), array(301, 302, 303)) return; // No default route if redirect
+		if (in_array(http_response_code(), array(301, 302, 303))) return; // No default route if redirect
 
 		try {
 
