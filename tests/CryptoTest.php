@@ -6,7 +6,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase {
 	
 	protected function setUp() {
 		
-		$this->password = 'My super secret password!';
+		$this->password = base64_encode('My super secret password!');
 		$this->unencrypted = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut urna tellus, faucibus nec porttitor ac, laoreet tristique libero.';
 
 	}
@@ -17,6 +17,13 @@ class CryptoTest extends PHPUnit_Framework_TestCase {
 		$this->assertRegExp('/^[\w=\/\+]{5,}$/', $this->iv);
 		
 		return $this->iv;
+		
+	}
+
+	public function testKeyGen() {
+		
+		$key = Firelit\Crypto::generateKey();
+		$this->assertRegExp('/^[0-9A-Za-z\\=\+]{44}$/', $key);
 		
 	}
 
