@@ -4,6 +4,7 @@
 			<file>./tests/QueryTest.php</file>
 			<file>./tests/RegistryTest.php</file>
 			<file>./tests/RequestTest.php</file>
+			<file>./tests/ApiResponseTest.php</file>
 			<file>./tests/SessionTest.php</file>
 			<file>./tests/CacheTest.php</file>
 			<file>./tests/RouterTest.php</file>

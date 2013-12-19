@@ -10,15 +10,15 @@ abstract class Singleton {
 
 		$class = get_called_class();
 
-		if (!isset(static::$singletons[$class])) {
+		if (!isset(self::$singletons[$class])) {
 
 			$args = func_get_args();
 			$r = new \ReflectionClass($class);
-			static::$singletons[$class] = $r->newInstanceArgs($args);
+			self::$singletons[$class] = $r->newInstanceArgs($args);
 
 		}
 
-		return static::$singletons[$class];
+		return self::$singletons[$class];
 
 	}
 
