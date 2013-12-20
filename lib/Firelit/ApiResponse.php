@@ -10,6 +10,10 @@ class ApiResponse extends Response {
 	
 	public function __construct($responseFormat = 'JSON', $ob = true, $charset = "UTF-8") { 
 		parent::__construct($ob, $charset);
+
+		if ($responseFormat == 'JSON')
+			$this->contentType('application/json');
+		
 		$this->responseFormat = strtoupper($responseFormat);
 	}
 	
