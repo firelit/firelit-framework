@@ -25,8 +25,10 @@ class ApiResponse extends Response {
 		$this->response = array_merge($this->response, $response);	
 	}
 	
-	public function respond($response = array(), $end = true) {
+	public function respond($response = array()) {
 		$this->set($response);
+
+		if ($this->hasResponded()) return;
 
 		if ($this->outputBuffering) {
 			$this->cleanBuffer();
@@ -45,8 +47,6 @@ class ApiResponse extends Response {
 		}
 
 		$this->responseSent = true;
-
-		if ($end) exit;
 	}
 	
 	public function hasResponded() {
