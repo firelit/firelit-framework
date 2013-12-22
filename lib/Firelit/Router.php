@@ -95,12 +95,6 @@ class Router extends Singleton {
 			
 			$this->triggerError($e->getCode(), $e->getMessage());
 
-		} catch (\Exception $e) {
-
-			if (is_callable($this->exceptionHandler)) { $eh = $this->exceptionHandler; $eh($e); }
-			elseif (self::$catchExceptions) $this->triggerError(500, 'Server error occured.');
-			else throw $e;
-
 		}
 		
 		$this->match = true;
@@ -146,6 +140,7 @@ class Router extends Singleton {
 	 */
 	public function exceptionHandler($execute) {
 		$this->exceptionHandler = $execute;
+		set_exception_handler($this->exceptionHandler);
 
 		return $this;
 	}
