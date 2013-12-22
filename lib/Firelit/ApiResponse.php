@@ -21,12 +21,13 @@ class ApiResponse extends Response {
 		$this->response = array_merge($this->response, $template);	
 	}
 	
-	public function set($response) {
-		$this->response = array_merge($this->response, $response);	
+	public function set($response, $replaceResponse = false) {
+		if ($replaceResponse) $this->response = $response;
+		else $this->response = array_merge($this->response, $response);	
 	}
 	
-	public function respond($response = array()) {
-		$this->set($response);
+	public function respond($response = array(), $replaceResponse = false) {
+		$this->set($response, $replaceResponse);
 
 		if ($this->hasResponded()) return;
 
