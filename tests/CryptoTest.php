@@ -23,7 +23,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase {
 	public function testKeyGen() {
 		
 		$key = Firelit\Crypto::generateKey();
-		$this->assertRegExp('/^[0-9A-Za-z\\=\+]{44}$/', $key);
+		$this->assertRegExp('/^[0-9A-Za-z\\=\+\/]{44}$/', $key);
 		
 	}
 
