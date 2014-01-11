@@ -82,7 +82,8 @@ class Router extends Singleton {
 		if ($regExpUrlMatch && !preg_match($regExpUrlMatch, $this->uri, $params)) return;
 		
 		// Method and URI match!
-		
+		$this->match = true;
+
 		// Remove the full text match from the match array
 		array_shift($params);
 		
@@ -97,8 +98,6 @@ class Router extends Singleton {
 
 		}
 		
-		$this->match = true;
-
 		// End execution
 		exit;
 		
@@ -160,11 +159,12 @@ class Router extends Singleton {
 			else exit($errorCode);
 		}
 
+		// Error response function exists
+		$this->match = true;
+
 		//call_user_func_array($this->error[$errorCode], array($errorCode, $errorMessage));
 		$this->error[$callError]($errorCode, $errorMessage);
 		// Or use call_user_func_array ?
-
-		$this->match = true;
 
 		exit($errorCode);
 	}
