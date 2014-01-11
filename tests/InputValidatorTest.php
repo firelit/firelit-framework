@@ -411,5 +411,50 @@ class InputValidatorTest extends PHPUnit_Framework_TestCase {
 
 	}
 
+	public function testURL() {
+
+		// No-http website
+		$iv = new InputValidator(InputValidator::URL, 'www.yahoo.com');
+		$this->assertEquals(true, $iv->isValid());
+		$this->assertEquals('http://www.yahoo.com', $iv->getNormalized());
+
+		// Website with a port
+		$iv = new InputValidator(InputValidator::URL, 'www.firelit.com:8080/index.html');
+		$this->assertEquals(true, $iv->isValid());
+		$this->assertEquals('http://www.firelit.com:8080/index.html', $iv->getNormalized());
+
+		// No-http website with path
+		$iv = new InputValidator(InputValidator::URL, 'yahoo.com/some/link.php');
+		$this->assertEquals(true, $iv->isValid());
+		$this->assertEquals('http://yahoo.com/some/link.php', $iv->getNormalized());
+
+		// http website
+		$iv = new InputValidator(InputValidator::URL, 'http://www.GOOGLE.com/');
+		$this->assertEquals(true, $iv->isValid());
+		$this->assertEquals('http://www.google.com/', $iv->getNormalized());
+
+		// http website with path
+		$iv = new InputValidator(InputValidator::URL, 'http://www.GOOGLE.com/THIS/thing.html');
+		$this->assertEquals(true, $iv->isValid());
+		$this->assertEquals('http://www.google.com/THIS/thing.html', $iv->getNormalized());
+
+		// https website
+		$iv = new InputValidator(InputValidator::URL, 'https://slashdot.org');
+		$this->assertEquals(true, $iv->isValid());
+		$this->assertEquals('https://slashdot.org', $iv->getNormalized());
+
+		// Invalid website
+		$iv = new InputValidator(InputValidator::URL, 'example');
+		$this->assertEquals(false, $iv->isValid());
+
+		// Invalid website
+		$iv = new InputValidator(InputValidator::URL, 'ftp://example.net');
+		$this->assertEquals(false, $iv->isValid());
+
+		// Invalid website
+		$iv = new InputValidator(InputValidator::URL, '/www.example.com');
+		$this->assertEquals(false, $iv->isValid());
+
+	}
 
 }

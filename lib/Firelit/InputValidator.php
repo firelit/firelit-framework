@@ -18,7 +18,8 @@ class InputValidator {
 		CREDIT_CVV = 11,
 		ACH_ROUT = 12,
 		ACH_ACCT = 13,
-		ACH_TYPE = 14;
+		ACH_TYPE = 14,
+		URL = 15;
 
 	const
 		TYPE_DEFAULT = 100, // For general use (sensitive data is automatically masked)
@@ -233,7 +234,14 @@ class InputValidator {
 				if ($type == 'C') return 'Checking';
 				elseif ($type == 'S') return 'Savings';
 				else return '';
-				
+			
+			case self::URL: 
+
+				$url = parse_url($this->value);
+				if (!strlen($url['scheme'])) $url['scheme'] = 'http';
+
+				return $url['scheme'] .'://'. strtolower($url['host']) . ($url['port'] ? ':'. $url['port'] : '') . $url['path'] . ($url['query'] ? '?'. $url['query'] : '');
+
 			default:
 				return false;
 		}
@@ -353,6 +361,20 @@ class InputValidator {
 			case self::ACH_TYPE:
 				
 				return preg_match('/^(C|S)$/i', substr($value, 0, 1));
+
+			case self::URL:
+
+				$url = parse_url($value);
+
+				if (!$url) return false;
+
+				if (!strlen($url['scheme'])) $url = parse_url('http://'.$value); // Add a scheme for proper parsing
+
+				if (strlen($url['scheme']) && !in_array($url['scheme'], array('http', 'https'))) return false;
+				if (!isset($url['host']) && isset($url['path'])) { $url['host'] = $url['path']; $url['path'] = ''; }
+				if (!preg_match('/^([a-z0-9\-]+\.)+([a-z]{2,})$/i', $url['host'])) return false;
+
+				return true;
 
 			default:
 				return false;
