@@ -250,9 +250,6 @@ class Query {
 			if (is_array($value) || is_object($value)) 
 				$value = serialize($value);
 
-			if (is_null($value))
-				$value = 'NULL';
-
 			$binder[$crossKey] = $value;
 
 		}
