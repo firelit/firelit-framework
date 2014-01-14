@@ -55,7 +55,6 @@ class Query {
 		if (is_string($sql))
 			$this->cleanBinders($binders, $sql);
 
-		$this->removeNulls($binders);
 		$this->convertDateTimes($binders);
 
 		if (!self::$pdo) self::connect();
@@ -90,14 +89,13 @@ class Query {
 	}
 
 	public function removeNulls(&$binder) {
-		// Make DB updates compatible with current code base and DB schema (where NULL is not valid)
+		// Make DB updates compatible with badly-designed code bases and DB schemas (where NULL is not valid)
 		foreach ($binder as $name => $value) {
 			if (is_null($value)) $binder[$name] = '';
 		}
 	}
 
 	public function convertDateTimes(&$binder) {
-		// Make DB updates compatible with current code base and DB schema (where NULL is not valid)
 		foreach ($binder as $name => $value) {
 			if (is_object($value) && is_a($value, 'DateTime')) $binder[$name] = $value->format('Y-m-d  H:i:s');
 		}
@@ -251,6 +249,9 @@ class Query {
 
 			if (is_array($value) || is_object($value)) 
 				$value = serialize($value);
+
+			if (is_null($value))
+				$value = 'NULL';
 
 			$binder[$crossKey] = $value;
 
