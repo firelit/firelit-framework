@@ -28,7 +28,8 @@ class DatabaseSessionHandler implements \SessionHandlerInterface {
 			':session_id' => $id
 		));
 
-		return $q->getRow();
+		if (!$data) return false;
+		return $data[ self::$config['colData'] ];
 
     }
 
