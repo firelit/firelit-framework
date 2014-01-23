@@ -87,5 +87,10 @@ class Session extends Singleton {
  		return $sid;
 
 	}
+
+	public function __destruct() {
+		// Not required as it is handled automatically but could be convienent to close a session early or juggle multiple sessions
+		session_write_close();
+	}
 	
 }
