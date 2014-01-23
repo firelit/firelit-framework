@@ -356,7 +356,7 @@ Example usage:
 ```php
 <?php
 
-$sess = new Firelit\Session(new Firelit\DatabseSessionHandler);
+$sess = new Firelit\Session::init(new Firelit\DatabseSessionHandler);
 
 $sess->loggedIn = true;
 $sess->userName = 'Peter';
