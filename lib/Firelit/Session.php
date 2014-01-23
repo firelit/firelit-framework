@@ -57,8 +57,9 @@ class Session extends Singleton {
 
 	public function updateSessionId($sid = false) {
 
-		// If not provided, retrieve it
-		if (!$sid) $sid = session_id();
+		// If not provided, retrieve it 
+		// (must get it from cookie, session_id() doesn't return value until after session_start())
+		if (!$sid) $sid = $_COOKIE[self::$config['cookieName']];
 		// If provided, be sure we're using it
 		else session_id($sid);
 
@@ -77,6 +78,7 @@ class Session extends Singleton {
 
 		}
 
+		// Looks like we need a new session ID
 		$sid = base64_encode( hash('sha256', microtime() . $_SERVER['REMOTE_ADDR'] . mt_rand(0, 1000000000), true) );
 
 		// Create mini-hmac; not critical, just a quick sanity check
