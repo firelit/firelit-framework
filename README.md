@@ -348,15 +348,15 @@ A class that manages the server's response to an incoming requests. Defaults to 
 
 ### Session
 
-Session management class which can use PHP's native session features (and an optional database store). You can get and set any property name to the session object and it is dynamically saved (using magic getter and setter methods). Implement the PHP-native SessionHandlerInterface to create your own session handler or session storage engine. This library provides database implementation called Firelit\DatabseSessionHandler. Roll your own by implementing SessionHandlerInterface and use a class of this object when instantiating the Session object. Or, leave this parameter off to simply use PHP's built-in cookie- & file-based session handling.
+Session management class which can use PHP's native session features (and an optional database store). You can get and set any property name to the session object and it is dynamically saved (using magic getter and setter methods). Implement the PHP-native SessionHandlerInterface to create your own session handler or session storage engine. This library provides database implementation called Firelit\DatabaseSessionHandler. Roll your own by implementing SessionHandlerInterface and use a class of this object when instantiating the Session object. Or, leave this parameter off to simply use PHP's built-in cookie- & file-based session handling.
 
-Note that if you are using Firelit\DatabseSessionHandler, the expiration of a session is NOT controlled by the `session.gc_maxlifetime` as it is if you use the Session class without the session handler.
+Note that if you are using Firelit\DatabaseSessionHandler, the expiration of a session is NOT controlled by the `session.gc_maxlifetime` as it is if you use the Session class without the session handler.
 
 Example usage:
 ```php
 <?php
 
-$sess = new Firelit\Session::init(new Firelit\DatabseSessionHandler);
+$sess = new Firelit\Session::init(new Firelit\DatabaseSessionHandler);
 
 $sess->loggedIn = true;
 $sess->userName = 'Peter';
