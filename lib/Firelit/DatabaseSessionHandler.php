@@ -2,14 +2,14 @@
 
 namespace Firelit;
 
-class DatabaseSessionHandler implements SessionHandlerInterface {
+class DatabaseSessionHandler implements \SessionHandlerInterface {
 
 	static public $config = array(
 		'tableName' => 'Sessions', // Table where it is all stored
 		'colKey' => 'key', // The key column for the unique session ID
 		'colData' => 'data', // The data column for storing session data
 		'colExp' => 'expires', // The datetime column for expiration date
-		'expSeconds' => 60 * 60 * 4 // 4 hours
+		'expSeconds' => 14400 // 4 hours
 	);
 
 	public function open($savePath, $sessionName) {

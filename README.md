@@ -18,7 +18,6 @@ Requirements
 - cURL PHP extension (required for `HttpRequest` class)
 - PDO PHP extension (required for `Query` class)
 - SQLite PHP extension (required for `Query` class unit tests)
-- PEAR Mail and Mail mime extensions (required for `EmailSenderSMTP` class)
 
 How to Use
 ----------
@@ -349,24 +348,21 @@ A class that manages the server's response to an incoming requests. Defaults to 
 
 ### Session
 
-Session management class which can use PHP's native session features or a database. You can get and set any property name to the session object and it is dynamically saved (using magic getter and setter methods). The abstract method SessionStore defines how the session system stores and retrieves the data. This library provides database and PHP versions of the SessionStore class. Roll your own by extending SessionStore and use a class of this object when instantiating the Session object. Sessions are saved all at once at session object `__destruct` or when the `save()` method is explicitly called.
+Session management class which can use PHP's native session features (and an optional database store). You can get and set any property name to the session object and it is dynamically saved (using magic getter and setter methods). Implement the PHP-native SessionHandlerInterface to create your own session handler or session storage engine. This library provides database implementation called Firelit\DatabseSessionHandler. Roll your own by implementing SessionHandlerInterface and use a class of this object when instantiating the Session object. Or, leave this parameter off to simply use PHP's built-in cookie- & file-based session handling.
 
-Note that if you are using PHP's native session support (which is an option), the expiration of a session is controlled by the `session.gc_maxlifetime` parameter.
+Note that if you are using Firelit\DatabseSessionHandler, the expiration of a session is NOT controlled by the `session.gc_maxlifetime` as it is if you use the Session class without the session handler.
 
 Example usage:
 ```php
 <?php
 
-$store = Firelit\SessionStore:init('DB', new Query);
-$sess = new Firelit\Session($store);
+$sess = new Firelit\Session(new Firelit\DatabseSessionHandler);
 
 $sess->loggedIn = true;
 $sess->userName = 'Peter';
 
 echo '<p>Hello '. $sess->userName .'</p>';
 ```
-
-Note that if you're using a database as a session store that the expired values should be cleaned up regularly (eg, with a cron job) via the `SessionStoreDB->cleanExpired()` method.
 
 ### Strings
 

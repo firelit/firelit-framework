@@ -2,80 +2,29 @@
 
 class SessionTest extends PHPUnit_Framework_TestCase {
 	
-	private $session, $store, $testVal;
+	public function testOpenRead() {
 	
-	protected function setUp() {
+		$this->store = $this->getMock('Firelit\DatabaseSessionHandler', array('open', 'close', 'read', 'write', 'destroy', 'gc'));
 		
-		$this->testVal = 'A test value';
-		
-		$this->store = $this->getMock('Firelit\SessionStore', array('store', 'fetch', 'destroy'));
-		
-		$this->session = new Firelit\Session($this->store);
-		
-	}
-		
-	public function testSet() {
-	
-		$varName = 'test'. mt_rand(0, 1000);
+		$varName = 'name'. mt_rand(0, 1000);
+		$varValue = 'value'. mt_rand(0, 1000);
+		$sessionId = '0hIWWN5z1tiaIhrAOC2YpjYSNbqRIE+D3Z69M/Q5eOQ=LzBpo7'; // Of the valid format
 		
 		$this->store->expects($this->once())
-					->method('store')
-					->with($this->equalTo(array( $varName => $this->testVal)));
+					->method('open')
+					->will($this->returnValue(true));
+
+		$this->store->expects($this->once())
+					->method('read')
+					->with($this->equalTo($sessionId))
+					->will($this->returnValue(false));
                  
-		$this->session->$varName = $this->testVal;
+		$session = new Firelit\Session($this->store, $sessionId);
 		
-		$this->session->save();
-		
-	}
-		
-	public function testGet() {
-	
-		$varName = 'test'. mt_rand(0, 1000);
-		
-		$this->store->expects($this->once())
-					->method('fetch')
-					->will($this->returnValue(array( $varName => $this->testVal)));
-                 
-		$this->assertEquals($this->session->$varName, $this->testVal);
-		
+		$session->$varName = $varValue;
+
+		$this->assertEquals($varValue, $session->$varName);
+
 	}
 	
-	public function testGetOnlyOnce() {
-	
-		$varName = 'test'. mt_rand(0, 1000);
-		
-		$this->store->expects($this->once())
-					->method('fetch')
-					->will($this->returnValue(array( $varName => $this->testVal)));
-                 
-		$firstGet = $this->session->$varName;
-		
-		// Second get should be from object cache
-		$this->assertEquals($this->session->$varName, $this->testVal);
-		
-	}
-	
-	public function testUnset() {
-	
-		$varName = 'test'. mt_rand(0, 1000);
-		
-		$this->store->expects($this->once())
-					->method('store')
-					->with($this->equalTo(array()));
-                 
-		unset($this->session->$varName);
-		
-		$this->session->save();
-				
-	}
-	
-	
-	public function testDestroy() {
-	
-		$this->store->expects($this->once())
-					->method('destroy');
-					
-		$this->session->destroy();
-		
-	}
 }
