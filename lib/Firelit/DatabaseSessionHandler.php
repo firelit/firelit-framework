@@ -24,7 +24,7 @@ class DatabaseSessionHandler implements \SessionHandlerInterface {
 
 		$sql = "SELECT `". self::$config['colData'] ."` FROM `". self::$config['tableName'] ."` WHERE `". self::$config['colKey'] ."`=:session_id AND `". self::$config['colExp'] ."` > NOW() LIMIT 1";
 
-		$q = new Firelit\Query($sql, array(
+		$q = new Query($sql, array(
 			':session_id' => $id
 		));
 
@@ -34,7 +34,7 @@ class DatabaseSessionHandler implements \SessionHandlerInterface {
 
 	public function write($id, $data) {
 
-		$q = new Firelit\Query();
+		$q = new Query();
 
     	$q->replace(self::$config['tableName'], array(
     		self::$config['colKey'] => $id,
@@ -50,7 +50,7 @@ class DatabaseSessionHandler implements \SessionHandlerInterface {
 
 		$sql = "DELETE FROM `". self::$config['tableName'] ."` WHERE `". self::$config['colKey'] ."`=:session_id LIMIT 1";
 
-		new Firelit\Query($sql, array(
+		new Query($sql, array(
 			':session_id' => $id
 		));
 
@@ -63,7 +63,7 @@ class DatabaseSessionHandler implements \SessionHandlerInterface {
 
 		$sql = "DELETE FROM `". self::$config['tableName'] ."` WHERE `". self::$config['colExp'] ."` <= NOW()";
 
-		new Firelit\Query($sql, array(
+		new Query($sql, array(
 			':session_id' => $id
 		));
 
