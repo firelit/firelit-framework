@@ -56,16 +56,27 @@ class Request extends Singleton {
 		} else
 			$this->headers = array();
 			
+		if ($this->method == 'PUT') {
+			parse_str(file_get_contents("php://input"), $_PUT);
+		} else {
+			$_PUT = array();
+		}
+
 		if ($bodyFormat == 'json') {
 			
-			$stream = fopen('php://input', 'r');
-			$this->post = stream_get_contents($stream);
-			fclose($stream);
+			$this->put = array();
+			$this->post = array();
 
-			$this->post = json_decode($this->post, true);
+			$bodyIn = file_get_contents("php://input");
 
+			if ($this->method == 'PUT')
+				$this->put = json_decode($bodyIn, true);
+			elseif ($this->method == 'POST')
+				$this->post = json_decode($bodyIn, true);
+			
 		} else {
 			$this->post = $_POST;
+			$this->put = $_PUT;
 		}
 
 		$this->get = $_GET;
@@ -91,6 +102,7 @@ class Request extends Singleton {
 			throw new \Exception('Specified filter is not callable.');
 		
 		$this->recurse($this->post, $filter);
+		$this->recurse($this->put, $filter);
 		$this->recurse($this->get, $filter);
 		$this->recurse($this->cookie, $filter);
 	
