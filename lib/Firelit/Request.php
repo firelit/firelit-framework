@@ -6,13 +6,13 @@ class Request extends Singleton {
 	
 	// All properties accessible via magic getter method
 	private $ip, $proxies, $host, $path, $method, $secure, $referer, $protocol, $cli, $headers, $uri;
-	private $post, $get, $cookie;
+	private $put, $post, $get, $cookie;
 	
 	public static $loadBalanced = false;
 
 	// $filter should be a filtering function, if supplied, which filters a string value by reference
 	public function __construct($filter = false, $bodyFormat = 'querystring') { 
-		
+
 		$this->ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : false;
 		$this->proxies = array();
 		$this->method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : false;
@@ -55,19 +55,20 @@ class Request extends Singleton {
 		
 		} else
 			$this->headers = array();
-			
+		
+		global $_PUT;
+		$_PUT = array();
+
+		$bodyIn = file_get_contents("php://input");
+
 		if ($this->method == 'PUT') {
-			parse_str(file_get_contents("php://input"), $_PUT);
-		} else {
-			$_PUT = array();
+			parse_str($bodyIn, $_PUT);
 		}
 
 		if ($bodyFormat == 'json') {
 			
 			$this->put = array();
 			$this->post = array();
-
-			$bodyIn = file_get_contents("php://input");
 
 			if ($this->method == 'PUT')
 				$this->put = json_decode($bodyIn, true);
