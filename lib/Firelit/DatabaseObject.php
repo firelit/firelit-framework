@@ -122,7 +122,6 @@ class DatabaseObject {
 		if (!static::$primaryKey) 
 			throw new \Exception('Cannot perform delete without a primary key.');
 
-		$this->_data = array();
 		$this->_dirty = array();
 
 		if ($this->_new) return;
@@ -133,6 +132,8 @@ class DatabaseObject {
 		else $q = new Query();
 
 		$q->query($sql, array( ':id' => $this->_data[static::$primaryKey] ));
+		
+		$this->_data = array();
 
 	}
 
