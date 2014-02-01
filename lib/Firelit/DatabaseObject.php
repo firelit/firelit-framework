@@ -11,6 +11,7 @@ class DatabaseObject {
 	protected $_data = array(); // The object's data
 	protected $_dirty = array(); // Array of dirty properties that need saving
 	protected $_new = false; // Indicates a new, unsaved object
+	protected $_readOnly = false; // Cannot save or delete a read-only object
 	
 	protected static $query = false;
 
@@ -35,6 +36,7 @@ class DatabaseObject {
 	public function save() {
 
 		if (!$this->_new && !sizeof($this->_dirty)) return;
+		if ($this->_readOnly) throw new \Exception('Cannot save a read-only object.');
 
 		if (static::$query) $q = static::$query;
 		else $q = new Query();
@@ -83,6 +85,12 @@ class DatabaseObject {
 		$this->_new = false;
 	}
 
+	public function setReadOnly() {
+		$this->_new = false;
+		$this->_dirty = array();
+		$this->_readOnly = true;
+	}
+
 	public function isNew() {
 		return $this->_new;
 	}
@@ -119,6 +127,8 @@ class DatabaseObject {
 
 	public function delete() {
 
+		if ($this->_readOnly) throw new \Exception('Cannot delete a read-only object.');
+
 		if (!static::$primaryKey) 
 			throw new \Exception('Cannot perform delete without a primary key.');
 
@@ -132,7 +142,7 @@ class DatabaseObject {
 		else $q = new Query();
 
 		$q->query($sql, array( ':id' => $this->_data[static::$primaryKey] ));
-		
+
 		$this->_data = array();
 
 	}

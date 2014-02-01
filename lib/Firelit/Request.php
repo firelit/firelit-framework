@@ -88,6 +88,7 @@ class Request extends Singleton {
 			// Unset global versions to prevent access to un-filtered
 			$this->filterInputs($filter);
 			
+			$_PUT = null;
 			$_POST = null;
 			$_GET = null;
 			$_COOKIE = null;
