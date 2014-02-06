@@ -40,7 +40,7 @@ class ApiResponse extends Response {
 			echo json_encode($this->response);
 
 		} else {
-			throw new Exception('Invalid response format: '. $this->responseFormat);
+			throw new \Exception('Invalid response format: '. $this->responseFormat);
 		}
 
 		$this->responseSent = true;
