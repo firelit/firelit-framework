@@ -29,7 +29,6 @@ class ResponseTest extends PHPUnit_Framework_TestCase {
 
 		$r = Firelit\Response::init();
 		$r->setCallback(function(&$out) {
-			echo 'Callback '. $out;
 			$out = preg_replace('/not/', 'NOT', $out);
 		});
 
