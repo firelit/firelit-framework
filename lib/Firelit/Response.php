@@ -7,6 +7,7 @@ class Response extends Singleton {
 	protected $code = 200;
 	protected $outputBuffering = true;
 	protected $charset;
+	protected $callback = false;
 	
 	static public $exceptOnHeaders = false;
 	
@@ -36,7 +37,32 @@ class Response extends Singleton {
 	}
 	
 	public function __destruct() {
+
+		if (is_callable($this->callback)) {
+
+			if ($this->outputBuffering) {
+
+				$out = ob_get_contents();
+
+				// Work-around: Can't call anonymous functions that are class properties
+				// PHP just looks for a method with that name
+				$callback = &$this->callback;
+				$callback($out);
+
+				$this->clearBuffer();
+
+				echo $out;
+
+			} else $this->callback();
+
+		}
+
 		$this->endBuffer();
+
+	}
+
+	public function setCallback($function) {
+		$this->callback = $function;
 	}
 
 	public function contentType($type = false) {
@@ -96,56 +122,44 @@ class Response extends Singleton {
 		
 	}
 	
-	static public function getClass() {
-
-		$class = __CLASS__;
-		return $class::init();
-
-	}
-
-	static public function flushBuffer() {
+	public function flushBuffer() {
 	
-		$respObj = self::getClass();
-		if ($respObj->outputBuffering)
+		if ($this->outputBuffering)
 			ob_flush();
 			
 	}
 	
-	static public function cleanBuffer() {
+	public function cleanBuffer() {
 	
-		$respObj = self::getClass();
-		if ($respObj->outputBuffering)
+		if ($this->outputBuffering)
 			ob_clean();
 			
 	}
 	
-	static public function clearBuffer() {
+	public function clearBuffer() {
 		// Alias of cleanBuffer()
-
-		$respObj = self::getClass();
-		$respObj->cleanBuffer();
+		$this->cleanBuffer();
 		
 	}
 
-	static public function endBuffer() {
+	public function endBuffer() {
 		// Call cleanBuffer first if you don't want anything getting out
-		$respObj = self::getClass();
-		if ($respObj->outputBuffering)
+		if ($this->outputBuffering)
 			ob_end_flush();
 
-		$respObj->outputBuffering = false;
+		$this->outputBuffering = false;
+
 	}
 
-	static public function setCode($code) {
+	public function setCode($code) {
 
-		$respObj = self::getClass();
-		$respObj->code($code);
+		$this->code($code);
+
 	}
 
-	static public function setContentType($type) {
+	public function setContentType($type) {
 
-		$respObj = self::getClass();
-		$respObj->contentType($type);
+		$this->contentType($type);
 		
 	}
 

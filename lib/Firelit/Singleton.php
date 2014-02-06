@@ -22,4 +22,12 @@ abstract class Singleton {
 
 	}
 
+	static public function destruct() {
+
+		$class = get_called_class();
+		if (isset(self::$singletons[$class]))
+			unset(self::$singletons[$class]);
+		
+	}
+
 }
