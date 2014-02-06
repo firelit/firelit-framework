@@ -43,10 +43,6 @@ class ApiResponse extends Response {
 			throw new Exception('Invalid response format: '. $this->responseFormat);
 		}
 
-		if ($this->outputBuffering) {
-			$this->flushBuffer();
-		}
-
 		$this->responseSent = true;
 	}
 	
@@ -60,5 +56,7 @@ class ApiResponse extends Response {
 			$this->respond(array(), false);
 		}
 
+		parent::__destruct();
+		
 	}
 }
