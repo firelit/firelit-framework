@@ -5,7 +5,7 @@ namespace Firelit;
 class Request extends Singleton {
 	
 	// All properties accessible via magic getter method
-	private $ip, $proxies, $host, $path, $method, $secure, $referer, $protocol, $cli, $headers, $uri;
+	private $ip, $proxies, $host, $path, $method, $secure, $referer, $protocol, $cli, $headers, $uri, $body;
 	private $put, $post, $get, $cookie;
 	
 	public static $loadBalanced = false;
@@ -59,10 +59,10 @@ class Request extends Singleton {
 		global $_PUT;
 		$_PUT = array();
 
-		$bodyIn = file_get_contents("php://input");
+		$this->body = file_get_contents("php://input");
 
 		if ($this->method == 'PUT') {
-			parse_str($bodyIn, $_PUT);
+			parse_str($this->body, $_PUT);
 		}
 
 		if ($bodyFormat == 'json') {
@@ -71,9 +71,9 @@ class Request extends Singleton {
 			$this->post = array();
 
 			if ($this->method == 'PUT')
-				$this->put = json_decode($bodyIn, true);
+				$this->put = json_decode($this->body, true);
 			elseif ($this->method == 'POST')
-				$this->post = json_decode($bodyIn, true);
+				$this->post = json_decode($this->body, true);
 			
 		} else {
 			$this->post = $_POST;
