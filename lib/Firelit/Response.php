@@ -99,9 +99,7 @@ class Response extends Singleton {
 		if (!$type) $type = "text/html";
 		
 		self::$contentType = $type ."; charset=". strtolower(self::$charset);
-
-		if (!self::$outputBuffering)
-			header("Content-Type: ". self::$contentType);
+		header("Content-Type: ". self::$contentType);
 		
 	}
 	
@@ -118,9 +116,7 @@ class Response extends Singleton {
 		}
 		
 		self::$code = $code;
-
-		if (!self::$outputBuffering)
-			http_response_code(self::$code);
+		http_response_code(self::$code);
 
 	}
 
@@ -148,20 +144,8 @@ class Response extends Singleton {
 		
 	}
 	
-	public function sendHeaders() {
-		// If headers haven't been sent and OB is on (if off, headers sent as they are set)
-		if (!headers_sent() && self::$outputBuffering) {
-
-			http_response_code(self::$code);
-			header("Content-Type: ". self::$contentType);
-
-		}
-	}
-
 	public function flushBuffer() {
 		// Send buffer out
-		$this->sendHeaders();
-
 		if (self::$outputBuffering)
 			ob_flush();
 			
@@ -180,12 +164,8 @@ class Response extends Singleton {
 		
 	}
 
-	public function endBuffer($sendHeaders = true) {
+	public function endBuffer() {
 		// Call cleanBuffer first if you don't want anything getting out
-
-		// Sending headers is recommended if ending OB to be sure they make it out before content
-		if ($sendHeaders)
-			$this->sendHeaders();
 
 		if (self::$outputBuffering)
 			ob_end_flush();
