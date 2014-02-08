@@ -12,12 +12,12 @@ class ApiResponse extends Response {
 		// Use parent's output buffer controls
 		parent::__construct($ob, $charset);
 
-		// Set appropriate output formats
-		if ($responseFormat == 'JSON')
-			$this->setContentType('application/json');
-		
 		$this->responseFormat = strtoupper($responseFormat);
 
+		// Set appropriate output formats
+		if ($this->responseFormat == 'JSON')
+			$this->setContentType('application/json');
+		
 	}
 	
 	public function setTemplate($template) {

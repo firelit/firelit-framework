@@ -4,13 +4,15 @@ namespace Firelit;
 
 class Response extends Singleton {
 	
-	protected $code = 200;
-	protected $charset = "UTF-8";
-	protected $contentType = "text/html";
 	protected $callback = false;
 
 	// Static to prevent mutliple, tangled, nested output buffers
 	static protected $outputBuffering = true;
+
+	// Static b/c there should really only be one type of response
+	static protected $code = 200;
+	static protected $charset = "UTF-8";
+	static protected $contentType = "text/html";
 
 	// Global config - if to throw exception when headers already sent and update can't be made
 	static public $exceptOnHeaders = false;
@@ -20,11 +22,11 @@ class Response extends Singleton {
 		// $charset: Specify the charset?
 
 		// Set charset
-		$this->charset = $charset;
+		self::$charset = $charset;
 
 		// UTF-8 output by default
 		if (!headers_sent()) 
-			mb_http_output($this->charset);
+			mb_http_output(self::$charset);
 		elseif (self::$exceptOnHeaders)
 			throw new \Exception('Headers already sent. Multi-byte output cannot be enabled.');
 		
@@ -86,10 +88,10 @@ class Response extends Singleton {
 		
 		if (!$type) $type = "text/html";
 		
-		$this->contentType = $type ."; charset=". strtolower($this->charset);
+		self::$contentType = $type ."; charset=". strtolower(self::$charset);
 
 		if (!self::$outputBuffering)
-			header("Content-Type: ". $this->contentType);
+			header("Content-Type: ". self::$contentType);
 		
 	}
 	
@@ -105,10 +107,10 @@ class Response extends Singleton {
 				
 		}
 		
-		$this->code = $code;
+		self::$code = $code;
 
 		if (!self::$outputBuffering)
-			http_response_code($this->code);
+			http_response_code(self::$code);
 
 	}
 
@@ -140,8 +142,8 @@ class Response extends Singleton {
 		// If headers haven't been sent and OB is on (if off, headers sent as they are set)
 		if (!headers_sent() && self::$outputBuffering) {
 
-			http_response_code($this->code);
-			header("Content-Type: ". $this->contentType);
+			http_response_code(self::$code);
+			header("Content-Type: ". self::$contentType);
 
 		}
 	}
