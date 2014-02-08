@@ -7,7 +7,7 @@ class Response extends Singleton {
 	protected $callback = false;
 
 	// Static to prevent mutliple, tangled, nested output buffers
-	static protected $outputBuffering = true;
+	static protected $outputBuffering = false;
 
 	// Static b/c there should really only be one type of response
 	static protected $code = 200;

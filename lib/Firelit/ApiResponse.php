@@ -40,8 +40,7 @@ class ApiResponse extends Response {
 		if ($this->hasResponded()) return;
 
 		// Clear anything that may have snuck in
-		if (self::$outputBuffering)
-			$this->cleanBuffer();
+		$this->cleanBuffer();
 
 		// Format for specific output type
 		if ($this->responseFormat == 'JSON') {
@@ -64,10 +63,8 @@ class ApiResponse extends Response {
 	// Cancel the ApiResponse (allows switch to output of non-api data if needed)
 	public function cancel() {
 		// Stop buffering
-		if (self::$outputBuffering) {
-			$this->cleanBuffer();
-			$this->endBuffer(false);
-		}
+		$this->cleanBuffer();
+		$this->endBuffer(false);
 
 		// No longer need a response
 		$this->responseSent = true;
