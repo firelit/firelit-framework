@@ -11,7 +11,7 @@ class Response extends Singleton {
 
 	// Static to prevent mutliple, tangled, nested output buffers
 	static protected $outputBuffering = true;
-	
+
 	// Global config - if to throw exception when headers already sent and update can't be made
 	static public $exceptOnHeaders = false;
 	
@@ -19,10 +19,7 @@ class Response extends Singleton {
 		// $ob: Turn output buffering on?
 		// $charset: Specify the charset?
 
-		// Will not turn off if already on
-		if (!self::$outputBuffering)
-			self::$outputBuffering = $ob;
-		
+		// Set charset
 		$this->charset = $charset;
 
 		// UTF-8 output by default
@@ -31,12 +28,16 @@ class Response extends Singleton {
 		elseif (self::$exceptOnHeaders)
 			throw new \Exception('Headers already sent. Multi-byte output cannot be enabled.');
 		
-		if (self::$outputBuffering) {
+		// Will not turn off or on if already on
+		if ($ob && !self::$outputBuffering) {
+
 			// Ouput buffer by default to prevent unforseen errors from printing to the page,
 			// to make possible a special 500 error page if something comes up during processing,
 			// to prevent flushing in strange places and partial page loads if a internal processes take too long,
 			// and ability to redirect at any time if there is an issue
 			
+			self::$outputBuffering = $ob;
+
 			// Run output through muli-byte filter to match the above-specified (via mb_http_output) output encoding 
 			ob_start("mb_output_handler");
 			
