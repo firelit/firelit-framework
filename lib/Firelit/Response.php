@@ -5,16 +5,23 @@ namespace Firelit;
 class Response extends Singleton {
 	
 	protected $code = 200;
-	protected $outputBuffering = true;
 	protected $charset;
 	protected $callback = false;
+
+	// Static to prevent mutliple, tangled, nested output buffers
+	static protected $outputBuffering = true;
 	
+	// Global config - if to throw exception when headers already sent and update can't be made
 	static public $exceptOnHeaders = false;
 	
 	public function __construct($ob = true, $charset = "UTF-8") { 
 		// $ob: Turn output buffering on?
 		// $charset: Specify the charset?
-		$this->outputBuffering = $ob;
+
+		// Will not turn off if already on
+		if (!self::$outputBuffering)
+			self::$outputBuffering = $ob;
+		
 		$this->charset = $charset;
 
 		// UTF-8 output by default
@@ -23,7 +30,7 @@ class Response extends Singleton {
 		elseif (self::$exceptOnHeaders)
 			throw new \Exception('Headers already sent. Multi-byte output cannot be enabled.');
 		
-		if ($ob) {
+		if (self::$outputBuffering) {
 			// Ouput buffer by default to prevent unforseen errors from printing to the page,
 			// to make possible a special 500 error page if something comes up during processing,
 			// to prevent flushing in strange places and partial page loads if a internal processes take too long,
@@ -40,7 +47,7 @@ class Response extends Singleton {
 
 		if (is_callable($this->callback)) {
 
-			if ($this->outputBuffering) {
+			if (self::$outputBuffering) {
 
 				$out = ob_get_contents();
 
@@ -77,6 +84,7 @@ class Response extends Singleton {
 		
 		if (!$type) $type = "text/html";
 		
+		// Even with OB on, headers may be sent before content -- move to destruct?
 		header("Content-Type: ". $type ."; charset=". strtolower($this->charset));
 		
 	}
@@ -94,6 +102,8 @@ class Response extends Singleton {
 		}
 		
 		$this->code = $code;
+		
+		// Even with OB on, headers may be sent before content -- move to destruct?
 		http_response_code($code);
 
 	}
@@ -112,7 +122,7 @@ class Response extends Singleton {
 				
 		}
 		
-		if ($this->outputBuffering)
+		if (self::$outputBuffering)
 			$this->cleanBuffer();
 
 		$this->code($type);
@@ -124,14 +134,14 @@ class Response extends Singleton {
 	
 	public function flushBuffer() {
 	
-		if ($this->outputBuffering)
+		if (self::$outputBuffering)
 			ob_flush();
 			
 	}
 	
 	public function cleanBuffer() {
 	
-		if ($this->outputBuffering)
+		if (self::$outputBuffering)
 			ob_clean();
 			
 	}
@@ -144,10 +154,10 @@ class Response extends Singleton {
 
 	public function endBuffer() {
 		// Call cleanBuffer first if you don't want anything getting out
-		if ($this->outputBuffering)
+		if (self::$outputBuffering)
 			ob_end_flush();
 
-		$this->outputBuffering = false;
+		self::$outputBuffering = false;
 
 	}
 
