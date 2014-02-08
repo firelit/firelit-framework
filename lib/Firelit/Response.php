@@ -5,7 +5,8 @@ namespace Firelit;
 class Response extends Singleton {
 	
 	protected $code = 200;
-	protected $charset;
+	protected $charset = "UTF-8";
+	protected $contentType = "text/html";
 	protected $callback = false;
 
 	// Static to prevent mutliple, tangled, nested output buffers
@@ -25,7 +26,7 @@ class Response extends Singleton {
 		$this->charset = $charset;
 
 		// UTF-8 output by default
-		if (!headers_sent())
+		if (!headers_sent()) 
 			mb_http_output($this->charset);
 		elseif (self::$exceptOnHeaders)
 			throw new \Exception('Headers already sent. Multi-byte output cannot be enabled.');
@@ -36,7 +37,7 @@ class Response extends Singleton {
 			// to prevent flushing in strange places and partial page loads if a internal processes take too long,
 			// and ability to redirect at any time if there is an issue
 			
-			// Run output through muli-byte filter to match the above-specified output encoding
+			// Run output through muli-byte filter to match the above-specified (via mb_http_output) output encoding 
 			ob_start("mb_output_handler");
 			
 		}
@@ -84,8 +85,10 @@ class Response extends Singleton {
 		
 		if (!$type) $type = "text/html";
 		
-		// Even with OB on, headers may be sent before content -- move to destruct?
-		header("Content-Type: ". $type ."; charset=". strtolower($this->charset));
+		$this->contentType = $type ."; charset=". strtolower($this->charset);
+
+		if (!self::$outputBuffering)
+			header("Content-Type: ". $this->contentType);
 		
 	}
 	
@@ -102,9 +105,9 @@ class Response extends Singleton {
 		}
 		
 		$this->code = $code;
-		
-		// Even with OB on, headers may be sent before content -- move to destruct?
-		http_response_code($code);
+
+		if (!self::$outputBuffering)
+			http_response_code($this->code);
 
 	}
 
@@ -132,15 +135,27 @@ class Response extends Singleton {
 		
 	}
 	
+	public function sendHeaders() {
+		// If headers haven't been sent and OB is on (if off, headers sent as they are set)
+		if (!headers_sent() && self::$outputBuffering) {
+
+			http_response_code($this->code);
+			header("Content-Type: ". $this->contentType);
+
+		}
+	}
+
 	public function flushBuffer() {
-	
+		// Send buffer out
+		$this->sendHeaders();
+
 		if (self::$outputBuffering)
 			ob_flush();
 			
 	}
 	
 	public function cleanBuffer() {
-	
+		// Empty buffer
 		if (self::$outputBuffering)
 			ob_clean();
 			
@@ -152,8 +167,13 @@ class Response extends Singleton {
 		
 	}
 
-	public function endBuffer() {
+	public function endBuffer($sendHeaders = true) {
 		// Call cleanBuffer first if you don't want anything getting out
+
+		// Sending headers is recommended if ending OB to be sure they make it out before content
+		if ($sendHeaders)
+			$this->sendHeaders();
+
 		if (self::$outputBuffering)
 			ob_end_flush();
 
@@ -162,13 +182,13 @@ class Response extends Singleton {
 	}
 
 	public function setCode($code) {
-
+		// Set the HTTP response code
 		$this->code($code);
 
 	}
 
 	public function setContentType($type) {
-
+		// Set the HTTP content type
 		$this->contentType($type);
 		
 	}

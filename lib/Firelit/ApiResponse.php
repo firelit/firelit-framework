@@ -14,7 +14,7 @@ class ApiResponse extends Response {
 
 		// Set appropriate output formats
 		if ($responseFormat == 'JSON')
-			$this->contentType('application/json');
+			$this->setContentType('application/json');
 		
 		$this->responseFormat = strtoupper($responseFormat);
 
@@ -66,7 +66,7 @@ class ApiResponse extends Response {
 		// Stop buffering
 		if (self::$outputBuffering) {
 			$this->cleanBuffer();
-			$this->endBuffer();
+			$this->endBuffer(false);
 		}
 
 		// No longer need a response
