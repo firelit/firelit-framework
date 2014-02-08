@@ -64,7 +64,13 @@ class Response extends Singleton {
 
 				echo $out;
 
-			} else $this->callback();
+			} else {
+				// Work-around: Can't call anonymous functions that are class properties
+				// PHP just looks for a method with that name
+				$callback = &$this->callback;
+				$callback(false);
+
+			}
 
 		}
 
@@ -72,6 +78,10 @@ class Response extends Singleton {
 
 	}
 
+	// Pass a closure to define a callback function
+	// Should take one parameter: the string to be sent as output
+	// Used passed variable referentially to save any changes to output
+	// If output buffering is off, false will be passed
 	public function setCallback($function) {
 		$this->callback = $function;
 	}
