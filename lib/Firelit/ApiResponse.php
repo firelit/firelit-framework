@@ -62,10 +62,6 @@ class ApiResponse extends Response {
 
 	// Cancel the ApiResponse (allows switch to output of non-api data if needed)
 	public function cancel() {
-		// Stop buffering
-		$this->cleanBuffer();
-		$this->endBuffer();
-
 		// No longer need a response
 		$this->responseSent = true;
 	}
