@@ -108,6 +108,8 @@ class DatabaseObject {
 
 	public function __set($var, $val) {
 
+		if ($this->_data[$var] === $val) return;
+
 		$this->_data[$var] = $val;
 
 		if (!$this->_new && !in_array($var, $this->_dirty))
