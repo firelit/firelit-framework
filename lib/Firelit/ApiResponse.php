@@ -71,6 +71,7 @@ class ApiResponse extends Response {
 
 		// Respond, if it hasn't yet
 		if (!$this->hasResponded()) {
+			$this->code(500);
 			$this->respond(array(), false);
 		}
 
