@@ -42,6 +42,12 @@ class ApiResponse extends Response {
 		// Clear anything that may have snuck in
 		$this->cleanBuffer();
 
+		if ($this->code == 204) {
+			// No-body response
+			$this->responseSent = true;
+			return;
+		}
+		
 		// Format for specific output type
 		if ($this->responseFormat == 'JSON') {
 			
