@@ -42,5 +42,5 @@ class ApiResponseTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('<HTML>', $res);
 		
 	}
-
+	
 }

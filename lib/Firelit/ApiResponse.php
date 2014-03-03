@@ -76,10 +76,8 @@ class ApiResponse extends Response {
 	public function __destruct() {
 
 		// Respond, if it hasn't yet
-		if (!$this->hasResponded()) {
-			$this->code(500);
+		if (!$this->hasResponded())
 			$this->respond(array(), false);
-		}
 
 		// Parent's destructer returns all data in output buffer
 		parent::__destruct();
