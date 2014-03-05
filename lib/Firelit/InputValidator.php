@@ -241,6 +241,8 @@ class InputValidator {
 				if (empty($url['scheme'])) 
 					$url = parse_url('http://'. $this->value); // Add a scheme for proper parsing
 
+				if (empty($url['path'])) $url['path'] = '/';
+				
 				return $url['scheme'] .'://'. strtolower($url['host']) . (!empty($url['port']) ? ':'. $url['port'] : '') . $url['path'] . (!empty($url['query']) ? '?'. $url['query'] : '');
 
 			default:

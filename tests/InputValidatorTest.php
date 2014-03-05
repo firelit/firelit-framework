@@ -416,7 +416,7 @@ class InputValidatorTest extends PHPUnit_Framework_TestCase {
 		// No-http website
 		$iv = new InputValidator(InputValidator::URL, 'www.yahoo.com');
 		$this->assertEquals(true, $iv->isValid());
-		$this->assertEquals('http://www.yahoo.com', $iv->getNormalized());
+		$this->assertEquals('http://www.yahoo.com/', $iv->getNormalized());
 
 		// Website with a port
 		$iv = new InputValidator(InputValidator::URL, 'www.firelit.com:8080/index.html');
@@ -441,7 +441,7 @@ class InputValidatorTest extends PHPUnit_Framework_TestCase {
 		// https website
 		$iv = new InputValidator(InputValidator::URL, 'https://slashdot.org');
 		$this->assertEquals(true, $iv->isValid());
-		$this->assertEquals('https://slashdot.org', $iv->getNormalized());
+		$this->assertEquals('https://slashdot.org/', $iv->getNormalized());
 
 		// Invalid website
 		$iv = new InputValidator(InputValidator::URL, 'example');
