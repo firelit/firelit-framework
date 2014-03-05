@@ -55,4 +55,22 @@ class CryptoTest extends PHPUnit_Framework_TestCase {
 		
 	}
 	
+	public function testPackages() {
+			
+		$subject = 'This is a test cipher. Encrypt me!';
+		$password = Firelit\Crypto::generateKey(32);
+
+		$package = Firelit\Crypto::package($subject, $password);
+		
+		$this->assertRegExp('/^[0-9A-Za-z\\=\+\/\|]{20,}$/', $package);
+
+		$failedUnPackage = Firelit\Crypto::unpackage($package, $password.'1');
+
+		$this->assertNull($failedUnPackage, 'Unpackaging should fail due to invalid HMAC');
+
+		$successUnPackage = Firelit\Crypto::unpackage($package, $password);
+
+		$this->assertTrue($subject === $successUnPackage, 'Unpackaging should be successfull');
+		
+	}
 }
