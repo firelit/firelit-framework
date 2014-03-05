@@ -368,7 +368,7 @@ class InputValidator {
 
 				if (!$url) return false;
 
-				if (!strlen($url['scheme'])) $url = parse_url('http://'.$value); // Add a scheme for proper parsing
+				if (empty($url['scheme'])) $url = parse_url('http://'.$value); // Add a scheme for proper parsing
 
 				if (strlen($url['scheme']) && !in_array($url['scheme'], array('http', 'https'))) return false;
 				if (!isset($url['host']) && isset($url['path'])) { $url['host'] = $url['path']; $url['path'] = ''; }
