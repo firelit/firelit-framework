@@ -228,7 +228,7 @@ Available methods for getting the status and/or results of a query:
 - `success();` returns true if the query was successfully executed
 - `logError(LogEntry $logger, $file, $line);` is a helper method for logging any query errors
 
-### ServerRequest
+### Request
 
 A class that captures the incoming HTTP request in a single object and performs any necessary preliminary work. Provides a nice class wrapper around all the important parameters within the request and allows for easy sanitization.
 
@@ -236,7 +236,7 @@ Example usage:
 ```php
 <?php
 
-$req = new Firelit\ServerRequest( function(&$val) {
+$req = new Firelit\Request::init( function(&$val) {
 	
 	// Remove any invalid UTF-8 characters from $_POST, $_GET and $_COOKIE
 	Firelit\Strings::cleanUTF8($val); 
@@ -247,21 +247,41 @@ $req = new Firelit\ServerRequest( function(&$val) {
 if ($req->get['page'] == '2') showPageTwo();
 ```
 
+Example usage:
+```php
+<?php
+// Handle JSON body parsing and PUT requests automatically
+$req = new Firelit\Request::init(false, 'json');
+
+// Filtered $_POST, $_GET and $_COOKIE parameters can then be accessed via the object
+$newName = $req->put['name'];
+```
+
 Available properties:
 - `cli` will return true if the page was loaded from the command line interface
 - `cookie` will return all data (filtered, as specified) originally available via $_COOKIE
 - `get` will return all data (filtered, as specified) originally available via $_GET
-- `header` will return an array of all HTTP headers by key (if Apache is the web server used)
+- `headers` will return an array of all HTTP headers by key (if Apache is the web server used)
 - `host` is set to the host as secified in the HTTP request
 - `method` is set to the HTTP request method (eg, 'POST', 'PUT', etc.)
 - `path` is set to the requested path (eg, '/folder/test.php')
 - `post` will return all data (filtered, as specified) originally available via $_POST
+- `protocol` will return the request protocol (eg, HTTP 1.0 or HTTP 1.1)
+- `proxies` will return an array of IPs that may be in use as proxies
+- `put` will return all data (filtered, as specified) in HTTP body (if PUT request)
 - `referer` will return the HTTP referer as specified by the client
 - `secure` will return true if the connection is secure (ie, 'HTTPS://')
+- `uri` will return the full URI of the request, including HTTP or HTTPS
 
-### ServerResponse
+### Response
 
 A class that manages the server's response to an incoming requests. Defaults to buffering output. Includes helper functions which make changing the HTTP response code and performing a redirect much easier. Note that the ApiResponse class inherits from this class to make use of its response management.
+
+Available methods:
+- `contentType()` can be used to set the content-type of the response (eg, 'application/json')
+- `redirect()` can be used to redirect the visitor to another URI
+- `setCallback()` can be used to set a callback function to handle the server output before it is sent
+- `setCode()` can be used to set the HTTP response code (eg, 404)
 
 ### Session
 
@@ -278,7 +298,7 @@ $sess = new Firelit\Session::init(new Firelit\DatabaseSessionHandler);
 $sess->loggedIn = true;
 $sess->userName = 'Peter';
 
-echo '<p>Hello '. $sess->userName .'</p>';
+echo '<p>Hello '. htmlentities($sess->userName) .'</p>';
 ```
 
 ### Strings
