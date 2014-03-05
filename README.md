@@ -79,42 +79,35 @@ Firelit\Cache::config(array(
 	'memcached' => array(
 		'enabled' => true,
 		'servers' => array(
-			array('cache.example.com', 11211, 33)
+			array(
+				'host' => 'localhost',
+				'port' => 11211, 
+				'persistent' => true, 
+				'weight' => 1, 
+				'timeout' => 1
+			)
+			/* Multiple servers can be added */
 		)
 	)
 ));
 
 $val = Firelit\Cache::get('randomValue', function() {
 
-	// If cache miss, this closure will retrieve and return the value
+	// If cache miss, this closure will execute this closure, storing the returned value in cache
 	return mt_rand(0, 1000);
 	
 });
 
 if (Firelit\Cache::$cacheHit) 
 	echo 'Cache hit!';
-```
 
-### CheckHTTPS
-
-A short class to help verify a connection is secure (ie, using TLS) and take action (ie, redirect or return error) if it isn't. It would be best if this were done via the web server settings but this isn't always possible.
-
-Example usage:
-```php
-<?php
-
-// Simple redirect if the connection isn't secure
-Firelit\CheckHTTPS::redirect();
-
-// Or log the insecure access attempt and exit with HTTP 400
-Firelit\CheckHTTPS::error(function() {
-	new Firelit\LogEntry(1, 'Connection is not secure and it needs to be.', __FILE__, __LINE__);
-});
+// Set a value to null in order to remove it from cache
+Firelit\Cache::set('randomValue', null);
 ```
 
 ### Crypto
 
-A symmetrical-key encryption/decryption helper class (uses MCRYPT_RIJNDAEL_256 aka AES). Includes password hashing method.
+A symmetrical-key encryption/decryption helper class (uses MCRYPT_RIJNDAEL_256 aka AES) with HMAC and automatic initialization vector creation.
 
 Example encryption/decryption usage:
 ```php
@@ -122,10 +115,9 @@ Example encryption/decryption usage:
 
 $mySecretPassword = 'Super secret!';
 
-$iv = Firelit\Crypto::getIv();
-$encrypted = Firelit\Crypto::encrypt('Super secret text', $mySecretPassword, $iv);
+$encrypted = Firelit\Crypto::package('Super secret text', $mySecretPassword);
 
-$decrypted = Firelit\Crypto::decrypt($encrypted, $mySecretPassword, $iv);
+$decrypted = Firelit\Crypto::unpackage($encrypted, $mySecretPassword);
 ```
 
 Example password hasing usage:

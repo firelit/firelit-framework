@@ -34,7 +34,6 @@ class CacheTest extends PHPUnit_Framework_TestCase {
 		});
 		
 		$this->assertEquals( 12345, $val );
-		$this->assertTrue( Firelit\Cache::$cacheMiss );
 		$this->assertFalse( Firelit\Cache::$cacheHit );
 		
 	}
@@ -51,7 +50,6 @@ class CacheTest extends PHPUnit_Framework_TestCase {
 		});
 		
 		$this->assertEquals( 100, $val );
-		$this->assertTrue( Firelit\Cache::$cacheMiss );
 		$this->assertFalse( Firelit\Cache::$cacheHit );
 		
 	}
@@ -68,9 +66,30 @@ class CacheTest extends PHPUnit_Framework_TestCase {
 		});
 		
 		$this->assertEquals( 12345, $val );
-		$this->assertFalse( Firelit\Cache::$cacheMiss );
 		$this->assertTrue( Firelit\Cache::$cacheHit );
 		
 	}
 	
+	/**
+	* @depends testGetCacheHit
+	*/
+	public function testGetCacheSet() {
+	
+		$val = Firelit\Cache::get('index');
+
+		$this->assertEquals( 12345, $val );
+
+		Firelit\Cache::set('index', 123456);
+		
+		$val = Firelit\Cache::get('index');
+
+		$this->assertEquals( 123456, $val );
+		
+		Firelit\Cache::set('index', null);
+		
+		$val = Firelit\Cache::get('index');
+
+		$this->assertNull( $val );
+		
+	}
 }
