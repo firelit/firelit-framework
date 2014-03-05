@@ -238,7 +238,8 @@ class InputValidator {
 			case self::URL: 
 
 				$url = parse_url($this->value);
-				if (empty($url['scheme'])) $url['scheme'] = 'http';
+				if (empty($url['scheme'])) 
+					$url = parse_url('http://'. $this->value); // Add a scheme for proper parsing
 
 				return $url['scheme'] .'://'. strtolower($url['host']) . ($url['port'] ? ':'. $url['port'] : '') . $url['path'] . ($url['query'] ? '?'. $url['query'] : '');
 
@@ -368,7 +369,8 @@ class InputValidator {
 
 				if (!$url) return false;
 
-				if (empty($url['scheme'])) $url = parse_url('http://'.$value); // Add a scheme for proper parsing
+				if (empty($url['scheme'])) 
+					$url = parse_url('http://'. $value); // Add a scheme for proper parsing
 
 				if (strlen($url['scheme']) && !in_array($url['scheme'], array('http', 'https'))) return false;
 				if (!isset($url['host']) && isset($url['path'])) { $url['host'] = $url['path']; $url['path'] = ''; }
