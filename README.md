@@ -1,5 +1,6 @@
 Firelit-Framework
 ===============
+[![Build Status](https://travis-ci.org/firelit/firelit-framework.png?branch=master)](https://travis-ci.org/firelit/firelit-framework)
 
 Firelit's standard PHP framework provides a set of helpful classes for developing a website. They are created and namespaced so that they can easily be used with an auto-loader, following the [PSR-0 standard](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md).
 
