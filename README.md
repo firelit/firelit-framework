@@ -3,11 +3,7 @@ Firelit-Framework
 
 Firelit's standard PHP framework provides a set of helpful classes for developing a website. They are created and namespaced so that they can easily be used with an auto-loader, following the [PSR-0 standard](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md).
 
-**Not production ready!**
-
-**NOTE: This project is a WIP and is not versioned because it is not yet complete. All tests have not yet been written and thus all classes have not yet been tested.**
-
-TODO: UPDATE!
+** Not yet released, future changes may break backwards compatability **
 
 Requirements
 ------------
@@ -118,77 +114,6 @@ $mySecretPassword = 'Super secret!';
 $encrypted = Firelit\Crypto::package('Super secret text', $mySecretPassword);
 
 $decrypted = Firelit\Crypto::unpackage($encrypted, $mySecretPassword);
-```
-
-Example password hasing usage:
-```php
-<?php
-
-// Getting a hash for a new password
-list($hash, $salt) = Firelit\Crypto::password($_POST['new_password']);
-
-// Checking a submitted password against a user's stored info
-list($hash, $salt) = Firelit\Crypto::password($_POST['password'], $user['salt']);
-if ($user['hash'] == $hash) echo 'Password is correct!';
-```
-
-### Email
-
-An email to properly form and send emails with MIME multi-part, database-based queueing and SMTP support.
-
-Two email handling classes are included: EmailSender and EmailStore. See example usage below. Roll your own email sender and email store by extending these abstract classes.
-
-Example usage:
-```php
-<?php
-
-Firelit\EmailSenderSMTP::config(array(
-	'smtp_host' => 'localhost',
-	'smtp_port' => 25,
-	'smtp_user' => 'example',
-	'smtp_pass' => 'elpmaxe'
-));
-
-Firelit\EmailStoreDB::config(array(
-	'tableName' => 'EmailQueue'
-));
-
-$email = new Firelit\Email();
-
-$email->addTo('Jim Bo', 'jimbo@firelit.com'); // Add name & email addresses
-$email->to .= ', noname@firelit.com'; // Or set the to, cc & bcc field explicity through their properties
-
-$email->addCc('Accounting', 'accounting@firelit.com');
-$email->addBcc('Compliance', 'compliance@firelit.com');
-
-$email->subject = 'An important email';
-
-$email->html = '<h1>Email Test!</h1>'; // Set the html part of the email
-$email->text = '*Email Test!*'; // Set the text part of the email
-
-if ($storeAndSend) {
-	// You can use the EmailStore object to manage a db-based email queue
-	$store = Firelit\EmailStore::init('DB');
-	$store->storeAndSend( $email, Firelit\EmailSender::init('SMTP') ); // Store in DB and then try sending
-} elseif ($noStoreJustSend) {
-	// You can use the EmailSender class to send it out immediately
-	$sender = Firelit\EmailSender::init('SMTP');
-	$sender->send($email);
-}
-```
-
-### EndWithError
-
-A class to terminate the script, set the error code and display an error page.
-
-Example usage:
-```php
-<?php
-
-// Optionally create an HTML page to display
-$body = Firelit\EndWithError:createErrorBody('Page Not Found', 'Page Not Found', 'Sorry, we could not find the page you were looking for.');
-
-Firelit\EndWithError::now(404, $body);
 ```
 
 ### HttpRequest
