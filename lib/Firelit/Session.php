@@ -5,7 +5,14 @@ namespace Firelit;
 class Session extends Singleton {
 
 	public static $config = array(
-		'cookieName' => 'session',
+		'cookie' => array(
+			'name' => 'session',
+			'lifetime' => 0, // Expires when browser closes
+			'path' => '/',
+			'domain' => false, // Set to false to use the current domain
+			'secureOnly' => false,
+			'httpOnly' => true
+		),
 		'validatorSalt' => 'dJa832lwkdP1' // Recommend changing to slow session key brute-force spoofing
 	);
 
@@ -15,7 +22,15 @@ class Session extends Singleton {
 
 		if ($store) session_set_save_handler($store, true);
 
-		session_name(self::$config['cookieName']);
+		session_set_cookie_params(
+			self::$config['cookie']['lifetime'], 
+			self::$config['cookie']['path'], 
+			self::$config['cookie']['domain'], 
+			self::$config['cookie']['secureOnly'], 
+			self::$config['cookie']['httpOnly'] 
+		);
+
+		session_name(self::$config['cookie']['name']);
 
 		$this->updateSessionId($sessionId);
 
@@ -59,7 +74,7 @@ class Session extends Singleton {
 
 		// If not provided, retrieve it 
 		// (must get it from cookie, session_id() doesn't return value until after session_start())
-		if (!$sid) $sid = $_COOKIE[self::$config['cookieName']];
+		if (!$sid) $sid = $_COOKIE[self::$config['cookie']['name']];
 		// If provided, be sure we're using it
 		else session_id($sid);
 
