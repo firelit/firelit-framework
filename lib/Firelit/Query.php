@@ -24,27 +24,37 @@ class Query {
 
 		$reg = Registry::get('database');
 
-		if ($reg) {
-			if ($reg['type'] == 'mysql') {
+		try {
 
-				if (!isset($reg['port'])) $reg['port'] = 3306;
+			if ($reg) {
+				if ($reg['type'] == 'mysql') {
 
-				self::$pdo = new \PDO('mysql:host='. $reg['host'] .';port='. $reg['port'] .';dbname='. $reg['name'], $reg['user'], $reg['pass']);
+					if (!isset($reg['port'])) $reg['port'] = 3306;
 
+					self::$pdo = new \PDO('mysql:host='. $reg['host'] .';port='. $reg['port'] .';dbname='. $reg['name'], $reg['user'], $reg['pass']);
+
+				} else {
+
+					self::$pdo = new \PDO($reg['dsn']);
+
+				}
 			} else {
 
-				self::$pdo = new \PDO($reg['dsn']);
+				if (!isset($_SERVER['DB_PORT'])) $_SERVER['DB_PORT'] = 3306;
+
+				self::$pdo = new \PDO('mysql:host='. $_SERVER['DB_HOST'] .';port='. $_SERVER['DB_PORT'] .';dbname='. $_SERVER['DB_NAME'], $_SERVER['DB_USER'], $_SERVER['DB_PASS']);
 
 			}
-		} else {
 
-			if (!isset($_SERVER['DB_PORT'])) $_SERVER['DB_PORT'] = 3306;
-
-			self::$pdo = new \PDO('mysql:host='. $_SERVER['DB_HOST'] .';port='. $_SERVER['DB_PORT'] .';dbname='. $_SERVER['DB_NAME'], $_SERVER['DB_USER'], $_SERVER['DB_PASS']);
-
+		} catch (\Exception $e) {
+			self::$errorCount++;
+			throw $e;
 		}
 
-		if (!self::$pdo) throw new \Exception('Could not connect to database.');
+		if (!self::$pdo) {
+			self::$errorCount++;
+			throw new \Exception('Could not connect to database.');
+		}
 
 		return self::$pdo;
 
@@ -52,6 +62,8 @@ class Query {
 	
 	public function query($sql, $binders = array()) {
 
+		if (self::$errorCount > 10) die('ERROR Q'. __LINE__ .' <!-- TOO MANY QUERY ERRORS -->');
+ 
 		if (is_string($sql))
 			$this->cleanBinders($binders, $sql);
 
@@ -60,21 +72,25 @@ class Query {
 		if (!self::$pdo) self::connect();
 
 		// $sql can be a PDOStatement or a SQL string
-		if (is_string($sql))	
+		if (is_string($sql)) {
 			$this->sql = self::$pdo->prepare($sql);
-		elseif ($sql instanceof \PDOStatement)
+		} elseif ($sql instanceof \PDOStatement) {
 			$this->sql = $sql;
-		else
+		} else {
+			self::$errorCount++;
 			throw new \Exception('Invalid parameter supplied to query method.');
+		}
 		
+		foreach ($binders as $name => $value) {
+			// Fixes issue with innodb not interpreting false correctly (converts to empty string)
+			if (gettype($value) == 'boolean') $binders[$name] = intval($value);
+		}	
+
 		$this->res = $this->sql->execute($binders);
 
 		if (!$this->res) {
-			
-			if (self::$errorCount++ > 10) die('ERROR Q'. __LINE__ .' <!-- TOO MANY QUERY ERRORS -->');
-
+			self::$errorCount++;
 			throw new \Exception('Database error: '. $this->getErrorCode() .', '. $this->getError() .', '. $this->sql->queryString);
-
 		}
 
 		return $this->res;
