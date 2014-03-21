@@ -33,6 +33,9 @@ class Crypto {
 	 * @return string Return an cipher text, base64-encoded
 	 */
 	public static function encrypt($text, $key, $iv) { 
+		if (!is_string($key) || !strlen($key))
+			throw new \Exception('No key given for encryption');
+
 		$iv = base64_decode($iv);
 		$key = base64_decode($key);
 		$enc = mcrypt_encrypt(self::AES_256, $key, $text, self::CFB, $iv);

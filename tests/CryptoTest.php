@@ -73,4 +73,15 @@ class CryptoTest extends PHPUnit_Framework_TestCase {
 		$this->assertTrue($subject === $successUnPackage, 'Unpackaging should be successfull');
 		
 	}
+
+	public function testNoKeyException() {
+
+		$this->setExpectedException('Exception');
+
+		$subject = 'This is a test cipher. Encrypt me!';
+		$password = '';
+
+		$package = Firelit\Crypto::package($subject, $password);
+
+	}
 }
