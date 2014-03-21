@@ -84,7 +84,7 @@ class DatabaseObject {
 
 	}
 
-	protected function getWhere($valueArray) {
+	static protected function getWhere($valueArray) {
 
 		$whereBinder = array();
 		
@@ -93,7 +93,7 @@ class DatabaseObject {
 			$whereSql = "WHERE";
 
 			foreach (static::$primaryKey as $aKey) {
-				$whereSql = ':primary_key_'.mt_rand(0,10000);
+				$whereSql = ':primary_key_'.mt_rand(0,1000000);
 				$whereSql .= " `". static::$primaryKey ."`=". $binderName ." AND";
 				$whereBinder[$binderName] = $valueArray[static::$primaryKey];
 			}
@@ -102,9 +102,9 @@ class DatabaseObject {
 
 		} else {
 
-			$binderName = ':primary_key_'.mt_rand(0,10000);
+			$binderName = ':primary_key_'.mt_rand(0,1000000);
 			$whereSql = "WHERE `". static::$primaryKey ."`=". $binderName ." LIMIT 1";
-			$whereBinder[$binderName] = $this->valueArray[static::$primaryKey];
+			$whereBinder[$binderName] = $valueArray[static::$primaryKey];
 
 		}
 
@@ -212,7 +212,7 @@ class DatabaseObject {
 		if (!is_array($seachValue))
 			$seachValue = array(static::$primaryKey => $seachValue);
 
-		list($whereSql, $whereBinder) = $this->getWhere($seachValue);
+		list($whereSql, $whereBinder) = static::getWhere($seachValue);
 
 		$sql = "SELECT * FROM `". static::$tableName ."` ". $whereSql;
 
