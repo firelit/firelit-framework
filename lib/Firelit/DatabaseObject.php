@@ -45,8 +45,8 @@ class DatabaseObject {
 
 			$q->insert(static::$tableName, $this->_data);
 
-			// If new, set data id from autoincrement id
-			if (static::$primaryKey)
+			// If new and single primary key, set data id from autoincrement id
+			if (static::$primaryKey && !is_array(static::$primaryKey))
 				$this->_data[static::$primaryKey] = $q->getNewId();
 
 		} else {
@@ -54,7 +54,13 @@ class DatabaseObject {
 			if (!static::$primaryKey) 
 				throw new \Exception('Cannot perform update without a primary key.');
 
-			if (!isset($this->_data[static::$primaryKey]))
+			if (is_array(static::$primaryKey))
+				foreach (static::$primaryKey as $aKey) {
+					if (!isset($this->_data[$aKey]))
+						throw new \Exception('Cannot perform update without all primary keys set.');
+				}
+
+			elseif (!isset($this->_data[static::$primaryKey]))
 				throw new \Exception('Cannot perform update without primary key set.');
 
 			$updateData = array(); 
@@ -67,12 +73,42 @@ class DatabaseObject {
 			if (isset($updateData[static::$primaryKey]))
 				throw new \Exception('Cannot perform update on primary key (it was marked dirty).');
 
-			$q->update(static::$tableName, $updateData, "WHERE `". static::$primaryKey ."`='". $this->_data[static::$primaryKey] ."' LIMIT 1");
+			list($whereSql, $whereBinder) = $this->getWhere($this->_data);
+
+			$q->update(static::$tableName, $updateData, $whereSql, $whereBinder);
 			
 		}
 		
 		$this->_new = false;
 		$this->_dirty = array();
+
+	}
+
+	protected function getWhere($valueArray) {
+
+		$whereBinder = array();
+		
+		if (is_array(static::$primaryKey)) {
+
+			$whereSql = "WHERE";
+
+			foreach (static::$primaryKey as $aKey) {
+				$whereSql = ':primary_key_'.mt_rand(0,10000);
+				$whereSql .= " `". static::$primaryKey ."`=". $binderName ." AND";
+				$whereBinder[$binderName] = $valueArray[static::$primaryKey];
+			}
+
+			$whereSql = substr($whereSql, 0, -3). "LIMIT 1";
+
+		} else {
+
+			$binderName = ':primary_key_'.mt_rand(0,10000);
+			$whereSql = "WHERE `". static::$primaryKey ."`=". $binderName ." LIMIT 1";
+			$whereBinder[$binderName] = $this->valueArray[static::$primaryKey];
+
+		}
+
+		return array($whereSql, $whereBinder);
 
 	}
 
@@ -138,12 +174,14 @@ class DatabaseObject {
 
 		if ($this->_new) return;
 		
-		$sql = "DELETE FROM `". static::$tableName ."` WHERE `". static::$primaryKey ."`=:id LIMIT 1";
+		list($whereSql, $whereBinder) = $this->getWhere($this->_data);
+
+		$sql = "DELETE FROM `". static::$tableName ."` ". $whereSql;
 
 		if (static::$query) $q = static::$query;
 		else $q = new Query();
 
-		$q->query($sql, array( ':id' => $this->_data[static::$primaryKey] ));
+		$q->query($sql, $whereBinder);
 
 		$this->_data = array();
 
@@ -160,17 +198,28 @@ class DatabaseObject {
 
 	}
 
-	public static function find($id) {
+	public static function find($seachValue) {
 
 		if (!static::$primaryKey) 
 			throw new \Exception('Cannot perform find without a primary key.');
 
-		$sql = "SELECT * FROM `". static::$tableName ."` WHERE `". static::$primaryKey ."`=:id LIMIT 1";
+		if (is_array($seachValue) != is_array(static::$primaryKey))
+			throw new \Exception('If primary key is an array, must search by array and vice versa.');
+
+		if (is_array($seachValue) && (sizeof($id) != sizeof(static::$primaryKey)))
+			throw new \Exception('Number of elements in search array must match primary key array.');
+
+		if (!is_array($seachValue))
+			$seachValue = array(static::$primaryKey => $seachValue);
+
+		list($whereSql, $whereBinder) = $this->getWhere($seachValue);
+
+		$sql = "SELECT * FROM `". static::$tableName ."` ". $whereSql;
 
 		if (static::$query) $q = static::$query;
 		else $q = new Query();
 
-		$q->query($sql, array( ':id' => $id ));
+		$q->query($sql, $whereBinder);
 
 		return $q->getObject(get_called_class());
 
