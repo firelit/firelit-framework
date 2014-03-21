@@ -70,8 +70,14 @@ class DatabaseObject {
 					$updateData[$key] = $this->_data[$key];
 			}
 
-			if (isset($updateData[static::$primaryKey]))
+			if (is_array(static::$primaryKey)) {
+				foreach (static::$primaryKey as $aKey) {
+					if (isset($updateData[$aKey]))
+						throw new \Exception('Cannot perform update on primary key (it was marked dirty).');
+				}
+			} elseif (isset($updateData[static::$primaryKey])) {
 				throw new \Exception('Cannot perform update on primary key (it was marked dirty).');
+			}
 
 			list($whereSql, $whereBinder) = $this->getWhere($this->_data);
 
@@ -94,8 +100,8 @@ class DatabaseObject {
 
 			foreach (static::$primaryKey as $aKey) {
 				$whereSql = ':primary_key_'.mt_rand(0,1000000);
-				$whereSql .= " `". static::$primaryKey ."`=". $binderName ." AND";
-				$whereBinder[$binderName] = $valueArray[static::$primaryKey];
+				$whereSql .= " `". $aKey ."`=". $binderName ." AND";
+				$whereBinder[$binderName] = $valueArray[$aKey];
 			}
 
 			$whereSql = substr($whereSql, 0, -3). "LIMIT 1";
