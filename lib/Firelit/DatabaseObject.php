@@ -204,21 +204,21 @@ class DatabaseObject {
 
 	}
 
-	public static function find($seachValue) {
+	public static function find($searchValue) {
 
 		if (!static::$primaryKey) 
 			throw new \Exception('Cannot perform find without a primary key.');
 
-		if (is_array($seachValue) != is_array(static::$primaryKey))
+		if (is_array($searchValue) != is_array(static::$primaryKey))
 			throw new \Exception('If primary key is an array, must search by array and vice versa.');
 
-		if (is_array($seachValue) && (sizeof($id) != sizeof(static::$primaryKey)))
+		if (is_array($searchValue) && (sizeof($searchValue) != sizeof(static::$primaryKey)))
 			throw new \Exception('Number of elements in search array must match primary key array.');
 
-		if (!is_array($seachValue))
-			$seachValue = array(static::$primaryKey => $seachValue);
+		if (!is_array($searchValue))
+			$searchValue = array(static::$primaryKey => $searchValue);
 
-		list($whereSql, $whereBinder) = static::getWhere($seachValue);
+		list($whereSql, $whereBinder) = static::getWhere($searchValue);
 
 		$sql = "SELECT * FROM `". static::$tableName ."` ". $whereSql;
 
