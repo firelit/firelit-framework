@@ -99,7 +99,7 @@ class DatabaseObject {
 			$whereSql = "WHERE";
 
 			foreach (static::$primaryKey as $aKey) {
-				$whereSql = ':primary_key_'.mt_rand(0,1000000);
+				$binderName = ':primary_key_'.mt_rand(0,1000000);
 				$whereSql .= " `". $aKey ."`=". $binderName ." AND";
 				$whereBinder[$binderName] = $valueArray[$aKey];
 			}
