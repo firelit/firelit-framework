@@ -70,13 +70,16 @@ class Session extends Singleton {
 		
 	}
 
-	public function updateSessionId($sid = false) {
+	public function updateSessionId($sid = false, $filterSid = true) {
 
 		// If not provided, retrieve it 
 		// (must get it from cookie, session_id() doesn't return value until after session_start())
 		if (!$sid) $sid = $_COOKIE[self::$config['cookie']['name']];
 		// If provided, be sure we're using it
 		else session_id($sid);
+
+		// No filtering and validating, just accept it
+		if (!$filterSid) return $sid;
 
 		$sid = preg_replace('/[^A-Za-z0-9\+\/=]/', '', $sid);
 
