@@ -19,7 +19,11 @@ class DatabaseObject {
 	
 	protected static $query = false;
 
+	protected $constructed = false;
+
 	public function __construct($data = false) {
+
+		$this->constructed = true;
 
 		// If it doesn't come pre-loaded, it's new
 		// (Pre-loading made possible by PDOStatement::fetchObject)
@@ -150,7 +154,7 @@ class DatabaseObject {
 
 		if (isset($this->_data[$var])) $val = $this->_data[$var];
 		else return null;
-
+		
 		if (in_array($var, static::$colsSerialize)) {
 			$val = unserialize($val);
 		} elseif (in_array($var, static::$colsJson)) {
@@ -162,6 +166,12 @@ class DatabaseObject {
 	}
 
 	public function __set($var, $val) {
+
+		// If pre-construct loading
+		if (!$this->constructed) {
+			$this->_data[$var] = $val;
+			return;
+		}
 
 		if (!is_null($val) && in_array($var, static::$colsSerialize)) {
 			$val = serialize($val);
