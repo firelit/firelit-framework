@@ -1,5 +1,17 @@
 <?PHP
 
+class TestObject extends Firelit\DatabaseObject {
+
+	// To Use: Extend this class and replace the following values
+	protected static $tableName = 'TableName'; // The table name
+	protected static $primaryKey = 'id'; // The primary key for table (or false if n/a)
+
+	// Optional fields to set in extension
+	protected static $colsSerialize = array('serialize'); // Columns that should be automatically php-serialized when using
+	protected static $colsJson = array('jsonize'); // Columns that should be automatically JSON-encoded/decoded when using
+
+}
+
 class DatabaseObjectTest extends PHPUnit_Framework_TestCase {
 
 	public function testSaveNew() {
@@ -80,6 +92,20 @@ class DatabaseObjectTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals(sizeof($dirty), 2);
 		$this->assertEquals($dirty[1], 'sex');
+
+	}
+
+	public function testSerialization() {
+
+		$to = new TestObject(array(
+			'test' => '123',
+			'serialize' => array(1, 2, 3),
+			'jsonize' => array(4, 5, 6)
+		));
+
+		$this->assertEquals($to->test, '123');
+		$this->assertEquals($to->serialize, array(1, 2, 3));
+		$this->assertEquals($to->jsonize, array(4, 5, 6));
 
 	}
 

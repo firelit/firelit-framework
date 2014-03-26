@@ -8,6 +8,10 @@ class DatabaseObject {
 	protected static $tableName = 'ReplaceMe'; // The table name
 	protected static $primaryKey = 'id'; // The primary key for table (or false if n/a)
 
+	// Optional fields to set in extension
+	protected static $colsSerialize = array(); // Columns that should be automatically php-serialized when using
+	protected static $colsJson = array(); // Columns that should be automatically JSON-encoded/decoded when using
+
 	protected $_data = array(); // The object's data
 	protected $_dirty = array(); // Array of dirty properties that need saving
 	protected $_new = false; // Indicates a new, unsaved object
@@ -24,7 +28,8 @@ class DatabaseObject {
 		$this->_dirty = array(); // Reset in case pre-loaded
 
 		if (is_array($data))
-			$this->_data = $data;
+			foreach ($data as $name => $value)
+				$this->__set($name, $value);
 
 	}
 
@@ -143,12 +148,26 @@ class DatabaseObject {
 
 	public function __get($var) {
 
-		if (isset($this->_data[$var])) return $this->_data[$var];
+		if (isset($this->_data[$var])) $val = $this->_data[$var];
 		else return null;
+
+		if (in_array($var, static::$colsSerialize)) {
+			$val = unserialize($val);
+		} elseif (in_array($var, static::$colsJson)) {
+			$val = json_decode($val, true);
+		}
+
+		return $val;
 
 	}
 
 	public function __set($var, $val) {
+
+		if (!is_null($val) && in_array($var, static::$colsSerialize)) {
+			$val = serialize($val);
+		} elseif (!is_null($val) && in_array($var, static::$colsJson)) {
+			$val = json_encode($val);
+		}
 
 		if ($this->_data[$var] === $val) return;
 
