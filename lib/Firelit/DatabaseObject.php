@@ -169,7 +169,7 @@ class DatabaseObject {
 			$val = json_encode($val);
 		}
 
-		if ($this->_data[$var] === $val) return;
+		if (isset($this->_data[$var]) && ($this->_data[$var] === $val)) return;
 
 		$this->_data[$var] = $val;
 
