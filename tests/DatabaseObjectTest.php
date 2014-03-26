@@ -105,7 +105,9 @@ class DatabaseObjectTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals($to->test, '123');
 		$this->assertEquals($to->serialize, array(1, 2, 3));
+		$this->assertEquals($to->serialize[2], 3);
 		$this->assertEquals($to->jsonize, array(4, 5, 6));
+		$this->assertEquals($to->jsonize[2], 6);
 
 	}
 
