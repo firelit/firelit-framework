@@ -77,16 +77,15 @@ class Session extends Singleton {
 		// Not relying on session to retrieve it's ID from the cookie
 		session_id($sessionId);
 
-		if (headers_sent()) return;
-
-		setcookie(
-			self::$config['cookie']['name'], 
-			$sessionId, 
-			self::$config['cookie']['lifetime'] + time(), 
+		// Will set cookie automatically anyway, let's try to control it
+		session_set_cookie_params(
+			self::$config['cookie']['lifetime'], 
 			self::$config['cookie']['path'], 
 			self::$config['cookie']['domain'], 
 			self::$config['cookie']['secureOnly'], 
 			self::$config['cookie']['httpOnly'] );
+
+		session_name(self::$config['cookie']['name']);
 
 	}
 
