@@ -16,7 +16,7 @@ class Session extends Singleton {
 		'validatorSalt' => 'dJa832lwkdP1' // Recommend changing to slow session key brute-force spoofing
 	);
 
-	private static $session_id;
+	private $session_id;
 
 	public function __construct(\SessionHandlerInterface $store = null, $sessionId = false, $validateSessionId = true) {	
 		// Create a session using the given SessionHandlerInterface object
