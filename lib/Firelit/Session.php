@@ -123,8 +123,14 @@ class Session extends Singleton {
 
 	public static function generateSessionId() {
 
+		if (isset($_SERVER['REMOTE_ADDR'])) $remAddr = $_SERVER['REMOTE_ADDR'];
+		else $remAddr = mt_rand(0, 1000000);
+
+		if (isset($_SERVER['REMOTE_PORT'])) $remPort = $_SERVER['REMOTE_PORT'];
+		else $remPort = mt_rand(0, 1000000);
+
 		// Looks like we need a new session ID
-		$sid = base64_encode( hash('sha256', microtime() .'|'. $_SERVER['REMOTE_ADDR'] .'|'. $_SERVER['REMOTE_PORT'] .'|'. mt_rand(0, 1000000000), true) );
+		$sid = base64_encode( hash('sha256', microtime() .'|'. $remAddr .'|'. $remPort .'|'. mt_rand(0, 1000000), true) );
 
 		// Create mini-hmac; not critical, just a quick sanity check
 		return static::generateHmacSid($sid, static::$config['validatorSalt']);
