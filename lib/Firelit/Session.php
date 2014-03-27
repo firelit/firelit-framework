@@ -16,28 +16,26 @@ class Session extends Singleton {
 		'validatorSalt' => 'dJa832lwkdP1' // Recommend changing to slow session key brute-force spoofing
 	);
 
-	public function __construct(\SessionHandlerInterface $store = null, $sessionId = false) {	
+	private static $session_id;
+
+	public function __construct(\SessionHandlerInterface $store = null, $sessionId = false, $validateSessionId = true) {	
 		// Create a session using the given SessionHandlerInterface object
 		// If null, will use PHP's native SESSION engine
 
 		if ($store) session_set_save_handler($store, true);
 
-		session_set_cookie_params(
-			self::$config['cookie']['lifetime'], 
-			self::$config['cookie']['path'], 
-			self::$config['cookie']['domain'], 
-			self::$config['cookie']['secureOnly'], 
-			self::$config['cookie']['httpOnly'] 
-		);
+		// Check for Session ID in cookies
+		if (!$sessionId)
+			$sessionId = $this->getSessionId();
 
-		session_name(self::$config['cookie']['name']);
+		// Generate Session ID if none available
+		if (!$sessionId)
+			$sessionId = $this->generateSessionId();
 
-		$this->updateSessionId($sessionId);
+		// Set the Session ID and send cookie with value
+		$this->setSessionId($sessionId, $validateSessionId);
 
-		if ($sessionId && headers_sent())
-			@session_start(); // In this case, supress headers-sent warning: session ID is available so all ok
-		else
-			session_start();
+		@session_start();
 
 	}
 	
@@ -63,49 +61,87 @@ class Session extends Singleton {
 		
 	}
 	
+	// Can only be excuted before session_start()
+	protected function setSessionId($sessionId, $validateSessionId = true) {
+
+		if ($validateSessionId) {
+			if (!$this->sessionIdIsValid($sessionId))
+				$sessionId = false;
+		}
+
+		if (!$sessionId)
+			$sessionId = $this->generateSessionId();
+
+		$this->session_id = $sessionId;
+
+		// Not relying on session to retrieve it's ID from the cookie
+		session_id($sessionId);
+
+		if (headers_sent()) return;
+
+		setcookie(
+			self::$config['cookie']['name'], 
+			$sessionId, 
+			self::$config['cookie']['lifetime'] + time(), 
+			self::$config['cookie']['path'], 
+			self::$config['cookie']['domain'], 
+			self::$config['cookie']['secureOnly'], 
+			self::$config['cookie']['httpOnly'] );
+
+	}
+
+	public function getSessionId() {
+		
+		if (!$this->session_id) {
+
+			if (isset($_COOKIE[self::$config['cookie']['name']]))
+				$this->session_id = $_COOKIE[self::$config['cookie']['name']];
+
+		}
+
+		return $this->session_id;
+
+	}
+
+	public static function sessionIdIsValid($sessionId) {
+
+		$sessionId = preg_replace('/[^A-Za-z0-9\+\/=]+/', '', $sessionId);
+
+		if (strlen($sessionId) != 50) return false;
+
+		$sids = explode('=', $sessionId);
+		if (sizeof($sids) != 2) return false;
+
+		// Verify mini-hmac; not critical, just a quick sanity check
+		$check = static::generateHmacSid($sids[0].'=', static::$config['validatorSalt']);
+
+		if ($sessionId !== $check) return false;
+
+		return true;
+
+	}
+
+	public static function generateSessionId() {
+
+		// Looks like we need a new session ID
+		$sid = base64_encode( hash('sha256', microtime() .'|'. $_SERVER['REMOTE_ADDR'] .'|'. $_SERVER['REMOTE_PORT'] .'|'. mt_rand(0, 1000000000), true) );
+
+		// Create mini-hmac; not critical, just a quick sanity check
+		return static::generateHmacSid($sid, static::$config['validatorSalt']);
+
+	}
+
+	public static function generateHmacSid($partSid, $salt) {
+
+		return $partSid . substr( base64_encode( hash_hmac('sha256', $partSid, $salt, true) ), 0, 6 );
+
+	}
+
 	public function destroy() {
 		// Remove all data from and traces of the current session
 		
 		session_destroy();
 		
-	}
-
-	public function updateSessionId($sid = false, $filterSid = true) {
-
-		// If not provided, retrieve it 
-		// (must get it from cookie, session_id() doesn't return value until after session_start())
-		if (!$sid) $sid = $_COOKIE[self::$config['cookie']['name']];
-		// If provided, be sure we're using it
-		else session_id($sid);
-
-		// No filtering and validating, just accept it
-		if (!$filterSid) return $sid;
-
-		$sid = preg_replace('/[^A-Za-z0-9\+\/=]/', '', $sid);
-
-		while (strlen($sid) == 50) {
-
-			$sids = explode('=', $sid);
-			if (sizeof($sids) != 2) break;
-
-			// Verify mini-hmac; not critical, just a quick sanity check
-			$check = substr( base64_encode( hash('sha256', $sids[0] .'='. self::$config['validatorSalt'], true) ), 0, 6 );
-			if ($sids[1] !== $check) break;
-
-			return $sid;
-
-		}
-
-		// Looks like we need a new session ID
-		$sid = base64_encode( hash('sha256', microtime() . $_SERVER['REMOTE_ADDR'] . mt_rand(0, 1000000000), true) );
-
-		// Create mini-hmac; not critical, just a quick sanity check
-		$sid .= substr( base64_encode( hash('sha256', $sid . self::$config['validatorSalt'], true) ), 0, 6 );
- 
- 		session_id($sid);
-
- 		return $sid;
-
 	}
 
 	public function __destruct() {
