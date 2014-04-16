@@ -292,30 +292,29 @@ class Countries {
 	public static function getName($countryAbbrv, $html = true) {
 		// Get a country's name from its abbrevation
 		
-		if (self::check($countryAbbrv)) {
-			$ret = self::$list[$countryAbbrv];
+		if (!self::check($countryAbbrv)) 
+			return false;
+
+		$ret = self::$list[$countryAbbrv];
+		
+		if ($html) {
 			
-			if ($html) {
-				
-				$find = array(
-					'Å',
-					'ô',
-					'é'
-				);
-				
-				$replace = array(
-					'&Aring;',
-					'&ocirc;',
-					'&eacute;'
-				);
-				
-				$ret = str_replace($find, $replace, $ret);
-			}
+			$find = array(
+				'Å',
+				'ô',
+				'é'
+			);
 			
-			return self::$list[$countryAbbrv];
+			$replace = array(
+				'&Aring;',
+				'&ocirc;',
+				'&eacute;'
+			);
+			
+			$ret = str_replace($find, $replace, $ret);
 		}
 		
-		return false;
+		return $ret;
 		
 	}
 	

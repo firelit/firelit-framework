@@ -8,7 +8,7 @@ class ApiResponse extends Response {
 	protected $responseSent = false;
 	protected $responseFormat = 'JSON';
 	
-	public function __construct($responseFormat = 'JSON', $ob = true, $charset = "UTF-8") { 
+	public function __construct($responseFormat = 'JSON', $ob = true, $charset = 'UTF-8') { 
 		// Use parent's output buffer controls
 		parent::__construct($ob, $charset);
 
