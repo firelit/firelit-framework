@@ -70,8 +70,9 @@ class View {
 
 	}
 
-	protected function includePart($name) {
+	protected function includePart($name, $moreData = array()) {
 		extract($this->data, EXTR_SKIP);
+		extract($moreData, EXTR_SKIP);
 
 		$file = $this->fileName($name);
 		include($file);
