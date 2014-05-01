@@ -165,6 +165,12 @@ class DatabaseObject {
 
 	}
 
+	public function __isset($var) {
+
+		return isset($this->_data[$var]);
+		
+	}
+
 	public function __set($var, $val) {
 
 		// If pre-construct loading
