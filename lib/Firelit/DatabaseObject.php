@@ -75,8 +75,7 @@ class DatabaseObject {
 			$updateData = array(); 
 
 			foreach ($this->_dirty as $key) {
-				if (isset($this->_data[$key]))
-					$updateData[$key] = $this->_data[$key];
+				$updateData[$key] = $this->_data[$key];
 			}
 
 			if (is_array(static::$primaryKey)) {
