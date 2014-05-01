@@ -128,4 +128,10 @@ class Request extends Singleton {
 		
 	}
 
+	public function __isset($name) {
+	
+		return isset($this->$name);
+		
+	}
+
 }
