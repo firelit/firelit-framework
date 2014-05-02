@@ -13,7 +13,7 @@ class HttpRequest {
 	public $delCookieFile = true; // Delete when object destructs
 	
 	// If set, overwrites $config
-	public static $userAgent = false;
+	public $userAgent = false;
 	
 	private $respCode = 0;
 	
@@ -26,7 +26,7 @@ class HttpRequest {
 		'caInfo' => false
 	);
 	
-	function __construct() {
+	public function __construct() {
 		
 		if (function_exists('curl_init')) $this->handle = curl_init();
 		else throw new Exception('cURL required.');
@@ -35,13 +35,13 @@ class HttpRequest {
 		
 	}
 	
-	public static config($config) {
+	public static function config($config) {
 		
 		self::$config = array_merge(self::$config, $config);
 		
 	}
 	
-	function enableCookies($file = false, $delOnDestruct = true) {
+	public function enableCookies($file = false, $delOnDestruct = true) {
 		
 		$this->cookies = true;
 		
@@ -54,7 +54,7 @@ class HttpRequest {
 		
 	}
 	
-	function close() {
+	public function close() {
 		
 		if (!$this->handle) return;
 		
@@ -64,14 +64,14 @@ class HttpRequest {
 		
 	}
 	
-	function clearCookies() {
+	public function clearCookies() {
 		
 		if ($this->cookies && $this->delCookieFile && file_exists($this->cookieFile))
 			unlink($this->cookieFile);
 		
 	}
 	
-	function customHeaders($headerArray) {
+	public function customHeaders($headerArray) {
 		
 		curl_setopt($this->handle, CURLOPT_HTTPHEADER, $headerArray);
 		
@@ -79,7 +79,7 @@ class HttpRequest {
 	
 	// Three executing methods:
 	
-	function get($url) {
+	public function get($url) {
 		
 		curl_setopt($this->handle, CURLOPT_POST, 0); // Added to clear past values
 		curl_setopt($this->handle, CURLOPT_CUSTOMREQUEST, 'GET'); // Added to clear past values
@@ -88,7 +88,7 @@ class HttpRequest {
 		
 	}
 	
-	function post($url, $postData) {
+	public function post($url, $postData) {
 	
 		if (is_array($postData)) $postData = http_build_query($postData);
 		
@@ -100,7 +100,7 @@ class HttpRequest {
 		
 	}
 	
-	function other($url, $type) {
+	public function other($url, $type) {
 		// For DELETE, PUT, HEAD, etc
 		curl_setopt($this->handle, CURLOPT_POST, 0); // Added to clear past values
 		curl_setopt($this->handle, CURLOPT_CUSTOMREQUEST, $type);
@@ -136,13 +136,13 @@ class HttpRequest {
 		
 	}
 	
-	function respCode() {
+	public function respCode() {
 		
 		return $this->respCode;
 		
 	}
 	
-	function __destruct() {
+	public function __destruct() {
 		
 		$this->close();
 		$this->clearCookies();
