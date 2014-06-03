@@ -9,6 +9,9 @@ class Query {
 	private static $database = false;
 	private static $errorCount = 0;
 
+	/* Set the databases default TZ (for storing php datetime objects into mysql datetime columns) */
+	static public $defaultTz = false; // Should be a DateTimeZone object
+
 	/* Object variables */
 	private $res;
 	
@@ -113,7 +116,15 @@ class Query {
 
 	public function convertDateTimes(&$binder) {
 		foreach ($binder as $name => $value) {
-			if (is_object($value) && is_a($value, 'DateTime')) $binder[$name] = $value->format('Y-m-d  H:i:s');
+			if (is_object($value) && is_a($value, 'DateTime')) {
+
+				$date = clone $value;
+				if (static::$defaultTz) 
+					$date->setTimezone(static::$defaultTz);
+
+				$binder[$name] = $date->format('Y-m-d  H:i:s');
+
+			}
 		}
 	}
 
