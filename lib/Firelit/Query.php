@@ -72,7 +72,7 @@ class Query {
 
 		$this->convertDateTimes($binders);
 
-		if (!self::$pdo) self::connect();
+		if (!self::$pdo) static::connect();
 
 		// $sql can be a PDOStatement or a SQL string
 		if (is_string($sql)) {
@@ -185,7 +185,7 @@ class Query {
 		// Preform an insert on the table
 		// Enter an associative array for $array with column names as keys
 
-		if (!self::$pdo) self::connect();
+		if (!self::$pdo) static::connect();
 
 		list($statementArray, $binderArray) = self::splitArray($array);
 
@@ -199,7 +199,7 @@ class Query {
 		// Preform an replace on the table
 		// Enter an associative array for $array with column names as keys
 		
-		if (!self::$pdo) self::connect();
+		if (!self::$pdo) static::connect();
 
 		list($statementArray, $binderArray) = self::splitArray($array);
 
@@ -213,7 +213,7 @@ class Query {
 		// Preform an update on the table
 		// Enter an associative array for $array with column names as keys
 		
-		if (!self::$pdo) self::connect();
+		if (!self::$pdo) static::connect();
 		
 		list($statementArray, $binderArray) = self::splitArray($array);
 
