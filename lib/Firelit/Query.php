@@ -70,7 +70,7 @@ class Query {
 		if (is_string($sql))
 			$this->cleanBinders($binders, $sql);
 
-		$this->convertDateTimes($binders);
+		$this->convertBinderValues($binders);
 
 		if (!self::$pdo) static::connect();
 
@@ -114,17 +114,39 @@ class Query {
 		}
 	}
 
-	public function convertDateTimes(&$binder) {
+	public function convertBinderValues(&$binder) {
 		foreach ($binder as $name => $value) {
+			
+			// If value is a 2-element array with the first value
+			// having one of the following values, the second is assumed
+			// to need special attention. ("SQL" is handeled only in 
+			// splitArray for insert/update)
+			if (is_array($value) && (sizeof($value) == 2)) {
+				switch (strtoupper($value[0])) {
+					case 'SERIALIZE':
+						$value = serialize($value[1]);
+						break;
+					case 'JSON':
+						$value = json_encode($value[1]);
+						break;
+				}
+			}
+
 			if (is_object($value) && is_a($value, 'DateTime')) {
 
 				$date = clone $value;
 				if (static::$defaultTz) 
 					$date->setTimezone(static::$defaultTz);
 
-				$binder[$name] = $date->format('Y-m-d H:i:s');
+				$value = $date->format('Y-m-d H:i:s');
 
 			}
+
+			if (is_array($value) || is_object($value)) 
+				$value = serialize($value);
+
+			$binder[$name] = $value;
+			
 		}
 	}
 
@@ -245,22 +267,13 @@ class Query {
 		$binder = array();
 
 		foreach ($arrayIn as $key => $value) {
-			
-			// If value is a 2-element array with the first value
-			// having one of the following values, the second is assumed
-			// to need special attention.
+
+			// Check for anything that should be SQL and put in statement array
 			if (is_array($value) && (sizeof($value) == 2)) {
-				switch (strtoupper($value[0])) {
-					case 'SQL':
-						if (!is_string($value[1])) break;
-						$statement[$key] = $value[1];
-						continue 2;
-					case 'SERIALIZE':
-						$value = serialize($value[1]);
-						break;
-					case 'JSON':
-						$value = json_encode($value[1]);
-						break;
+				if (strtoupper($value[0]) == 'SQL') {
+					if (!is_string($value[1])) continue;
+					$statement[$key] = $value[1];
+					continue;
 				}
 			}
 
@@ -270,9 +283,6 @@ class Query {
 			if (isset($binder[$crossKey])) $crossKey .= '_'. mt_rand(1000, 10000);
 
 			$statement[$key] = $crossKey;
-
-			if (is_array($value) || is_object($value)) 
-				$value = serialize($value);
 
 			$binder[$crossKey] = $value;
 
