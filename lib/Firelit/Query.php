@@ -122,7 +122,7 @@ class Query {
 				if (static::$defaultTz) 
 					$date->setTimezone(static::$defaultTz);
 
-				$binder[$name] = $date->format('Y-m-d  H:i:s');
+				$binder[$name] = $date->format('Y-m-d H:i:s');
 
 			}
 		}
@@ -270,9 +270,6 @@ class Query {
 			if (isset($binder[$crossKey])) $crossKey .= '_'. mt_rand(1000, 10000);
 
 			$statement[$key] = $crossKey;
-
-			if (is_object($value) && is_a($value, 'DateTime')) 
-				$value = $value->format('Y-m-d H:i:s');
 
 			if (is_array($value) || is_object($value)) 
 				$value = serialize($value);
