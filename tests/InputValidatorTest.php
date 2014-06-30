@@ -85,6 +85,36 @@ class InputValidatorTest extends PHPUnit_Framework_TestCase {
 
 	}
 
+	public function testOrgName() {
+
+		// Valid org name
+		$iv = new InputValidator(InputValidator::ORG_NAME, 'First Church');
+		$this->assertEquals(true, $iv->isValid());
+
+		$iv = new InputValidator(InputValidator::ORG_NAME, 'GO');
+		$this->assertEquals(true, $iv->isValid());
+		
+		$iv = new InputValidator(InputValidator::ORG_NAME, 'GO!');
+		$this->assertEquals(true, $iv->isValid());
+
+		$iv = new InputValidator(InputValidator::ORG_NAME, 'GO (now)');
+		$this->assertEquals(true, $iv->isValid());
+
+		$iv = new InputValidator(InputValidator::ORG_NAME, '127 Foundation, Inc.');
+		$this->assertEquals(true, $iv->isValid());
+
+		$iv = new InputValidator(InputValidator::ORG_NAME, 'Strait to 123');
+		$this->assertEquals(true, $iv->isValid());
+
+		// Invalid org name
+		$iv = new InputValidator(InputValidator::ORG_NAME, '1');
+		$this->assertEquals(false, $iv->isValid());
+
+		$iv = new InputValidator(InputValidator::ORG_NAME, ',');
+		$this->assertEquals(false, $iv->isValid());
+
+	}
+
 	public function testCity() {
 
 		// Valid city

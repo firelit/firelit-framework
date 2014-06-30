@@ -6,20 +6,21 @@ class InputValidator {
 	
 	const
 		NAME = 1,
-		ADDRESS = 2,
-		CITY = 3,
-		STATE = 4,
-		ZIP = 5,
-		COUNTRY = 6,
-		PHONE = 7,
-		EMAIL = 8,
-		CREDIT_ACCT = 9,
-		CREDIT_EXP = 10, 
-		CREDIT_CVV = 11,
-		ACH_ROUT = 12,
-		ACH_ACCT = 13,
-		ACH_TYPE = 14,
-		URL = 15;
+		ORG_NAME = 2,
+		ADDRESS = 3,
+		CITY = 4,
+		STATE = 5,
+		ZIP = 6,
+		COUNTRY = 7,
+		PHONE = 8,
+		EMAIL = 9,
+		CREDIT_ACCT = 10,
+		CREDIT_EXP = 11, 
+		CREDIT_CVV = 12,
+		ACH_ROUT = 13,
+		ACH_ACCT = 14,
+		ACH_TYPE = 15,
+		URL = 16;
 
 	const
 		TYPE_DEFAULT = 100, // For general use (sensitive data is automatically masked)
@@ -49,6 +50,7 @@ class InputValidator {
 
 		switch ($this->type) {
 			case self::NAME:
+			case self::ORG_NAME:
 			case self::CITY:
 
 				$name = $this->value;
@@ -260,7 +262,11 @@ class InputValidator {
 
 				if (preg_match('/^\d/', $value)) return false;
 
-				return preg_match('/\p{L}[\p{L} \-\'\+&\.]*[\p{L}\.]/u', $value);
+				return preg_match('/^\p{L}[\p{L} \-\'\+&\.]*[\p{L}\.]$/u', $value);
+
+			case self::ORG_NAME:
+
+				return preg_match('/^[\p{L}\d].*[\p{L}\d\.\)\]\!\?]$/u', $value);
 
 			case self::ADDRESS:
 
