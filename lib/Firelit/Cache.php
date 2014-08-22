@@ -69,7 +69,7 @@ class Cache {
 			// Check if in memcached
 			$val = self::$memcached->get($name);
 			
-			if (self::$memcached->getResultCode() != \Memcached::RES_NOTFOUND) {
+			if (self::$memcached->getResultCode() == \Memcached::RES_SUCCESS) {
 				
 				// Cache hit!
 				self::$cacheHit = true;
