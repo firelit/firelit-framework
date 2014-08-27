@@ -65,12 +65,9 @@ class States {
 			"WV" => "West Virginia",
 			"WI" => "Wisconsin",
 			"WY" => "Wyoming",
-			"AE" => "Armed Forces Africa",
-			"AA" => "Armed Forces Americas",
-			"AE" => "Armed Forces Canada",
-			"AE" => "Armed Forces Europe",
-			"AE" => "Armed Forces Mid East",
-			"AP" => "Armed Forces Pacific"
+			"AA" => "Armed Forces (AA)",
+			"AE" => "Armed Forces (AE)",
+			"AP" => "Armed Forces (AP)"
 		),
 		"CA" => array(
 			"AB" => "Alberta",
