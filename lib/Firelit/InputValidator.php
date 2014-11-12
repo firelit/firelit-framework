@@ -333,6 +333,7 @@ class InputValidator {
 				$value = preg_replace('/\s+/', '', $value);
 
 				if (!preg_match('/^\d{15,16}$/', $value)) return false;
+				if (!preg_match('/^[3-6]/', $value)) return false;
 
 				return self::checkLuhn($value);
 

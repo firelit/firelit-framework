@@ -154,21 +154,25 @@ class InputValidatorTest extends PHPUnit_Framework_TestCase {
 
 		// Valid VISA credit card number
 		$iv = new InputValidator(InputValidator::CREDIT_ACCT, '4111111111111111');
-		$this->assertEquals(true, $iv->isValid());
+		$this->assertTrue($iv->isValid());
 
 		// Valid AMEX credit card number
 		$iv = new InputValidator(InputValidator::CREDIT_ACCT, '370000000000002');
-		$this->assertEquals(true, $iv->isValid());
+		$this->assertTrue($iv->isValid());
 		$this->assertEquals('xxxxxxxxxxx0002', $iv->getNormalized());
 
 		// Valid MC credit card number
 		$iv = new InputValidator(InputValidator::CREDIT_ACCT, '5454 5454 5454 5454');
-		$this->assertEquals(true, $iv->isValid());
+		$this->assertTrue($iv->isValid());
 		$this->assertEquals('5454545454545454', $iv->getNormalized(InputValidator::TYPE_GATEWAY));
 
 		// Invalid credit card number
 		$iv = new InputValidator(InputValidator::CREDIT_ACCT, '4111 1111 1111 1112');
-		$this->assertEquals(false, $iv->isValid());
+		$this->assertFalse($iv->isValid());
+
+		// Invalid credit card number
+		$iv = new InputValidator(InputValidator::CREDIT_ACCT, '1111 2222 3333 4444');
+		$this->assertFalse($iv->isValid());
 
 	}
 
