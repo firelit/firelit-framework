@@ -28,11 +28,11 @@ Here is an example `composer.json` that you could add to your project root:
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/firelit/firelit-library"
+            "url": "https://github.com/firelit/firelit-framework"
         }
     ],
     "require": {
-        "firelit/library": "dev-master" /* It would be better to specify a version here */
+        "firelit/framework": "dev-master" /* It would be better to specify a version here */
     }
 }
 ```
