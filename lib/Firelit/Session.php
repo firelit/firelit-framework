@@ -46,18 +46,25 @@ class Session extends Singleton {
 
 	}
 	
-	public function __unset($name) {
-		// Magic session unsetter
-
-		unset($_SESSION[$name]);
-		
-	}
-	
 	public function __get($name) {
 		// Magic sesion value getter 
 		
 		if (!isset($_SESSION[$name])) return null;
 		return $_SESSION[$name];
+		
+	}
+	
+	public function __isset($name) {
+		// Magic session isset
+
+		return isset($_SESSION[$name]);
+		
+	}
+	
+	public function __unset($name) {
+		// Magic session unsetter
+
+		unset($_SESSION[$name]);
 		
 	}
 	
