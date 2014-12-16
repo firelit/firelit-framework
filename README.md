@@ -28,16 +28,27 @@ Here is an example `composer.json` that you could add to your project root:
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/firelit/firelit-library"
+            "url": "https://github.com/firelit/firelit-framework"
         }
     ],
     "require": {
-        "firelit/library": "dev-master" /* It would be better to specify a version here */
+        "firelit/framework": "dev-master" /* It would be better to specify a version here */
     }
 }
 ```
 
 Alternatively, you could go the manual way and setup your own autoloader and copy the project files from `lib/` into your project directory.
+
+MVC Architecture
+----------------
+
+This framework comes with classes to support building apps with the MVC architecture.
+- `Firelit\View` class
+- `Firelit\Controller` class
+- `Firelit\DatabaseObject` (i.e., model) class
+- `Firelit\Router` class
+
+TODO: More documentation here!
 
 Classes Included
 ----------------
@@ -50,7 +61,7 @@ Example usage:
 ```php
 <?php
 
-$resp = ApiResponse::init('JSON');
+$resp = Firelit\ApiResponse::init('JSON');
 
 $resp->setTemplate(array(
 	'success' => false,
@@ -139,32 +150,6 @@ $http->get('http://www.google.com/');
 // Hmmm, I wonder what cookies Google sets...
 echo '<pre>'. file_get_contents($http->cookieFile) .'</pre>';
 ```
-
-### LogEntry 
-
-An application logging class for recording errors, events or other useful data to either a database table or a file. 
-
-Example usage:
-```php
-<?php
-
-// One-time logger setup
-Firelit\LogEntry::config(array(
-	'file' => array('enabled' => true)
-));
-
-// Standard textual/contextual log entry:
-new Firelit\LogEntry(5, 'The website is going down!', __FILE__, __LINE__);
-
-// Exceptions can be logged:
-try {
-	throw new \Exception('all your base are belong to us');
-} catch (Exception $e) {
-	new Firelit\LogEntry(4, $e);
-}
-```
-
-Please remember to restrict access (eg, via .htaccess) to any files you may be using for logging.
 
 ### Query
 
