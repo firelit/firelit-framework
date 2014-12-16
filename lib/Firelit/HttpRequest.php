@@ -76,6 +76,13 @@ class HttpRequest {
 		curl_setopt($this->handle, CURLOPT_HTTPHEADER, $headerArray);
 		
 	}
+
+	public function setBasicAuth($user, $pass = null) {
+
+		curl_setopt($this->handle, CURLOPT_HTTPAUTH, CURLAUTH_BASIC) ; 
+		curl_setopt($this->handle, CURLOPT_USERPWD, (!empty($pass) ? $user .':'. $pass : $user)); // Should be 'username:password'
+
+	}
 	
 	// Three executing methods:
 	
