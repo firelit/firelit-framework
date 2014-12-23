@@ -107,6 +107,17 @@ class HttpRequest {
 		
 	}
 	
+	public function put($url, $putData) {
+	
+		if (is_array($putData)) $putData = http_build_query($putData);
+		
+		curl_setopt($this->handle, CURLOPT_CUSTOMREQUEST, 'PUT');
+		curl_setopt($this->handle, CURLOPT_POSTFIELDS, $putData);
+		
+		return $this->execute($url);
+		
+	}
+	
 	public function other($url, $type) {
 		// For DELETE, PUT, HEAD, etc
 		curl_setopt($this->handle, CURLOPT_POST, 0); // Added to clear past values
