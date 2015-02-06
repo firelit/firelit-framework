@@ -10,12 +10,15 @@ class Query {
 	private static $errorCount = 0;
 
 	/* Set the databases default TZ (for storing php datetime objects into mysql datetime columns) */
-	static public $defaultTz = false; // Should be a DateTimeZone object
+	static public $defaultTz = false; // Should be a DateTimeZone object, default to UTC in contructor
 
 	/* Object variables */
 	private $res;
 	
 	public function __construct($sql = false, $binders = array()) {
+
+		if (!static::$defaultTz)
+			static::$defaultTz = new DateTimeZone('UTC');
 
 		if ($sql === false) return;
 
