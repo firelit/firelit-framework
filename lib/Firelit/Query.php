@@ -65,7 +65,8 @@ class Query {
 	
 	public function query($sql, $binders = array()) {
 
-		if (self::$errorCount > 10) die('ERROR Q'. __LINE__ .' <!-- TOO MANY QUERY ERRORS -->');
+		if (self::$errorCount > 10) 
+			trigger_error('QUERY ERROR LIMIT REACHED', E_ERROR);
  
 		if (is_string($sql))
 			$this->cleanBinders($binders, $sql);
