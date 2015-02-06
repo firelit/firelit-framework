@@ -18,7 +18,7 @@ class Query {
 	public function __construct($sql = false, $binders = array()) {
 
 		if (!static::$defaultTz)
-			static::$defaultTz = new DateTimeZone('UTC');
+			static::$defaultTz = new \DateTimeZone('UTC');
 
 		if ($sql === false) return;
 
