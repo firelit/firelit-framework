@@ -216,7 +216,7 @@ Available methods for getting the status and/or results of a query:
 
 ### QueryIterator
 
-A PHP (iterator)[http://php.net/manual/en/class.iterator.php] that allows for a Query result set to be passed around without actually pre-retrieving all results. The QueryIterator object can then be used in a `foreach` loop, where it fetches the next row needed on-demand.
+A PHP [iterator](http://php.net/manual/en/class.iterator.php) that allows for a Query result set to be passed around without actually pre-retrieving all results. The QueryIterator object can then be used in a `foreach` loop, where it fetches the next row needed on-demand.
 
 Example usage:
 ```php
@@ -240,7 +240,7 @@ foreach ($results as $index => $value) {
 
 ```
 
-The QueryIterator constructor takes two parameters, the second optional: The Query object and the object into which the table row should be (fetched)[http://php.net/manual/en/pdostatement.fetchobject.php].
+The QueryIterator constructor takes two parameters, the second optional: The Query object and the object into which the table row should be [fetched](http://php.net/manual/en/pdostatement.fetchobject.php).
 
 ### Request
 
