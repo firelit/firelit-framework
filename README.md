@@ -214,6 +214,34 @@ Available methods for getting the status and/or results of a query:
 - `success();` returns true if the query was successfully executed
 - `logError(LogEntry $logger, $file, $line);` is a helper method for logging any query errors
 
+### QueryIterator
+
+A PHP (iterator)[http://php.net/manual/en/class.iterator.php] that allows for a Query result set to be passed around without actually pre-retrieving all results. The QueryIterator object can then be used in a `foreach` loop, where it fetches the next row needed on-demand.
+
+Example usage:
+```php
+<?php
+
+function demo() {
+
+	$q = new Firelit\Query($type);
+
+	$q->query("SELECT * FROM `TableName` WHERE `type`=:type", array('type' => $type));
+
+	return new Firelit\QueryIterator($q);
+
+}
+
+$results = demo('best_ones');
+
+foreach ($results as $index => $value) {
+	// Do something!
+} 
+
+```
+
+The QueryIterator constructor takes two parameters, the second optional: The Query object and the object into which the table row should be (fetched)[http://php.net/manual/en/pdostatement.fetchobject.php].
+
 ### Request
 
 A class that captures the incoming HTTP request in a single object and performs any necessary preliminary work. Provides a nice class wrapper around all the important parameters within the request and allows for easy sanitization.

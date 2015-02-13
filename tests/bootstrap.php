@@ -1,6 +1,7 @@
 <?PHP
 
 function bootstrapAutoloader($class) {
+	
 	$parts = explode('\\', $class);
 	if ($parts[0] != 'Firelit') 
 		return false;
