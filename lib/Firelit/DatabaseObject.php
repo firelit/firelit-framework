@@ -47,12 +47,25 @@ class DatabaseObject {
 		if (!$this->_new && !sizeof($this->_dirty)) return;
 		if ($this->_readOnly) throw new \Exception('Cannot save a read-only object.');
 
+		$saveData = $this->_data;
+
+		foreach ($saveData as $var => $val) {
+
+			// JIT encoding: Serialize/JSON-encode just before saving
+			if (!is_null($val) && in_array($var, static::$colsSerialize)) {
+				$saveData[$var] = serialize($val);
+			} elseif (!is_null($val) && in_array($var, static::$colsJson)) {
+				$saveData[$var] = json_encode($val);
+			}
+
+		}
+
 		if (static::$query) $q = static::$query;
 		else $q = new Query();
 		
 		if ($this->_new) {
 
-			$q->insert(static::$tableName, $this->_data);
+			$q->insert(static::$tableName, $saveData);
 
 			// If new and single primary key, set data id from autoincrement id
 			if (static::$primaryKey && !is_array(static::$primaryKey))
@@ -65,17 +78,17 @@ class DatabaseObject {
 
 			if (is_array(static::$primaryKey))
 				foreach (static::$primaryKey as $aKey) {
-					if (!isset($this->_data[$aKey]))
+					if (!isset($saveData[$aKey]))
 						throw new \Exception('Cannot perform update without all primary keys set.');
 				}
 
-			elseif (!isset($this->_data[static::$primaryKey]))
+			elseif (!isset($saveData[static::$primaryKey]))
 				throw new \Exception('Cannot perform update without primary key set.');
 
 			$updateData = array(); 
 
 			foreach ($this->_dirty as $key) {
-				$updateData[$key] = $this->_data[$key];
+				$updateData[$key] = $saveData[$key];
 			}
 
 			if (is_array(static::$primaryKey)) {
@@ -87,7 +100,7 @@ class DatabaseObject {
 				throw new \Exception('Cannot perform update on primary key (it was marked dirty).');
 			}
 
-			list($whereSql, $whereBinder) = $this->getWhere($this->_data);
+			list($whereSql, $whereBinder) = $this->getWhere($saveData);
 
 			$q->update(static::$tableName, $updateData, $whereSql, $whereBinder);
 			
@@ -151,17 +164,11 @@ class DatabaseObject {
 
 	public function __get($var) {
 
-		if (isset($this->_data[$var])) $val = $this->_data[$var];
-		else return null;
+		if (isset($this->_data[$var])) 
+			return $this->_data[$var];
 		
-		if (in_array($var, static::$colsSerialize)) {
-			$val = unserialize($val);
-		} elseif (in_array($var, static::$colsJson)) {
-			$val = json_decode($val, true);
-		}
-
-		return $val;
-
+		return null;
+		
 	}
 
 	public function __isset($var) {
@@ -174,14 +181,16 @@ class DatabaseObject {
 
 		// If pre-construct loading
 		if (!$this->constructed) {
+			
+			// Take out of deep-freeze (as stored in DB)
+			if (!is_null($val) && in_array($var, static::$colsSerialize)) {
+				$val = unserialize($val);
+			} elseif (!is_null($val) && in_array($var, static::$colsJson)) {
+				$val = json_decode($val, true);
+			}
+
 			$this->_data[$var] = $val;
 			return;
-		}
-
-		if (!is_null($val) && in_array($var, static::$colsSerialize)) {
-			$val = serialize($val);
-		} elseif (!is_null($val) && in_array($var, static::$colsJson)) {
-			$val = json_encode($val);
 		}
 
 		if (isset($this->_data[$var]) && ($this->_data[$var] === $val)) return;

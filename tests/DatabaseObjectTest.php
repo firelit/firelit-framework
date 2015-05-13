@@ -35,7 +35,7 @@ class DatabaseObjectTest extends PHPUnit_Framework_TestCase {
 
 		$do->save();
 
-		$this->assertEquals($do->id, $newId);
+		$this->assertEquals($newId, $do->id);
 
 	}
 
@@ -99,13 +99,12 @@ class DatabaseObjectTest extends PHPUnit_Framework_TestCase {
 
 		$to = new TestObject(array(
 			'test' => '123',
-			'serialize' => array(1, 2, 3),
+			'serialize' => $class = new stdClass(),
 			'jsonize' => array(4, 5, 6)
 		));
 
 		$this->assertEquals($to->test, '123');
-		$this->assertEquals($to->serialize, array(1, 2, 3));
-		$this->assertEquals($to->serialize[2], 3);
+		$this->assertSame($to->serialize, $class);
 		$this->assertEquals($to->jsonize, array(4, 5, 6));
 		$this->assertEquals($to->jsonize[2], 6);
 
