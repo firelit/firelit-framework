@@ -73,10 +73,13 @@ class Crypto {
 	 */
 	public static function generateKey($bytes = 32) {
 
-		// Mixin' it up
-		$key = mcrypt_create_iv(floor($bytes/2), MCRYPT_RAND);
-		usleep(mt_rand(1,10));
-		$key .= mcrypt_create_iv(ceil($bytes/2), MCRYPT_RAND);
+		$success = false;
+		
+		if (is_callable('openssl_random_pseudo_bytes'))
+			$key = openssl_random_pseudo_bytes($bytes, $success);
+		
+		if (!$success) 
+			$key = mcrypt_create_iv($bytes);
 
 		return base64_encode($key);
 	}
