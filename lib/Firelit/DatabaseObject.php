@@ -11,6 +11,7 @@ class DatabaseObject {
 	// Optional fields to set in extension
 	protected static $colsSerialize = array(); // Columns that should be automatically php-serialized when using
 	protected static $colsJson = array(); // Columns that should be automatically JSON-encoded/decoded when using
+	protected static $colsDateTime = array(); // Columns that should be a DateTime object when loaded from DB
 
 	protected $_data = array(); // The object's data
 	protected $_dirty = array(); // Array of dirty properties that need saving
@@ -21,6 +22,9 @@ class DatabaseObject {
 
 	protected $constructed = false;
 
+	/* Set the databases default TZ (for creating php datetime objects from mysql datetime columns) */
+	static public $defaultTz = false; // Should be a DateTimeZone object, defaults to UTC; should match Firelit\Query
+
 	public function __construct($data = false) {
 
 		$this->constructed = true;
@@ -28,6 +32,18 @@ class DatabaseObject {
 		// If it doesn't come pre-loaded, it's new
 		// (Pre-loading made possible by PDOStatement::fetchObject)
 		if (!sizeof($this->_data)) $this->_new = true;
+
+		if (is_array(static::$colsDateTime)) {
+
+			if (!static::$defaultTz)
+				static::$defaultTz = new \DateTimeZone('UTC');
+
+			foreach (static::$colsDateTime as $aCol) {
+				// Change all pre-loaded date/time data into DateTime object
+				if (!empty($this->_data[$aCol]) && !is_object($this->_data[$aCol]))
+					$this->_data[$aCol] = new \DateTime($this->_data[$aCol], static::$defaultTz);
+			}
+		}
 
 		$this->_dirty = array(); // Reset in case pre-loaded
 
