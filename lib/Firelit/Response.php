@@ -17,6 +17,11 @@ class Response extends Singleton {
 	// Global config - if to throw exception when headers already sent and update can't be made
 	static public $exceptOnHeaders = false;
 	
+	/**
+	 * Construct
+	 * @param Bool $ob Enable output buffer
+	 * @param String $charset The character set (e.g., 'UTF-8')
+	 */
 	public function __construct($ob = true, $charset = "UTF-8") { 
 		// $ob: Turn output buffering on?
 		// $charset: Specify the charset?
@@ -47,6 +52,9 @@ class Response extends Singleton {
 		
 	}
 	
+	/**
+	 * Most likely called at end of execution, outputs data as needed
+	 */
 	public function __destruct() {
 
 		if (is_callable($this->callback)) {
@@ -78,14 +86,31 @@ class Response extends Singleton {
 
 	}
 
-	// Pass a closure to define a callback function
-	// Should take one parameter: the string to be sent as output
-	// Used passed variable referentially to save any changes to output
-	// If output buffering is off, false will be passed
+	/**
+	 * Pass a closure to define a callback function
+	 * Should take one parameter: the string to be sent as output
+	 * Used passed variable referentially to save any changes to output
+	 * If output buffering is off, false will be passed
+	 * @param Function $function 
+	 */
 	public function setCallback($function) {
+
+		if (empty($function)) {
+			$this->callback = false;
+			return;
+		}
+
+		if (!is_callable($function))
+			throw new \Exception('Callback should be a function or false.');
+
 		$this->callback = $function;
+		
 	}
 
+	/**
+	 * Set the HTTP content type
+	 * @param Mixed $type The response type (defaults to 'text/html')
+	 */
 	public function contentType($type = false) {
 			
 		if (headers_sent()) {
@@ -103,6 +128,11 @@ class Response extends Singleton {
 		
 	}
 	
+	/**
+	 * Set the HTTP response code
+	 * @param Mixed $code The response code to use or false to return current value
+	 * @return Return the code used if $code is false
+	 */
 	public function code($code = false) {
 		
 		if (!$code) return http_response_code();
@@ -120,6 +150,12 @@ class Response extends Singleton {
 
 	}
 
+	/**
+	 * Redirect the client
+	 * @param String $path 
+	 * @param Int $type 301 or 302 redirect 
+	 * @param Bool $end End response 
+	 */
 	public function redirect($path, $type = 302, $end = true) {
 		// $type should be one of the following:
 		// 301 = Moved permanently
@@ -144,6 +180,9 @@ class Response extends Singleton {
 		
 	}
 	
+	/**
+	 * Flush the output buffer (but leave enabled)
+	 */
 	public function flushBuffer() {
 		// Send buffer out
 		if (self::$outputBuffering)
@@ -151,6 +190,9 @@ class Response extends Singleton {
 			
 	}
 	
+	/**
+	 * Clean the output buffer
+	 */
 	public function cleanBuffer() {
 		// Empty buffer
 		if (self::$outputBuffering)
@@ -158,12 +200,18 @@ class Response extends Singleton {
 			
 	}
 	
+	/**
+	 * Clear the output buffer, alias to cleanBuffer() method
+	 */
 	public function clearBuffer() {
 		// Alias of cleanBuffer()
 		$this->cleanBuffer();
 		
 	}
 
+	/**
+	 * Flush the buffer and end
+	 */
 	public function endBuffer() {
 		// Call cleanBuffer first if you don't want anything getting out
 
@@ -174,12 +222,18 @@ class Response extends Singleton {
 
 	}
 
+	/**
+	 * Alias to code() method, only does not return code
+	 */
 	public function setCode($code) {
 		// Set the HTTP response code
 		$this->code($code);
 
 	}
 
+	/**
+	 * Alias to contentType() method
+	 */
 	public function setContentType($type) {
 		// Set the HTTP content type
 		$this->contentType($type);
