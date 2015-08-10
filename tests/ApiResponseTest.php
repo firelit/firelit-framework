@@ -43,13 +43,13 @@ class ApiResponseTest extends PHPUnit_Framework_TestCase {
 		
 	}
 	
-	public function testCallback() {
+	public function testApiCallback() {
 		
 		ob_start();
 		
 		$resp = Firelit\ApiResponse::init('JSON', false);
 
-		$resp->setCallback(function(&$response) {
+		$resp->setApiCallback(function(&$response) {
 
 			unset($response['data']);
 			$response['new'] = true;

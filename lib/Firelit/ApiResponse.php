@@ -105,7 +105,7 @@ class ApiResponse extends Response {
 	 * Set a function to be called upon response (or false to cancel)
 	 * @param Funcation $callback The function to call with 1 parameter being the data to return (pass by reference to modify)
 	 */
-	public function setCallback($callback) {
+	public function setApiCallback($callback) {
 
 		if (empty($callback)) {
 			$this->apiResponseCallback = false;
