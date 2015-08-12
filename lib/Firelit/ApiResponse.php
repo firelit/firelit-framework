@@ -8,6 +8,7 @@ class ApiResponse extends Response {
 	protected $responseSent = false;
 	protected $responseFormat = 'JSON';
 	protected $apiResponseCallback = false;
+	protected $jsonCallbackWrap = false;
 	
 	/**
 	 * Set response data
@@ -75,7 +76,11 @@ class ApiResponse extends Response {
 		// Format for specific output type
 		if ($this->responseFormat == 'JSON') {
 			
+			if ($this->jsonCallbackWrap) echo $this->jsonCallbackWrap . '(';
+
 			echo json_encode($this->response);
+
+			if ($this->jsonCallbackWrap) echo ');';
 
 		} else {
 			throw new \Exception('Invalid response format: '. $this->responseFormat);
@@ -99,6 +104,24 @@ class ApiResponse extends Response {
 	public function cancel() {
 		// No longer need a response
 		$this->responseSent = true;
+	}
+
+	/**
+	 * Set a function to be wrapped around JSON response (for JSONP)
+	 * @param String $callback The function name
+	 */
+	public function setJsonCallbackWrap($callback) {
+
+		if (empty($callback)) {
+			$this->jsonCallbackWrap = false;
+			return;
+		}
+
+		if (!is_string($callback))
+			throw new \Exception('JSON callback wrap should be a string or false.');
+
+		$this->jsonCallbackWrap = $callback;
+
 	}
 
 	/**

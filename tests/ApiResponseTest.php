@@ -43,6 +43,28 @@ class ApiResponseTest extends PHPUnit_Framework_TestCase {
 		
 	}
 	
+	public function testJsonCallbackWrap() {
+		
+		ob_start();
+		
+		$resp = Firelit\ApiResponse::init('JSON', false);
+
+		$resp->setJsonCallbackWrap('test_function');
+		
+		$resp->setTemplate(array('res' => false, 'message' => 'Peter picked a pack of pickels'));
+		$resp->respond(array(), false);
+
+		unset($resp);
+		Firelit\ApiResponse::destruct();
+
+		$res = ob_get_contents();
+		ob_end_clean();
+
+		$this->assertEquals('test_function({"res":false,"message":"Peter picked a pack of pickels"});', $res);
+		
+	}
+
+	
 	public function testApiCallback() {
 		
 		ob_start();
