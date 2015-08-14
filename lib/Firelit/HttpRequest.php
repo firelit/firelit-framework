@@ -29,9 +29,9 @@ class HttpRequest {
 	public function __construct() {
 		
 		if (function_exists('curl_init')) $this->handle = curl_init();
-		else throw new Exception('cURL required.');
+		else throw new \Exception('cURL required.');
 		
-		if (!$this->handle) throw new Exception('Could not initiate cURL.');
+		if (!$this->handle) throw new \Exception('Could not initiate cURL.');
 		
 	}
 	
