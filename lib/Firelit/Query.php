@@ -3,7 +3,7 @@
 namespace Firelit;
 
 class Query {
-
+	
 	/* Global connection & state variables */
 	private static $pdo = false;
 	private static $database = false;
@@ -14,7 +14,7 @@ class Query {
 
 	/* Object variables */
 	private $res;
-
+	
 	public function __construct($sql = false, $binders = array()) {
 
 		if (!static::$defaultTz)
@@ -24,8 +24,8 @@ class Query {
 
 		$this->query($sql, $binders);
 
-	}
-
+	}	
+	
 	public static function connect() {
 
 		$reg = Registry::get('database');
@@ -65,14 +65,14 @@ class Query {
 		return self::$pdo;
 
 	}
-
+	
 	public function query($sql, $binders = array()) {
 
 		if (self::$errorCount > 10) {
 			trigger_error('QUERY ERROR LIMIT REACHED', E_USER_ERROR);
 			exit(1);
 		}
-
+ 
 		if (is_string($sql))
 			$this->cleanBinders($binders, $sql);
 
@@ -89,11 +89,11 @@ class Query {
 			self::$errorCount++;
 			throw new \Exception('Invalid parameter supplied to query method.');
 		}
-
+		
 		foreach ($binders as $name => $value) {
 			// Fixes issue with innodb not interpreting false correctly (converts to empty string)
 			if (gettype($value) == 'boolean') $binders[$name] = intval($value);
-		}
+		}	
 
 		$this->res = $this->sql->execute($binders);
 
@@ -105,7 +105,7 @@ class Query {
 		return $this->res;
 
 	}
-
+	
 	public function cleanBinders(&$binder, $sql) {
 		foreach ($binder as $name => $value) {
 			if (strpos($sql, $name) === false)
@@ -122,10 +122,10 @@ class Query {
 
 	public function convertBinderValues(&$binder) {
 		foreach ($binder as $name => $value) {
-
+			
 			// If value is a 2-element array with the first value
 			// having one of the following values, the second is assumed
-			// to need special attention. ("SQL" is handeled only in
+			// to need special attention. ("SQL" is handeled only in 
 			// splitArray for insert/update)
 			if (is_array($value) && (sizeof($value) == 2)) {
 				switch (strtoupper($value[0])) {
@@ -141,25 +141,25 @@ class Query {
 			if (is_object($value) && is_a($value, 'DateTime')) {
 
 				$date = clone $value;
-				if (static::$defaultTz)
+				if (static::$defaultTz) 
 					$date->setTimezone(static::$defaultTz);
 
 				$value = $date->format('Y-m-d H:i:s');
 
 			}
 
-			if (is_array($value) || is_object($value))
+			if (is_array($value) || is_object($value)) 
 				$value = serialize($value);
 
 			$binder[$name] = $value;
-
+			
 		}
 	}
 
 	public function getRes() {
 		return $this->res;
 	}
-
+	
 	public function getAll() {
 		if (!$this->res) return false;
 		return $this->sql->fetchAll(\PDO::FETCH_ASSOC);
@@ -169,7 +169,7 @@ class Query {
 		if (!$this->res) return false;
 		return $this->sql->fetch(\PDO::FETCH_ASSOC);
 	}
-
+	
 	public function getObject($className) {
 		if (!$this->res) return false;
 		return $this->sql->fetchObject($className);
@@ -178,23 +178,23 @@ class Query {
 	public function getNewId() {
 		return self::$pdo->lastInsertId();
 	}
-
+	
 	public function getAffected() {
 		return $this->sql->rowCount();
 	}
-
+	
 	public function getNumRows() {
 		// May not always return the correct number of rows
 		// See note at http://php.net/manual/en/pdostatement.rowcount.php
 		return $this->sql->rowCount();
 	}
-
+	
 	public function getError() {
 		$e = self::$pdo->errorInfo();
 		if ($e[0] == '00000') $e = $this->sql->errorInfo();
 		return $e[2]; // Driver specific error message.
 	}
-
+	
 	public function getErrorCode() {
 		$e = self::$pdo->errorInfo();
 		if ($e[0] == '00000') $e = $this->sql->errorInfo();
@@ -208,8 +208,8 @@ class Query {
 	public function success() {
 		return $this->res;
 	}
-
-	public function insert($table, $array, $dupUpdate = false) {
+	
+	public function insert($table, $array) {
 		// Preform an insert on the table
 		// Enter an associative array for $array with column names as keys
 
@@ -217,32 +217,32 @@ class Query {
 
 		list($statementArray, $binderArray) = self::splitArray($array);
 
-		$this->sql = self::$pdo->prepare("INSERT INTO `". $table ."` ". self::toSQL('INSERT', $statementArray) . ($dupUpdate ? ' ON DUPLICATE KEY UPDATE' : ''));
-
+		$this->sql = self::$pdo->prepare("INSERT INTO `". $table ."` ". self::toSQL('INSERT', $statementArray));
+		
 		return $this->query($this->sql, $binderArray);
-
+		
 	}
-
+	
 	public function replace($table, $array) {
 		// Preform an replace on the table
 		// Enter an associative array for $array with column names as keys
-
+		
 		if (!self::$pdo) static::connect();
 
 		list($statementArray, $binderArray) = self::splitArray($array);
 
 		$this->sql = self::$pdo->prepare("REPLACE INTO `". $table ."` ". self::toSQL('REPLACE', $statementArray));
-
+		
 		return $this->query($this->sql, $binderArray);
-
+		
 	}
-
+	
 	public function update($table, $array, $whereSql, $whereBinder = array()) {
 		// Preform an update on the table
 		// Enter an associative array for $array with column names as keys
-
+		
 		if (!self::$pdo) static::connect();
-
+		
 		list($statementArray, $binderArray) = self::splitArray($array);
 
 		// Look for binder conflicts
@@ -257,11 +257,11 @@ class Query {
 			}
 
 		}
-
+		
 		$this->sql = self::$pdo->prepare("UPDATE `". $table ."` SET ". self::toSQL('UPDATE', $statementArray) ." WHERE ". preg_replace('/^\s?WHERE\s/', '', $whereSql));
-
+		
 		return $this->query($this->sql, array_merge($binderArray, $whereBinder));
-
+		
 	}
 
 	public static function splitArray($arrayIn) {
@@ -300,38 +300,38 @@ class Query {
 
 	public static function toSQL($verb, $assocArray) {
 		// $assocArray should be an array of 'raw' items (not yet escaped for database)
-
+		
 		$verb = strtoupper($verb);
 
 		if (($verb == 'INSERT') || ($verb == 'REPLACE')) {
-
+			
 			$sql1 = '';
 			$sql2 = '';
-
+			
 			foreach ($assocArray as $key => $value) {
-
+				
 				$sql1 .= ', `'. str_replace('`', '', $key) .'`';
 				$sql2 .= ", ". $value;
-
+				
 			}
 
 			return '('. substr($sql1, 2) . ') VALUES ('. substr($sql2, 2) .')';
-
+			
 		} elseif ($verb == 'UPDATE') {
-
+			
 			$sql = '';
-
+			
 			foreach ($assocArray as $key => $value) {
-
+				
 				$sql .= ', `'. str_replace('`', '', $key) .'`='. $value;
-
+				
 			}
-
+			
 			return substr($sql, 2);
-
+			
 		} else throw new \Exception("Invalid verb for toSQL();");
 	}
-
+	
 	public static function escapeLike($sql) {
 		return preg_replace('/([%_])/', '\\\\\\1', $sql);
 	}
