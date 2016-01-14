@@ -8,7 +8,12 @@ class Request extends Singleton {
 	private $ip, $proxies, $host, $path, $method, $secure, $referer, $protocol, $cli, $headers, $uri, $body;
 	private $put, $post, $get, $cookie;
 
+	// If load-balanced, look for appropriate headers
 	public static $loadBalanced = false;
+
+	// Used for unit testing: Supply data insetad of 'php://input'
+	public static $dataInput;
+	public static $methodInput;
 
 	// $filter should be a filtering function, if supplied, which filters a string value by reference
 	public function __construct($filter = false, $bodyFormat = 'querystring') {
@@ -24,6 +29,8 @@ class Request extends Singleton {
 
 		$this->cli = (php_sapi_name() == 'cli');
 		if ($this->cli) $this->method = 'CLI';
+
+		if (isset(static::$methodInput)) $this->method = static::$methodInput;
 
 		$this->uri = ($this->cli ? false : ($this->secure ? 'https' : 'http') .'://'. $this->host . $this->path);
 
@@ -53,13 +60,19 @@ class Request extends Singleton {
 
 			}
 
-		} else
+		} else {
 			$this->headers = array();
+		}
 
+		// Create our own global array for PUT data
 		global $_PUT;
 		$_PUT = array();
 
-		$this->body = file_get_contents("php://input");
+		if (isset(self::$dataInput)) {
+			$this->body = self::$dataInput;
+		} else {
+			$this->body = file_get_contents("php://input");
+		}
 
 		if ($this->method == 'PUT') {
 			parse_str($this->body, $_PUT);
@@ -70,10 +83,32 @@ class Request extends Singleton {
 			$this->put = array();
 			$this->post = array();
 
-			if ($this->method == 'PUT')
+			$jsonErr = JSON_ERROR_NONE;
+
+			if ($this->method == 'PUT') {
 				$this->put = json_decode($this->body, true);
-			elseif ($this->method == 'POST')
+				$jsonErr = json_last_error();
+			} elseif ($this->method == 'POST') {
 				$this->post = json_decode($this->body, true);
+				$jsonErr = json_last_error();
+			}
+
+			if ($jsonErr != JSON_ERROR_NONE) {
+				switch ($jsonErr) {
+					case JSON_ERROR_DEPTH:
+						throw new \Exception('Invalid JSON with request: Maximum stack depth exceeded.');
+					case JSON_ERROR_STATE_MISMATCH:
+						throw new \Exception('Invalid JSON with request: Underflow or the modes mismatch.');
+					case JSON_ERROR_CTRL_CHAR:
+						throw new \Exception('Invalid JSON with request: Unexpected control character found.');
+					case JSON_ERROR_SYNTAX:
+						throw new \Exception('Invalid JSON with request: Syntax error, malformed data.');
+					case JSON_ERROR_UTF8:
+						throw new \Exception('Invalid JSON with request: Malformed UTF-8 characters, possibly incorrectly encoded.');
+					default:
+						throw new \Exception('Invalid JSON with request.');
+				}
+			}
 
 		} else {
 			$this->post = $_POST;
