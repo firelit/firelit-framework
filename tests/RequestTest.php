@@ -60,6 +60,18 @@ class RequestTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $data, $sut->post, 'Post JSON data was not correctly made available.' );
 
+		Firelit\Request::$dataInput = '{"json":"invalid",:}';
+		Firelit\Request::$methodInput = 'PUT';
+
+		try {
+			$sut = new Firelit\Request(false, 'json');
+
+			$this->assertTrue( false, 'Invalid JSON data was not caught.' );
+
+		} catch (Exception $e) {
+			$this->assertTrue( (bool) preg_match('/JSON/', $e->getMessage()), 'Invalid JSON data was not caught.' );
+		}
+
 		Firelit\Request::$dataInput = null;
 		Firelit\Request::$methodInput = null;
 

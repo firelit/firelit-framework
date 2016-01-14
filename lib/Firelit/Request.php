@@ -93,7 +93,7 @@ class Request extends Singleton {
 				$jsonErr = json_last_error();
 			}
 
-			if ($jsonErr != JSON_ERROR_NONE) {
+			if ($jsonErr !== JSON_ERROR_NONE) {
 				switch ($jsonErr) {
 					case JSON_ERROR_DEPTH:
 						throw new \Exception('Invalid JSON with request: Maximum stack depth exceeded.');
