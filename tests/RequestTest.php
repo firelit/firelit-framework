@@ -68,8 +68,8 @@ class RequestTest extends PHPUnit_Framework_TestCase {
 
 			$this->assertTrue( false, 'Invalid JSON data was not caught.' );
 
-		} catch (Exception $e) {
-			$this->assertTrue( (bool) preg_match('/JSON/', $e->getMessage()), 'Invalid JSON data was not caught.' );
+		} catch (Firelit\InvalidJsonException $e) {
+			$this->assertTrue( true, 'Invalid JSON data was not caught.' );
 		}
 
 		Firelit\Request::$dataInput = null;

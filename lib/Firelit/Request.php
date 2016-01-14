@@ -96,18 +96,20 @@ class Request extends Singleton {
 			if ($jsonErr !== JSON_ERROR_NONE) {
 				switch ($jsonErr) {
 					case JSON_ERROR_DEPTH:
-						throw new \Exception('Invalid JSON with request: Maximum stack depth exceeded.');
+						$jsonErrMsg = 'Maximum stack depth exceeded.';
 					case JSON_ERROR_STATE_MISMATCH:
-						throw new \Exception('Invalid JSON with request: Underflow or the modes mismatch.');
+						$jsonErrMsg = 'Underflow or the modes mismatch.';
 					case JSON_ERROR_CTRL_CHAR:
-						throw new \Exception('Invalid JSON with request: Unexpected control character found.');
+						$jsonErrMsg = 'Unexpected control character found.';
 					case JSON_ERROR_SYNTAX:
-						throw new \Exception('Invalid JSON with request: Syntax error, malformed data.');
+						$jsonErrMsg = 'Syntax error, malformed data.';
 					case JSON_ERROR_UTF8:
-						throw new \Exception('Invalid JSON with request: Malformed UTF-8 characters, possibly incorrectly encoded.');
+						$jsonErrMsg = 'Malformed UTF-8 characters, possibly incorrectly encoded.';
 					default:
-						throw new \Exception('Invalid JSON with request.');
+						$jsonErrMsg = 'Generic error.';
 				}
+
+				throw new InvalidJsonException($jsonErrMsg);
 			}
 
 		} else {
