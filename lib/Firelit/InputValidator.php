@@ -3,7 +3,7 @@
 namespace Firelit;
 
 class InputValidator {
-	
+
 	const
 		NAME = 1,
 		ORG_NAME = 2,
@@ -15,7 +15,7 @@ class InputValidator {
 		PHONE = 8,
 		EMAIL = 9,
 		CREDIT_ACCT = 10,
-		CREDIT_EXP = 11, 
+		CREDIT_EXP = 11,
 		CREDIT_CVV = 12,
 		ACH_ROUT = 13,
 		ACH_ACCT = 14,
@@ -36,7 +36,7 @@ class InputValidator {
 		));
 		$this->region = $region;
 		$this->required = true;
-	} 
+	}
 
 	public function setRequired($required = true) {
 		$this->required = $required;
@@ -59,24 +59,24 @@ class InputValidator {
 				$name = mb_convert_case($name, MB_CASE_TITLE, 'UTF-8');
 
 				if (strlen($name) == 0) return '';
-				
-				$name = str_replace(array('`','—','–','  ','--','And '), array("'",'-','-',' ','-','and '), $name); 
+
+				$name = str_replace(array('`','—','–','  ','--','And '), array("'",'-','-',' ','-','and '), $name);
 
 				$name = preg_replace_callback("/([A-Za-z]+[\-'])([A-Za-z]{2})/", function($matches) {
 						return $matches[1] . mb_convert_case($matches[2], MB_CASE_TITLE, 'UTF-8');
-					}, $name); 
+					}, $name);
 
 				$name = preg_replace_callback("/([a-z])\s*[\+&]\s*([a-z])/i", function($matches) {
 						return $matches[1] .' & '. mb_strtoupper($matches[2]);
-					}, $name); 
+					}, $name);
 
 				$name = preg_replace_callback("/(Mc)([a-z]+)/", function($matches) {
 						return $matches[1] . mb_convert_case($matches[2], MB_CASE_TITLE, 'UTF-8');
-					}, $name); 
+					}, $name);
 
 				$name = preg_replace_callback("/(\b)(Ii|Iii|Iv)(\b)/", function($matches) {
 						return $matches[1] . mb_strtoupper($matches[2]) . $matches[3];
-					}, $name); 
+					}, $name);
 
 				$name = preg_replace_callback("/(\b)(j|s)\.?r\.?$/i", function($matches) {
 						return $matches[1] . mb_strtoupper($matches[2]) . 'r';
@@ -85,16 +85,16 @@ class InputValidator {
 				if ($compName) {
 					$name = preg_replace_callback("/\b(Van|De|Di)([a-z]+)/", function($matches) {
 						return $matches[1] . mb_convert_case($matches[2], MB_CASE_TITLE, 'UTF-8');
-					}, $name); 
+					}, $name);
 				}
-				
+
 				return $name;
 
 			case self::ADDRESS:
 
 				$address = mb_strtolower($this->value);
 				if (strlen($address) == 0) return '';
-				
+
 				$address = str_replace(array('`','—','–','  ','--'), array("'",'-','-',' ','-'), $address);
 				$address = preg_replace_callback("/([a-z]+[\-'])([a-z]{2})/", function($matches) {
 						return $matches[1] . mb_convert_case($matches[2], MB_CASE_TITLE, 'UTF-8');
@@ -102,40 +102,40 @@ class InputValidator {
 				$address = preg_replace_callback("/([0-9#])([a-z])(\b|[0-9])/", function($matches) {
 						return $matches[1] . mb_strtoupper($matches[2]) . $matches[3];
 					}, $address);
-				
-				$patterns = array('/p\.o\.(\s?)/i',	'/^po\s/i',	'/^po\.(\s?)/i'); 
-				$replacew = array('PO ', 			'PO ',		'PO '); 
+
+				$patterns = array('/p\.o\.(\s?)/i',	'/^po\s/i',	'/^po\.(\s?)/i');
+				$replacew = array('PO ', 			'PO ',		'PO ');
 				$address = preg_replace($patterns, $replacew, $address);
-				
-				$patterns = array(	'/\bn(\.?\s?)e(\.?)\s/i',	'/\bn(\.?\s?)e(\.?)$/i',	
-									'/\bn(\.?\s?)w(\.?)\s/i',	'/\bn(\.?\s?)w(\.?)$/i',	
-									'/\bs(\.?\s?)e(\.?)\s/i',	'/\bs(\.?\s?)e(\.?)$/i',	
+
+				$patterns = array(	'/\bn(\.?\s?)e(\.?)\s/i',	'/\bn(\.?\s?)e(\.?)$/i',
+									'/\bn(\.?\s?)w(\.?)\s/i',	'/\bn(\.?\s?)w(\.?)$/i',
+									'/\bs(\.?\s?)e(\.?)\s/i',	'/\bs(\.?\s?)e(\.?)$/i',
 									'/\bs(\.?\s?)w(\.?)\s/i',	'/\bs(\.?\s?)w(\.?)$/i',
-									'/\br(\.?\s?)r(\.?)\s/i'); 
-				$replacew = array('NE ', 'NE', 'NW ', 'NW', 'SE ', 'SE', 'SW ', 'SW', 'RR '); 
+									'/\br(\.?\s?)r(\.?)\s/i');
+				$replacew = array('NE ', 'NE', 'NW ', 'NW', 'SE ', 'SE', 'SW ', 'SW', 'RR ');
 				$address = self::mb_ucwords(preg_replace($patterns, $replacew, $address));
-				
+
 				return $address;
 
 			case self::STATE:
 
 				$state = $this->value;
 
-				if (in_array($this->region, array('US', 'CA', 'MX'))) 
+				if (in_array($this->region, array('US', 'CA', 'MX')))
 					return substr(mb_strtoupper(trim($state)), 0, 2);
 
-				if (strlen($state) <= 3) 
+				if (strlen($state) <= 3)
 					return mb_strtoupper($state);
 
 				return self::mb_ucwords($state);
 
 			case self::ZIP:
-				
+
 				$zip = mb_strtoupper($this->value);
 				if ($this->region == 'CA')
 					$zip = substr($zip, 0, 3) .' '. substr($zip, -3);
 
-				return $zip; 
+				return $zip;
 
 			case self::COUNTRY:
 
@@ -153,7 +153,7 @@ class InputValidator {
 
 					if ((strlen($phone) > 10) && (substr($phone, 0, 1) == '1'))
 						$phone = substr($phone, 1);
-					
+
 					$phone = "(". substr($phone, 0, 3) .") ". substr($phone, 3, 3) ."-". substr($phone, 6, 4) . trim( ' '. substr($phone, 10) );
 
 				} else {
@@ -165,13 +165,13 @@ class InputValidator {
 				return $phone;
 
 			case self::EMAIL:
-				
+
 				return mb_strtolower($this->value);
 
 			case self::CREDIT_ACCT:
 
 				$num = preg_replace('/\D+/', '', $this->value);
-				
+
 				if ($returnType == self::TYPE_GATEWAY)
 					return $num;
 
@@ -196,8 +196,8 @@ class InputValidator {
 
 				if ($returnType == self::TYPE_GATEWAY)
 					return date('my', $exp);
-				
-				if ($returnType == self::TYPE_DB) 
+
+				if ($returnType == self::TYPE_DB)
 					return '20'. $yr .'-'. $mo .'-'. date('t', $exp);
 
 				return date('m/y', $exp);
@@ -205,7 +205,7 @@ class InputValidator {
 			case self::CREDIT_CVV:
 
 				$num = preg_replace('/\D+/', '', $this->value);
-				
+
 				if ($returnType == self::TYPE_GATEWAY)
 					return $num;
 
@@ -214,13 +214,13 @@ class InputValidator {
 			case self::ACH_ROUT:
 
 				$num = preg_replace('/\D+/', '', $this->value);
-				
+
 				return $num;
 
 			case self::ACH_ACCT:
 
 				$num = preg_replace('/\D+/', '', $this->value);
-				
+
 				if ($returnType == self::TYPE_GATEWAY)
 					return $num;
 
@@ -236,15 +236,15 @@ class InputValidator {
 				if ($type == 'C') return 'Checking';
 				elseif ($type == 'S') return 'Savings';
 				else return '';
-			
-			case self::URL: 
+
+			case self::URL:
 
 				$url = parse_url($this->value);
-				if (empty($url['scheme'])) 
+				if (empty($url['scheme']))
 					$url = parse_url('http://'. $this->value); // Add a scheme for proper parsing
 
 				if (empty($url['path'])) $url['path'] = '/';
-				
+
 				return $url['scheme'] .'://'. strtolower($url['host']) . (!empty($url['port']) ? ':'. $url['port'] : '') . $url['path'] . (!empty($url['query']) ? '?'. $url['query'] : '');
 
 			default:
@@ -270,10 +270,8 @@ class InputValidator {
 
 			case self::ADDRESS:
 
-				if ($region == 'US') 
-					return preg_match('/^\d+.{2,}$/', $value);
-
-				return preg_match('/^.{3,}$/', $value);
+				// Must contain at least one digit and 2 letters
+				return preg_match('/\d+/', $value) && preg_match('/[A-Za-z]{2,}/', $value);
 
 			case self::STATE:
 
@@ -307,7 +305,7 @@ class InputValidator {
 				}
 
 			case self::COUNTRY:
-				
+
 				return Countries::check($value);
 
 			case self::PHONE:
@@ -369,7 +367,7 @@ class InputValidator {
 				return preg_match('/^\d{4,25}$/', $value);
 
 			case self::ACH_TYPE:
-				
+
 				return preg_match('/^(C|S)$/i', substr($value, 0, 1));
 
 			case self::URL:
@@ -378,7 +376,7 @@ class InputValidator {
 
 				if (!$url) return false;
 
-				if (empty($url['scheme'])) 
+				if (empty($url['scheme']))
 					$url = parse_url('http://'. $value); // Add a scheme for proper parsing
 
 				if (strlen($url['scheme']) && !in_array($url['scheme'], array('http', 'https'))) return false;
@@ -397,7 +395,7 @@ class InputValidator {
 
 		$len = strlen($number);
 		if ($len == 0) return '';
-		
+
 		$lastLen = intval(floor($len / 2));
 		if ($lastLen > 4) $lastLen = 4;
 		$lastFour = substr($number, -$lastLen, $lastLen);
@@ -438,7 +436,7 @@ class InputValidator {
 		return (($sum % 10) === 0);
 
 	}
-	
+
 	static public function mb_ucwords($str) {
 		// mb_convert_case($str, MB_CASE_TITLE, 'UTF-8') is doing a lower() first, not like ucwords()
 		return preg_replace_callback('/\b(\s?)(.)(\S*)\b/u', function($matches) {

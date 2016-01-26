@@ -93,7 +93,7 @@ class InputValidatorTest extends PHPUnit_Framework_TestCase {
 
 		$iv = new InputValidator(InputValidator::ORG_NAME, 'GO');
 		$this->assertEquals(true, $iv->isValid());
-		
+
 		$iv = new InputValidator(InputValidator::ORG_NAME, 'GO!');
 		$this->assertEquals(true, $iv->isValid());
 
@@ -268,7 +268,7 @@ class InputValidatorTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(false, $iv->isValid());
 
 	}
-	
+
 	public function testBankAccountType() {
 
 		// Valid type: checking
@@ -318,6 +318,10 @@ class InputValidatorTest extends PHPUnit_Framework_TestCase {
 
 		$iv = new InputValidator(InputValidator::ADDRESS, '123 Upper Ave. NW', 'US');
 		$this->assertEquals('123 Upper Ave. NW', $iv->getNormalized());
+
+		// Unique count-letter address
+		$iv = new InputValidator(InputValidator::ADDRESS, 'A-123 Front St', 'US');
+		$this->assertEquals(true, $iv->isValid());
 
 		// Valid no-region address
 		$iv = new InputValidator(InputValidator::ADDRESS, 'Field 12');
