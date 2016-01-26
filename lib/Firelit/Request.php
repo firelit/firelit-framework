@@ -159,7 +159,7 @@ class Request extends Singleton {
 
 	public function __get($name) {
 
-		if (isset($this->$name)) return $this->$name;
+		if (property_exists($this, $name)) return $this->$name;
 
 		throw new \Exception('The property "'. $name .'" is not valid.');
 
