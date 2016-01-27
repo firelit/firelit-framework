@@ -78,6 +78,10 @@ class InputValidator {
 						return $matches[1] . mb_strtoupper($matches[2]) . $matches[3];
 					}, $name);
 
+				$name = preg_replace_callback("/(\b)(Llc)(\b)/", function($matches) {
+						return $matches[1] . mb_strtoupper($matches[2]) . $matches[3];
+					}, $name);
+
 				$name = preg_replace_callback("/(\b)(j|s)\.?r\.?$/i", function($matches) {
 						return $matches[1] . mb_strtoupper($matches[2]) . 'r';
 					}, $name);

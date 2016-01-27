@@ -106,6 +106,13 @@ class InputValidatorTest extends PHPUnit_Framework_TestCase {
 		$iv = new InputValidator(InputValidator::ORG_NAME, 'Strait to 123');
 		$this->assertEquals(true, $iv->isValid());
 
+		// Name normalization
+		$iv = new InputValidator(InputValidator::ORG_NAME, 'firelit design llc');
+		$this->assertEquals('Firelit Design LLC', $iv->getNormalized());
+
+		$iv = new InputValidator(InputValidator::ORG_NAME, 'halopays inc.');
+		$this->assertEquals('Halopays Inc.', $iv->getNormalized());
+
 		// Invalid org name
 		$iv = new InputValidator(InputValidator::ORG_NAME, '1');
 		$this->assertEquals(false, $iv->isValid());
