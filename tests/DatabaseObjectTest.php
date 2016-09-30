@@ -110,4 +110,123 @@ class DatabaseObjectTest extends PHPUnit_Framework_TestCase {
 
 	}
 
+	public function testFindBy() {
+
+		$queryStub = $this->getMock('Firelit\Query', array('query', 'getObject'));
+
+		$queryStub->expects($this->once())
+				->method('query')
+				->with(	$this->stringContains('SELECT * FROM `TableName` WHERE `email`'),
+						$this->callback(function($subject) {
+							// Make sure the 2nd param is an array
+							if (!is_array($subject)) return false;
+							if (sizeof($subject) != 1) return false;
+							// Make sure the primary key value is in the 2nd param
+							$key = key($subject);
+							if ($subject[$key] != 'test@test.com') return false;
+							// All good
+							return true;
+						})
+				);
+
+		$queryStub->expects($this->once())
+				->method('getObject')
+				->with( $this->equalTo('TestObject') )
+				->will( $this->returnValue( new TestObject() ) );
+
+		TestObject::setQueryObject($queryStub);
+
+		$to = TestObject::findBy('email', 'test@test.com');
+
+		$this->assertTrue($to instanceof TestObject);
+
+		// Test with arrays:
+
+		$queryStub = $this->getMock('Firelit\Query', array('query', 'getObject'));
+
+		$queryStub->expects($this->once())
+				->method('query')
+				->with(	$this->stringContains('SELECT * FROM `TableName` WHERE'),
+						$this->callback(function($subject) {
+							// Make sure the 2nd param is an array
+							if (!is_array($subject)) return false;
+							if (sizeof($subject) != 2) return false;
+							// Make sure the primary key value is in the 2nd param
+							$key = key($subject);
+							if ($subject[$key] != 'john') return false;
+							// Make sure the primary key value is in the 2nd param
+							next($subject);
+							$key = key($subject);
+							if ($subject[$key] != 'test@test.com') return false;
+							// All good
+							return true;
+						})
+				);
+
+		$queryStub->expects($this->once())
+				->method('getObject')
+				->with( $this->equalTo('TestObject') )
+				->will( $this->returnValue( new TestObject() ) );
+
+		TestObject::setQueryObject($queryStub);
+
+		$to = TestObject::findBy(array('name', 'email'), array('john', 'test@test.com'));
+
+		$this->assertTrue($to instanceof TestObject);
+
+		try {
+
+			$to = TestObject::findBy(array('test', 'test2'), 'nope');
+			$exception = false;
+
+		} catch (Exception $e) {
+			$exception = true;
+		}
+
+		$this->assertTrue($exception, 'Exception expected due to searching multiple columns with singular value');
+
+	}
+
+	public function testFind() {
+
+		$queryStub = $this->getMock('Firelit\Query', array('query', 'getObject'));
+
+		$queryStub->expects($this->once())
+				->method('query')
+				->with(	$this->stringContains('SELECT * FROM `TableName` WHERE `id`'),
+						$this->callback(function($subject) {
+							// Make sure the 2nd param is an array
+							if (!is_array($subject)) return false;
+							// Make sure the primary key value is in the 2nd param
+							$key = key($subject);
+							if ($subject[$key] != 100) return false;
+							// All good
+							return true;
+						})
+				);
+
+		$queryStub->expects($this->once())
+				->method('getObject')
+				->with( $this->equalTo('TestObject') )
+				->will( $this->returnValue( new TestObject() ) );
+
+		TestObject::setQueryObject($queryStub);
+
+		$to = TestObject::find(100);
+
+		$this->assertTrue($to instanceof TestObject);
+
+		try {
+
+			$to = TestObject::find(array(1, 2));
+			$exception = false;
+
+		} catch (Exception $e) {
+			$exception = true;
+		}
+
+		$this->assertTrue($exception, 'Exception expected due to searching array with singular PK');
+
+	}
+
 }
