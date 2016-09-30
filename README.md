@@ -26,8 +26,10 @@ Here is an example of how you'd add this package to your `composer.json` under t
     }
 ```
 
-You can also add it from the command line as follows:
-`php composer.phar require firelit/framework "^1.0"
+You could also add it from the command line as follows:
+```
+php composer.phar require firelit/framework "^1.0"
+```
 
 Alternatively, you could go the manual way and setup your own autoloader and copy the project files from `lib/` into your project directory.
 
