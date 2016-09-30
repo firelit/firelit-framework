@@ -169,12 +169,14 @@ Firelit\Registry::set('database', array(
 	'dsn' => 'sqlite::memory:'
 ));
 
-// Alternatively, database settings can be specified with define's
-define("DB_NAME", 'database');
-define("DB_HOST", 'localhost');
-define("DB_PORT", '3306');
-define("DB_USER", 'username');
-define("DB_PASS", 'password');
+/* 
+Alternatively, database settings can be specified using the following environmental variables:
+ - DB_NAME
+ - DB_HOST
+ - DB_PORT
+ - DB_USER
+ - DB_PASS
+*/
 
 $q = new Firelit\Query();
 
