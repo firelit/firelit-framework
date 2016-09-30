@@ -1,7 +1,7 @@
 {
     "name": "firelit/framework",
     "type": "library",
-    "description": "Framework for Firelit projects",
+    "description": "Simple PHP framework and helper classes for web projects",
     "license": "MIT",
     "repositories": [],
     "require": {
