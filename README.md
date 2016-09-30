@@ -83,9 +83,9 @@ Firelit\Cache::config(array(
 		'servers' => array(
 			array(
 				'host' => 'localhost',
-				'port' => 11211, 
-				'persistent' => true, 
-				'weight' => 1, 
+				'port' => 11211,
+				'persistent' => true,
+				'weight' => 1,
 				'timeout' => 1
 			)
 			/* Multiple servers can be added */
@@ -97,10 +97,10 @@ $val = Firelit\Cache::get('randomValue', function() {
 
 	// If cache miss, this closure will execute this closure, storing the returned value in cache
 	return mt_rand(0, 1000);
-	
+
 });
 
-if (Firelit\Cache::$cacheHit) 
+if (Firelit\Cache::$cacheHit)
 	echo 'Cache hit!';
 
 // Set a value to null in order to remove it from cache
@@ -147,27 +147,34 @@ echo '<pre>'. file_get_contents($http->cookieFile) .'</pre>';
 
 ### Query
 
-A database interaction class and SQL query creator. Makes database connection management and SQL authoring slightly easier. 
+A database interaction class and SQL query creator. Makes database connection management and SQL authoring slightly easier.
 
 Example usage:
 ```php
 <?php
 
 // One-time connection setup
-Firelit\Query::config(array(
+Firelit\Registry::set('database', array(
 	'type' => 'mysql',
-	'db_name' => 'database',
-	'db_host' => 'localhost', // Hostname or IP acceptable here
-	'db_port' => '3306', // Can be left undefined to use default port
-	'db_user' => 'username',
-	'db_pass' => 'password'
+	'name' => 'database',
+	'host' => 'localhost', // Hostname or IP acceptable here
+	'port' => '3306', // Can be left undefined to use default port
+	'user' => 'username',
+	'pass' => 'password'
 ));
 
 // Or specify the DSN string for PDO to connect to other types of databases
-Firelit\Query::config(array(
+Firelit\Registry::set('database', array(
 	'type' => 'other',
 	'dsn' => 'sqlite::memory:'
 ));
+
+// Alternatively, database settings can be specified with define's
+define("DB_NAME", 'database');
+define("DB_HOST", 'localhost');
+define("DB_PORT", '3306');
+define("DB_USER", 'username');
+define("DB_PASS", 'password');
 
 $q = new Firelit\Query();
 
@@ -181,7 +188,7 @@ if (!$q->success()) die('It did not work :(');
 
 $q->query("SELECT * FROM `TableName` WHERE `name`=:name", array('name' => $name));
 
-while ($row = $q->getRow()) 
+while ($row = $q->getRow())
 	echo $row['name'] .': '. $row['state'] .'<br>';
 ```
 
@@ -230,7 +237,7 @@ $results = demo('best_ones');
 
 foreach ($results as $index => $value) {
 	// Do something!
-} 
+}
 
 ```
 
@@ -245,10 +252,10 @@ Example usage:
 <?php
 
 $req = new Firelit\Request::init( function(&$val) {
-	
+
 	// Remove any invalid UTF-8 characters from $_POST, $_GET and $_COOKIE
-	Firelit\Strings::cleanUTF8($val); 
-	
+	Firelit\Strings::cleanUTF8($val);
+
 });
 
 // Filtered $_POST, $_GET and $_COOKIE parameters can then be accessed via the object
