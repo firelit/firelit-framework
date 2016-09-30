@@ -4,8 +4,6 @@ Firelit-Framework
 
 Firelit's standard PHP framework provides a set of helpful classes for developing a website. They are created and namespaced so that they can easily be used with an auto-loader, following the [PSR-0 standard](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md).
 
-** Not yet released, future changes may break backwards compatability **
-
 Requirements
 ------------
 
@@ -21,20 +19,16 @@ How to Use
 
 The easiest way to use this library is to use [Composer](http://getcomposer.org/) which automatically handles dependencies and auto-loading.
 
-Here is an example `composer.json` that you could add to your project root:
+Here is an example of how you'd add this package to your `composer.json` under the require key:
 ```js
-{
-    "name": "acme/blog", /* Your package name */
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/firelit/firelit-framework"
-        }
-    ],
     "require": {
-        "firelit/framework": "dev-master" /* It would be better to specify a version here */
+        "firelit/framework": "^1.0"
     }
-}
+```
+
+You could also add it from the command line as follows:
+```
+php composer.phar require firelit/framework "^1.0"
 ```
 
 Alternatively, you could go the manual way and setup your own autoloader and copy the project files from `lib/` into your project directory.
@@ -341,27 +335,4 @@ $vars->maintenanceMode = true;
 
 // Read a persistent application variable
 if ($vars->maintenanceMode) die('Sorry, under construction.');
-```
-
-Auto-Loader Example
--------------------
-
-The beauty of the auto-loader is that it will only load & parse PHP files that it needs. To use it, however, you must define an autoloader function. [Composer](http://getcomposer.org/) normally handles this, but if you are using this library without composer here is an exmaple autoloader that could be used, created by the [PSR-0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md) Framework Interop Group:
-
-```php
-<?php
-
-function autoload($className) {
-	$className = ltrim($className, '\\');
-	$fileName  = '';
-	$namespace = '';
-	if ($lastNsPos = strrpos($className, '\\')) {
-	  $namespace = substr($className, 0, $lastNsPos);
-	  $className = substr($className, $lastNsPos + 1);
-	  $fileName  = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
-	}
-	$fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
-	
-	require $fileName;
-}
 ```
