@@ -107,16 +107,24 @@ class DatabaseObject {
 				$updateData[$key] = $saveData[$key];
 			}
 
+			$wheres = array();
+
 			if (is_array(static::$primaryKey)) {
 				foreach (static::$primaryKey as $aKey) {
 					if (isset($updateData[$aKey]))
 						throw new \Exception('Cannot perform update on primary key (it was marked dirty).');
+
+					$wheres[] = $saveData[$aKey];
 				}
-			} elseif (isset($updateData[static::$primaryKey])) {
-				throw new \Exception('Cannot perform update on primary key (it was marked dirty).');
+			} else {
+				if (isset($updateData[static::$primaryKey])) {
+					throw new \Exception('Cannot perform update on primary key (it was marked dirty).');
+				}
+
+				$wheres = $saveData[static::$primaryKey];
 			}
 
-			list($whereSql, $whereBinder) = $this->getWhere($saveData);
+			list($whereSql, $whereBinder) = $this->getWhere($wheres);
 
 			$q->update(static::$tableName, $updateData, $whereSql, $whereBinder);
 
@@ -151,9 +159,13 @@ class DatabaseObject {
 
 		} else {
 
+			if (is_array(static::$primaryKey)) {
+				throw new \Exception('The valueArray must be an array if the primary key is an array.');
+			}
+
 			$binderName = ':binder_'.mt_rand(0,1000000);
 			$whereSql = "WHERE `". static::$primaryKey ."`=". $binderName ." LIMIT 1";
-			$whereBinder[$binderName] = $valueArray[static::$primaryKey];
+			$whereBinder[$binderName] = $valueArray;
 
 		}
 
