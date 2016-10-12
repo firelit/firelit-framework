@@ -17,18 +17,15 @@ class CryptoKey
 	const 	TYPE_SYMMETRIC = 'SYMMETRIC',
 			TYPE_PRIVATE = 'PRIVATE';
 
-	private $type;
-	private $key;
+	private $type, $key, $bits;
+
 
 	public function setKey($key, $type) {
 
 		if ($type == static::TYPE_SYMMETRIC) {
 
 			$len = strlen($key);
-
-			if (!in_array($len, array(128/8, 192/8, 256/8))) {
-				throw new \Exception('Invalid key length: '. ($len * 8) .' bits');
-			}
+			$this->bits = $len * 8;
 
 		} elseif ($type == static::TYPE_PRIVATE) {
 
@@ -44,6 +41,9 @@ class CryptoKey
 				throw new \Exception('Private key given in unsupported format (must be PEM encoded string or a key resource)');
 			}
 
+			$details = openssl_pkey_get_details($this->key);
+			$this->bits = $details['bits'];
+
 		} else {
 			throw new \Exception('Invalid key type');
 		}
@@ -56,6 +56,12 @@ class CryptoKey
 	public function getType() {
 
 		return $this->type;
+
+	}
+
+	public function getBitLength() {
+
+		return $this->bits;
 
 	}
 

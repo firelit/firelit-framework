@@ -10,6 +10,7 @@ class CryptoKeyTest extends PHPUnit_Framework_TestCase {
 
 		// Make sure the key type is set
 		$this->assertEquals( CryptoKey::TYPE_SYMMETRIC, $key->getType() );
+		$this->assertEquals( 256, $key->getBitLength() );
 
 		// It takes 24 base64 characters to represent 256-bits of data
 		$textKey = $key->getKey( CryptoKey::FORMAT_BASE64 );
@@ -19,6 +20,7 @@ class CryptoKeyTest extends PHPUnit_Framework_TestCase {
 
 		// Make sure the key type is set
 		$this->assertEquals( CryptoKey::TYPE_PRIVATE, $key->getType() );
+		$this->assertEquals( 1024, $key->getBitLength() );
 
 		// It takes 24 base64 characters to represent 256-bits of data
 		$textKey = $key->getKey( CryptoKey::FORMAT_PEM );
