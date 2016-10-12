@@ -8,7 +8,7 @@ class Vars
     const   TYPE_DB = 'TYPE_DB',
             TYPE_OTHER = 'TYPE_OTHER';
 
-    public static $config;
+    public static $config = array();
     public static $setter, $getter;
 
     public static function init($config = array()) {
@@ -68,24 +68,28 @@ class Vars
     public function __set($name, $val)
     {
 
-        return self::$setter($name, $val);
+        $setter = static::$setter;
+        return $setter($name, $val);
     }
 
     public function __unset($name)
     {
 
-        return self::$setter($name, null);
+        $setter = static::$setter;
+        return $setter($name, null);
     }
 
     public function __isset($name)
     {
 
-        return (self::$getter($name) !== null);
+        $getter = static::$getter;
+        return ($getter($name) !== null);
     }
 
     public function __get($name)
     {
 
-        return self::$getter($name);
+        $getter = static::$getter;
+        return $getter($name);
     }
 }
