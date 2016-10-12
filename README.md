@@ -83,9 +83,9 @@ Firelit\Cache::config(array(
 		'servers' => array(
 			array(
 				'host' => 'localhost',
-				'port' => 11211, 
-				'persistent' => true, 
-				'weight' => 1, 
+				'port' => 11211,
+				'persistent' => true,
+				'weight' => 1,
 				'timeout' => 1
 			)
 			/* Multiple servers can be added */
@@ -97,10 +97,10 @@ $val = Firelit\Cache::get('randomValue', function() {
 
 	// If cache miss, this closure will execute this closure, storing the returned value in cache
 	return mt_rand(0, 1000);
-	
+
 });
 
-if (Firelit\Cache::$cacheHit) 
+if (Firelit\Cache::$cacheHit)
 	echo 'Cache hit!';
 
 // Set a value to null in order to remove it from cache
@@ -147,7 +147,7 @@ echo '<pre>'. file_get_contents($http->cookieFile) .'</pre>';
 
 ### Query
 
-A database interaction class and SQL query creator. Makes database connection management and SQL authoring slightly easier. 
+A database interaction class and SQL query creator. Makes database connection management and SQL authoring slightly easier.
 
 Example usage:
 ```php
@@ -181,7 +181,7 @@ if (!$q->success()) die('It did not work :(');
 
 $q->query("SELECT * FROM `TableName` WHERE `name`=:name", array('name' => $name));
 
-while ($row = $q->getRow()) 
+while ($row = $q->getRow())
 	echo $row['name'] .': '. $row['state'] .'<br>';
 ```
 
@@ -230,7 +230,7 @@ $results = demo('best_ones');
 
 foreach ($results as $index => $value) {
 	// Do something!
-} 
+}
 
 ```
 
@@ -245,10 +245,10 @@ Example usage:
 <?php
 
 $req = new Firelit\Request::init( function(&$val) {
-	
+
 	// Remove any invalid UTF-8 characters from $_POST, $_GET and $_COOKIE
-	Firelit\Strings::cleanUTF8($val); 
-	
+	Firelit\Strings::cleanUTF8($val);
+
 });
 
 // Filtered $_POST, $_GET and $_COOKIE parameters can then be accessed via the object
@@ -316,21 +316,49 @@ A set of string helper functions wrapped into a class.
 Example usage:
 ```php
 <?php
+// Check if an email is valid
+$valid = Firelit\Strings::validEmail('test@test.com'); // $valid == true
 
-Firelit\Strings::cleanUTF8($_POST);
+// Clean the strings in the array for all valid UTF8
+Firelit\Strings::cleanUTF8($_POST); // The parameter is passed by reference and directly filtered
+
+// Normalize the formatting on a name or address
+$out = Firelit\Strings::nameFix('JOHN P.  DePrez SR'); // $out == 'John P. DePrez Sr.'
+$out = Firelit\Strings::addressFix('po box 3484'); // $out == 'PO Box 3484'
+
+// Multi-byte HTML and XML escaping
+$out = Firelit\Strings::html('You & I Rock'); // $out == 'You &amp; I Rock'
+$out = Firelit\Strings::xml('You & I Rock'); // $out == 'You &#38; I Rock'
+
+// Format the string as a CSV cell value (escaping quotes with a second quote)
+$out = Firelit\Strings::cleanUTF8('John "Hairy" Smith'); // $out == '"John ""Hairy"" Smith"'
+
+// Multi-byte safe string case maniuplation
+$out = Firelit\Strings::upper('this started lower'); // $out == 'THIS STARTED LOWER'
+$out = Firelit\Strings::lower('THIS STARTED UPPER'); // $out == 'this started upper'
+$out = Firelit\Strings::title('this STARTED mixed'); // $out == 'This Started Mixed'
+$out = Firelit\Strings::ucwords('this STARTED mixed'); // $out == 'This STARTED Mixed'
+
 ```
 
 ### Vars
 
-A class for managing application-level, persistent variables. Vars is implemented through magic setters and getters so you can use any name you want. Storage is maintained by the VarsStore abstract class and data can be held in a file or in a database. For VarsStoreDB, each set or get is equal to one database SQL statement so this can get costly very quick if you are doing a lot of read/writes. Roll your own VarsStore by extending the class.
+A class for managing application-level, persistent variables. Vars is implemented through magic setters and getters so you can use any name you want for your vars and any type of persistant data store. The store can be custom defined by creating custom getter and setter functions (e.g., for reading/writing the values to a file) or you can leave it to the default (which stores the values in a database).
 
 Example usage:
 ```php
 <?php
+// Configuration
+new Firelit\Vars::init(array(
+	'table' => 'Vars',
+	'col_name' => 'Name',
+	'col_value' => 'Value'
+));
 
-$vars = new Firelit\Vars( Firelit\VarsStore::init('DB') );
+// Later usage
+$vars = new Firelit\Vars::init();
 
-// Set a persistent application variable
+// Set a persistent application variable with any name accepted by your store
 $vars->maintenanceMode = true;
 
 // Read a persistent application variable

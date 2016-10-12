@@ -57,77 +57,12 @@ class InputValidator
             case self::NAME:
             case self::ORG_NAME:
             case self::CITY:
-                $name = $this->value;
 
-                $compName = (bool) preg_match("/\b(Van|De|Di)[A-Z][a-z]+/", $name);
-
-                $name = mb_convert_case($name, MB_CASE_TITLE, 'UTF-8');
-
-                if (strlen($name) == 0) {
-                    return '';
-                }
-
-                $name = str_replace(array('`','—','–','  ','--','And '), array("'",'-','-',' ','-','and '), $name);
-
-                $name = preg_replace_callback("/([A-Za-z]+[\-'])([A-Za-z]{2})/", function ($matches) {
-                        return $matches[1] . mb_convert_case($matches[2], MB_CASE_TITLE, 'UTF-8');
-                }, $name);
-
-                $name = preg_replace_callback("/([a-z])\s*[\+&]\s*([a-z])/i", function ($matches) {
-                        return $matches[1] .' & '. mb_strtoupper($matches[2]);
-                }, $name);
-
-                $name = preg_replace_callback("/(Mc)([a-z]+)/", function ($matches) {
-                        return $matches[1] . mb_convert_case($matches[2], MB_CASE_TITLE, 'UTF-8');
-                }, $name);
-
-                $name = preg_replace_callback("/(\b)(Ii|Iii|Iv)(\b)/", function ($matches) {
-                        return $matches[1] . mb_strtoupper($matches[2]) . $matches[3];
-                }, $name);
-
-                $name = preg_replace_callback("/(\b)(Llc)(\b)/", function ($matches) {
-                        return $matches[1] . mb_strtoupper($matches[2]) . $matches[3];
-                }, $name);
-
-                $name = preg_replace_callback("/(\b)(j|s)\.?r\.?$/i", function ($matches) {
-                        return $matches[1] . mb_strtoupper($matches[2]) . 'r';
-                }, $name);
-
-                if ($compName) {
-                    $name = preg_replace_callback("/\b(Van|De|Di)([a-z]+)/", function ($matches) {
-                        return $matches[1] . mb_convert_case($matches[2], MB_CASE_TITLE, 'UTF-8');
-                    }, $name);
-                }
-
-                return $name;
+                return Strings::nameFix($this->value);
 
             case self::ADDRESS:
-                $address = mb_strtolower($this->value);
-                if (strlen($address) == 0) {
-                    return '';
-                }
 
-                $address = str_replace(array('`','—','–','  ','--'), array("'",'-','-',' ','-'), $address);
-                $address = preg_replace_callback("/([a-z]+[\-'])([a-z]{2})/", function ($matches) {
-                        return $matches[1] . mb_convert_case($matches[2], MB_CASE_TITLE, 'UTF-8');
-                }, $address);
-                $address = preg_replace_callback("/([0-9#])([a-z])(\b|[0-9])/", function ($matches) {
-                        return $matches[1] . mb_strtoupper($matches[2]) . $matches[3];
-                }, $address);
-
-                $patterns = array('/p\.o\.(\s?)/i',     '/^po\s/i',     '/^po\.(\s?)/i');
-                $replacew = array('PO ',            'PO ',      'PO ');
-                $address = preg_replace($patterns, $replacew, $address);
-
-                $patterns = array(  '/\bn(\.?\s?)e(\.?)\s/i',   '/\bn(\.?\s?)e(\.?)$/i',
-                                    '/\bn(\.?\s?)w(\.?)\s/i',   '/\bn(\.?\s?)w(\.?)$/i',
-                                    '/\bs(\.?\s?)e(\.?)\s/i',   '/\bs(\.?\s?)e(\.?)$/i',
-                                    '/\bs(\.?\s?)w(\.?)\s/i',   '/\bs(\.?\s?)w(\.?)$/i',
-                                    '/\br(\.?\s?)r(\.?)\s/i');
-                $replacew = array('NE ', 'NE', 'NW ', 'NW', 'SE ', 'SE', 'SW ', 'SW', 'RR ');
-                $address = self::mb_ucwords(preg_replace($patterns, $replacew, $address));
-
-                return $address;
+                return Strings::addressFix($this->value);
 
             case self::STATE:
                 $state = $this->value;
@@ -140,7 +75,7 @@ class InputValidator
                     return mb_strtoupper($state);
                 }
 
-                return self::mb_ucwords($state);
+                return Strings::ucwords($state);
 
             case self::ZIP:
                 $zip = mb_strtoupper($this->value);
@@ -451,11 +386,4 @@ class InputValidator
         return (($sum % 10) === 0);
     }
 
-    public static function mb_ucwords($str)
-    {
-        // mb_convert_case($str, MB_CASE_TITLE, 'UTF-8') is doing a lower() first, not like ucwords()
-        return preg_replace_callback('/\b(\s?)(.)(\S*)\b/u', function ($matches) {
-                return $matches[1] . mb_strtoupper($matches[2]) . $matches[3];
-        }, $str);
-    }
 }

@@ -19,6 +19,7 @@
 			<file>./tests/ResponseTest.php</file>
 			<file>./tests/RouterTest.php</file>
 			<file>./tests/SessionTest.php</file>
+			<file>./tests/StringsTest.php</file>
 			<file>./tests/ViewTest.php</file>
 		</testsuite>
 	</testsuites>

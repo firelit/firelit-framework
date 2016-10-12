@@ -50,29 +50,8 @@ class InputValidatorTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(false, $iv->isValid());
 
 		// Name normalization
-		$iv = new InputValidator(InputValidator::NAME, 'j. d. doe i');
-		$this->assertEquals('J. D. Doe I', $iv->getNormalized());
-
 		$iv = new InputValidator(InputValidator::NAME, 'JOHN doe-dream ii');
 		$this->assertEquals('John Doe-Dream II', $iv->getNormalized());
-
-		$iv = new InputValidator(InputValidator::NAME, 'John mcdonald iii');
-		$this->assertEquals('John McDonald III', $iv->getNormalized());
-
-		$iv = new InputValidator(InputValidator::NAME, 'John VanPlaat iV');
-		$this->assertEquals('John VanPlaat IV', $iv->getNormalized());
-
-		$iv = new InputValidator(InputValidator::NAME, 'JOHN doe SR');
-		$this->assertEquals('John Doe Sr', $iv->getNormalized());
-
-		$iv = new InputValidator(InputValidator::NAME, 'JOHN DeBoer j.r.');
-		$this->assertEquals('John DeBoer Jr', $iv->getNormalized());
-
-		$iv = new InputValidator(InputValidator::NAME, 'john di\'vinici');
-		$this->assertEquals('John Di\'Vinici', $iv->getNormalized());
-
-		$iv = new InputValidator(InputValidator::NAME, 'Sam + John Smith');
-		$this->assertEquals('Sam & John Smith', $iv->getNormalized());
 
 		$iv = new InputValidator(InputValidator::NAME, 'Sam and John Smith');
 		$this->assertEquals('Sam and John Smith', $iv->getNormalized());
@@ -82,6 +61,8 @@ class InputValidatorTest extends PHPUnit_Framework_TestCase {
 
 		$iv = new InputValidator(InputValidator::NAME, 'Sam&John Smith');
 		$this->assertEquals('Sam & John Smith', $iv->getNormalized());
+
+		// See Firelit\Strings for more name normaliztion tests
 
 	}
 
@@ -313,19 +294,6 @@ class InputValidatorTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(true, $iv->isValid());
 		$this->assertEquals('123 North Avenue SE', $iv->getNormalized());
 
-		// Directional normalization
-		$iv = new InputValidator(InputValidator::ADDRESS, '123 Upper Ave. s.e.', 'US');
-		$this->assertEquals('123 Upper Ave. SE', $iv->getNormalized());
-
-		$iv = new InputValidator(InputValidator::ADDRESS, '123 Upper Ave. Ne.', 'US');
-		$this->assertEquals('123 Upper Ave. NE', $iv->getNormalized());
-
-		$iv = new InputValidator(InputValidator::ADDRESS, '123 Upper Ave. sw', 'US');
-		$this->assertEquals('123 Upper Ave. SW', $iv->getNormalized());
-
-		$iv = new InputValidator(InputValidator::ADDRESS, '123 Upper Ave. NW', 'US');
-		$this->assertEquals('123 Upper Ave. NW', $iv->getNormalized());
-
 		// Unique count-letter address
 		$iv = new InputValidator(InputValidator::ADDRESS, 'A-123 Front St', 'US');
 		$this->assertEquals(true, $iv->isValid());
@@ -347,6 +315,7 @@ class InputValidatorTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(true, $iv->isValid());
 		$this->assertEquals('PO Box 123', $iv->getNormalized());
 
+		// See Firelit\Strings for more address normaliztion tests
 	}
 
 	public function testPhone() {
