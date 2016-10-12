@@ -9,7 +9,7 @@
 		"ext-mbstring": "*"
     },
     "autoload": {
-        "psr-0": { "Firelit": "lib/" }
+        "psr-4": { "Firelit\\": "src/" }
     },
     "authors": [
 		{
@@ -18,5 +18,8 @@
 			"homepage": "http://www.firelit.com",
 			"role": "Developer"
 		}
-	]
+	],
+    "require-dev": {
+        "squizlabs/php_codesniffer": "*"
+    }
 }
