@@ -4,30 +4,20 @@ namespace Firelit;
 
 class Crypto
 {
-    
-    const AES_256 = MCRYPT_RIJNDAEL_256;
-    const CFB = MCRYPT_MODE_CFB;
+
+    private $key;
 
     /**
-     * config()
-     * @param array $config Updated configuration array
+     * Constructor
+     * @param CryptoKey $key Key to be used for encryption/decryption
      */
-    public static function config($config)
+    public function __construct(CryptoKey $key)
     {
-        self::$config = array_merge(self::$config, $config);
+
+        $this->key = $key;
+
     }
-    
-    /**
-     * getIv()
-     * @return string Return an initializtion vector appropriate for cipher
-     */
-    public static function getIv()
-    {
-        $size = mcrypt_get_iv_size(self::AES_256, self::CFB);
-        $iv = mcrypt_create_iv($size, MCRYPT_RAND);
-        return base64_encode($iv);
-    }
-    
+
     /**
      * encrypt()
      * @param string $text The string to encrypt
@@ -46,7 +36,7 @@ class Crypto
         $enc = mcrypt_encrypt(self::AES_256, $key, $text, self::CFB, $iv);
         return trim(base64_encode($enc));
     }
-    
+
     /**
      * decrypt()
      * @param string $enc The cipher text to decrypt, base64-encoded
@@ -61,37 +51,6 @@ class Crypto
         $key = base64_decode($key);
         $text = mcrypt_decrypt(self::AES_256, $key, $enc, self::CFB, $iv);
         return trim($text);
-    }
-
-    /**
-     * keyHexToBinary()
-     * @param string $hex A hexadecimal string
-     * @return string Returns a binary representation
-     */
-    public static function keyHexToBinary($hex)
-    {
-        return $key = pack('H*', $hex);
-    }
-
-    /**
-     * generateKey()
-     * @param string $bytes The length of the key in bytes
-     * @return string Returns a randomly generated, base64-encoded key of appropriate length
-     */
-    public static function generateKey($bytes = 32)
-    {
-
-        $success = false;
-        
-        if (is_callable('openssl_random_pseudo_bytes')) {
-            $key = openssl_random_pseudo_bytes($bytes, $success);
-        }
-        
-        if (!$success) {
-            $key = mcrypt_create_iv($bytes);
-        }
-
-        return base64_encode($key);
     }
 
     /**

@@ -7,12 +7,12 @@ Firelit's standard PHP framework provides a set of helpful classes for developin
 Requirements
 ------------
 
-- PHP version 5.4.0 and higher
-- MultiByte PHP extension
-- Mcrypt PHP extension (required for `Crypto` class)
-- cURL PHP extension (required for `HttpRequest` class)
-- PDO PHP extension (required for `Query` class)
-- SQLite PHP extension (required for `Query` class unit tests)
+- PHP version 5.4.0 or higher
+
+External PHP Extensions:
+- OpenSSL extension (required for `Crypto` and `CryptoKey` class)
+- cURL extension (required for `HttpRequest` class)
+- Database-specific PDO extension (e.g., `pdo-mysql`, required for `Query` class)
 
 How to Use
 ----------
