@@ -107,19 +107,32 @@ if (Firelit\Cache::$cacheHit)
 Firelit\Cache::set('randomValue', null);
 ```
 
-### Crypto
+### Crypto & CryptoKey
 
-A symmetrical-key encryption/decryption helper class (uses MCRYPT_RIJNDAEL_256 aka AES) with HMAC and automatic initialization vector creation.
+A encryption/decryption helper class using OpenSSL (used in lieu of mcrypt based on [this article](https://paragonie.com/blog/2015/05/if-you-re-typing-word-mcrypt-into-your-code-you-re-doing-it-wrong)). This and it's sister class CryptoKey can generate keys, encrypt and decrypt using both symmetric encryption (RSA) and private key encryption (AES).
 
 Example encryption/decryption usage:
 ```php
 <?php
 
-$mySecretPassword = 'Super secret!';
+$mySecret = 'Super secret!';
 
-$encrypted = Firelit\Crypto::package('Super secret text', $mySecretPassword);
+// Private key encryption
+$key = Firelit\CryptoKey:::newPrivateKey(); // Can be 1024, 2048 or 3072-bit
+$crypto = new Firelit\Crypto($key);
 
-$decrypted = Firelit\Crypto::unpackage($encrypted, $mySecretPassword);
+$ciphertext = $crypto->encrypt($mySecret)->with(Firelit\Crypto::PUBLIC_KEY);
+
+$plaintext = $crypto->decrypt($ciphertext)->with(Firelit\Crypto::PRIVATE_KEY);
+
+// Symmetric key encryption
+$key = Firelit\CryptoKey:::newSymmetricKey(); // Can be 128, 192 or 256-bit
+$crypto = new Firelit\Crypto($key);
+
+$ciphertext = $crypto->encrypt($mySecret);
+
+$plaintext = $crypto->decrypt($ciphertext);
+
 ```
 
 ### HttpRequest

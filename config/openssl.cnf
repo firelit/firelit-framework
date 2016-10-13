@@ -1,4 +1,4 @@
-# minimalist openssl.cnf file for use with phpseclib
+# minimalist openssl.cnf file
 
 HOME			= .
 RANDFILE		= $ENV::HOME/.rnd

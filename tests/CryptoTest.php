@@ -1,87 +1,62 @@
 <?PHP
 
 class CryptoTest extends PHPUnit_Framework_TestCase {
-	
-	private $encrypted, $password, $iv, $unencrypted;
-	
+
+	private $secret;
+
 	protected function setUp() {
-		
-		$this->password = base64_encode('My super secret password!');
-		$this->unencrypted = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut urna tellus, faucibus nec porttitor ac, laoreet tristique libero.';
+
+		$this->secret = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut urna tellus, faucibus nec porttitor ac, laoreet tristique libero.';
 
 	}
-	
-	public function testIv() {
-		
-		$this->iv = Firelit\Crypto::getIv();
-		$this->assertRegExp('/^[\w=\/\+]{5,}$/', $this->iv);
-		
-		return $this->iv;
-		
-	}
 
-	public function testKeyGen() {
-		
-		$key = Firelit\Crypto::generateKey();
-		$this->assertRegExp('/^[0-9A-Za-z\\=\+\/]{44}$/', $key);
-		
-	}
+	public function testSymmetric() {
 
-	/**
-	 * @depends testIv
-	 */
-	public function testEncrypt($iv) {
-	
-		$this->iv = $iv;
-		
-		$this->encrypted = Firelit\Crypto::encrypt($this->unencrypted, $this->password, $this->iv);
-		$this->assertRegExp('/^[\w=\/\+]{5,}$/', $this->encrypted);
-		$this->assertNotEquals($this->encrypted, $this->unencrypted);
-		
-		return array($this->iv, $this->encrypted);
-		
-	}
-	
-	/**
-	 * @depends testEncrypt
-	 */
-	public function testDecrypt($passed) {
+		$key = Firelit\CryptoKey::newSymmetricKey(256);
 
-		$this->iv = $passed[0];
-		$this->encrypted = $passed[1];
-		
-		$testVal = Firelit\Crypto::decrypt($this->encrypted, $this->password, $this->iv);
-		$this->assertEquals($testVal, $this->unencrypted);
-		
-	}
-	
-	public function testPackages() {
-			
-		$subject = 'This is a test cipher. Encrypt me!';
-		$password = Firelit\Crypto::generateKey(32);
+		$crypto = new Firelit\Crypto($key);
+		$ciphertext = $crypto->encrypt($this->secret);
 
-		$package = Firelit\Crypto::package($subject, $password);
-		
-		$this->assertRegExp('/^[0-9A-Za-z\\=\+\/\|]{20,}$/', $package);
+		$this->assertTrue(strlen($ciphertext) > 20);
+		$this->assertNotEquals($ciphertext, $this->secret);
 
-		$failedUnPackage = Firelit\Crypto::unpackage($package, $password.'1');
+		$crypto = new Firelit\Crypto($key);
+		$back = $crypto->decrypt($ciphertext);
 
-		$this->assertNull($failedUnPackage, 'Unpackaging should fail due to invalid HMAC');
-
-		$successUnPackage = Firelit\Crypto::unpackage($package, $password);
-
-		$this->assertTrue($subject === $successUnPackage, 'Unpackaging should be successfull');
-		
-	}
-
-	public function testNoKeyException() {
-
-		$this->setExpectedException('Exception');
-
-		$subject = 'This is a test cipher. Encrypt me!';
-		$password = '';
-
-		$package = Firelit\Crypto::package($subject, $password);
+		$this->assertEquals($this->secret, $back);
 
 	}
+
+	public function testAsymmetric() {
+
+		$key = Firelit\CryptoKey::newPrivateKey(1024);
+
+		$crypto = new Firelit\Crypto($key);
+		$ciphertext = $crypto->encrypt($this->secret)->with($crypto::PUBLIC_KEY);
+
+		$this->assertTrue(strlen($ciphertext) > 20);
+		$this->assertNotEquals($ciphertext, $this->secret);
+
+		$crypto = new Firelit\Crypto($key);
+		$back = $crypto->decrypt($ciphertext)->with($crypto::PRIVATE_KEY);
+
+		$this->assertEquals($this->secret, $back);
+
+ 		// Now let's try it the other way around
+
+		$key = Firelit\CryptoKey::newPrivateKey(1024);
+
+		$crypto = new Firelit\Crypto($key);
+		$ciphertext = $crypto->encrypt($this->secret)->with($crypto::PRIVATE_KEY);
+
+		$this->assertTrue(strlen($ciphertext) > 20);
+		$this->assertNotEquals($ciphertext, $this->secret);
+
+		$crypto = new Firelit\Crypto($key);
+		$back = $crypto->decrypt($ciphertext)->with($crypto::PUBLIC_KEY);
+
+		$this->assertEquals($this->secret, $back);
+
+	}
+
 }
