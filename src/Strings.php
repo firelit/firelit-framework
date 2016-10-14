@@ -162,7 +162,7 @@ class Strings
     {
         // mb_convert_case($str, MB_CASE_TITLE, 'UTF-8') is doing a lower() first, not like ucwords()
         return preg_replace_callback('/\b(\s?)(.)(\S*)\b/u', function ($matches) {
-                return $matches[1] . mb_strtoupper($matches[2]) . $matches[3];
+                return $matches[1] . static::upper($matches[2]) . $matches[3];
         }, $string);
     }
 }
