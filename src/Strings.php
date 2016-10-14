@@ -20,7 +20,7 @@ class Strings
             return '';
         }
 
-        $address = str_replace(array('`','—','–','  ','--'), array("'",'-','-',' ','-'), $address);
+        $address = str_replace(array('`','â€”','â€“','  ','--'), array("'",'-','-',' ','-'), $address);
 
         $address = preg_replace_callback("/([a-z]+[\-'])([a-z]{2})/", function ($matches) {
                 return $matches[1] . mb_convert_case($matches[2], MB_CASE_TITLE, 'UTF-8');
@@ -59,7 +59,8 @@ class Strings
             return '';
         }
 
-        $name = str_replace(array('`','—','–','  ','--','And '), array("'",'-','-',' ','-','and '), $name);
+        // General normalization
+        $name = str_replace(array('`', '  ', '--', 'And '), array("'", ' ', '-', 'and '), $name);
 
         $name = preg_replace_callback("/([A-Za-z]+[\-'])([A-Za-z]{2})/", function ($matches) {
                 return $matches[1] . mb_convert_case($matches[2], MB_CASE_TITLE, 'UTF-8');
