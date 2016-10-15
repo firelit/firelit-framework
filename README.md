@@ -111,6 +111,8 @@ Firelit\Cache::set('randomValue', null);
 
 A encryption/decryption helper classes using OpenSSL (used in lieu of mcrypt based on [this article](https://paragonie.com/blog/2015/05/if-you-re-typing-word-mcrypt-into-your-code-you-re-doing-it-wrong)). These classes can generate cryptographically secure secure keys and encrypt and decrypt using industry-standard symmetric encryption (RSA) and private key encryption (AES) schemes.
 
+Note that AES encryption will not work for large strings (80 characters or more, depending on key bit size) due to the amount of processing power it takes -- it quickly becomes inefficient. For larger strings, the plain text should be encrypted with RSA and the encryption key should be encrypted with AES.
+
 Example encryption/decryption usage:
 ```php
 <?php
