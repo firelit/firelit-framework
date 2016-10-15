@@ -26,6 +26,7 @@ class CryptoKey
 
 			$len = strlen($key);
 			$this->bits = $len * 8;
+			$this->key = $key;
 
 		} elseif ($type == static::TYPE_PRIVATE) {
 
@@ -49,7 +50,6 @@ class CryptoKey
 		}
 
 		$this->type = $type;
-		$this->key = $key;
 
 	}
 

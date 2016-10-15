@@ -6,7 +6,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase {
 
 	protected function setUp() {
 
-		$this->secret = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut urna tellus, faucibus nec porttitor ac, laoreet tristique libero.';
+		$this->secret = 'This is a secret phrase!';
 
 	}
 
@@ -27,7 +27,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase {
 
 	}
 
-	public function testAsymmetric() {
+	public function testPublicKey() {
 
 		$key = Firelit\CryptoKey::newPrivateKey(1024);
 

@@ -2,6 +2,9 @@
 
 namespace Firelit;
 
+/**
+ *  Important: Public key encryption will not work for longer strings (>80 characters, related to key size)
+ */
 class Crypto
 {
 
@@ -92,10 +95,12 @@ class Crypto
         }
 
         if ($keyType == self::PUBLIC_KEY) {
-            $publicKey = $this->key->getPublicKey(CryptoKey::FORMAT_PEM);
+            $publicKey = $this->key->getPublicKey(CryptoKey::FORMAT_RAW);
+
         } elseif ($keyType == self::PRIVATE_KEY) {
-            $privateKey = $this->key->getKey(CryptoKey::FORMAT_PEM);
+            $privateKey = $this->key->getKey(CryptoKey::FORMAT_RAW);
             $privateKey = openssl_pkey_get_private($privateKey);
+
         }
 
         $out = '';
