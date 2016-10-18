@@ -1,6 +1,8 @@
 <?PHP
 
-class RequestTest extends PHPUnit_Framework_TestCase
+namespace Firelit;
+
+class RequestTest extends \PHPUnit_Framework_TestCase
 {
 
     public function testConstructor()
@@ -17,7 +19,7 @@ class RequestTest extends PHPUnit_Framework_TestCase
         $_GET = array();
         $_COOKIE = array();
 
-        $sr = new Firelit\Request();
+        $sr = new Request();
 
         $this->assertEquals($orig, $sr->post, '$_POST should be copied into internal property.');
     }
@@ -36,8 +38,8 @@ class RequestTest extends PHPUnit_Framework_TestCase
         $_GET = array();
         $_COOKIE = array();
 
-        $sr = new Firelit\Request(function (&$val) {
-            Firelit\Strings::cleanUTF8($val);
+        $sr = new Request(function (&$val) {
+            Strings::cleanUTF8($val);
         });
 
         $this->assertEquals($orig, $sr->post, '$_POST was not copied by Request object.');
@@ -55,26 +57,26 @@ class RequestTest extends PHPUnit_Framework_TestCase
             )
         );
 
-        Firelit\Request::$dataInput = json_encode($data);
-        Firelit\Request::$methodInput = 'POST';
+        Request::$dataInput = json_encode($data);
+        Request::$methodInput = 'POST';
 
-        $sut = new Firelit\Request(false, 'json');
+        $sut = new Request(false, 'json');
 
         $this->assertEquals($data, $sut->post, 'Post JSON data was not correctly made available.');
 
-        Firelit\Request::$dataInput = '{"json":"invalid",:}';
-        Firelit\Request::$methodInput = 'PUT';
+        Request::$dataInput = '{"json":"invalid",:}';
+        Request::$methodInput = 'PUT';
 
         try {
-            $sut = new Firelit\Request(false, 'json');
+            $sut = new Request(false, 'json');
 
             $this->assertTrue(false, 'Invalid JSON data was not caught.');
-        } catch (Firelit\InvalidJsonException $e) {
+        } catch (InvalidJsonException $e) {
             $this->assertTrue(true, 'Invalid JSON data was not caught.');
         }
 
-        Firelit\Request::$dataInput = null;
-        Firelit\Request::$methodInput = null;
+        Request::$dataInput = null;
+        Request::$methodInput = null;
     }
 
     public function testFilter()
@@ -94,7 +96,7 @@ class RequestTest extends PHPUnit_Framework_TestCase
 
         $_COOKIE = array();
 
-        $sr = new Firelit\Request(function (&$val) {
+        $sr = new Request(function (&$val) {
             if ($val == 'bad') {
                 $val = 'clean';
             }
@@ -109,7 +111,7 @@ class RequestTest extends PHPUnit_Framework_TestCase
     public function testCliDetection()
     {
 
-        $sr = new Firelit\Request();
+        $sr = new Request();
 
         $this->assertEquals('CLI', $sr->method);
     }

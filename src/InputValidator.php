@@ -28,7 +28,10 @@ class InputValidator
         TYPE_GATEWAY = 200, // For payment gateway
         TYPE_DB = 300; // To get a database-ready version
 
-    protected $type, $value, $region, $required;
+    protected $type;
+    protected $value;
+    protected $region;
+    protected $required;
 
     public function __construct($type, $value, $region = false)
     {
@@ -168,7 +171,7 @@ class InputValidator
 
                 return self::lastfour($num, 'x');
 
-            case self::ACH_TYPE:
+            case self::ACH_TYPE: // @codingStandardsIgnoreLine (Code sniffer bug)
                 $type = mb_strtoupper(substr($this->value, 0, 1));
 
                 if (in_array($returnType, array(self::TYPE_DB, self::TYPE_GATEWAY))) {
@@ -222,14 +225,14 @@ class InputValidator
                 // Must contain at least one digit and 2 letters
                 return preg_match('/\d+/', $value) && preg_match('/[A-Za-z]{2,}/', $value);
 
-            case self::STATE:
+            case self::STATE: // @codingStandardsIgnoreLine (Code sniffer bug)
                 if (in_array($region, array('US', 'CA', 'MX'))) {
                     return ( States::check($region, mb_strtoupper($value)) !== false );
                 } else {
                     return preg_match('/^(.+)$/', $value);
                 }
 
-            case self::ZIP:
+            case self::ZIP: // @codingStandardsIgnoreLine (Code sniffer bug)
                 if ($region == 'US') {
                     return preg_match('/^\d{5}(\-\d{4})?$/', $value);
                 } elseif ($region == 'CA') {
@@ -243,7 +246,7 @@ class InputValidator
             case self::COUNTRY:
                 return Countries::check($value);
 
-            case self::PHONE:
+            case self::PHONE: // @codingStandardsIgnoreLine (Code sniffer bug)
                 $temp = preg_replace('/\D+/', '', $value);
 
                 if (in_array($region, array('US', 'CA'))) {

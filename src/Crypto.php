@@ -16,7 +16,9 @@ class Crypto
 
     const   DEFAULT_AES_MODE = 'CFB';
 
-    private $key, $subject, $action;
+    private $key;
+    private $subject;
+    private $action;
     private $aesMode;
 
     /**

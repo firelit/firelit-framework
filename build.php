@@ -39,7 +39,7 @@ class ValidateCommand extends Command
 
         $exitCode = 0;
 
-		passthru('vendor/bin/phpunit -c tests/phpunit.xml.dist tests/', $exitCode);
+		passthru('vendor/bin/phpunit -c phpunit.xml tests/', $exitCode);
 
         if ($exitCode) {
         	$output->writeln('<error>Unit tests failed!</error>');

@@ -4,8 +4,11 @@ namespace Firelit;
 
 class QueryIterator implements \Iterator
 {
-    
-    protected $query, $index = -1, $value, $className;
+
+    protected $query;
+    protected $index = -1;
+    protected $value;
+    protected $className;
 
     /**
      *  Provides an iterator interface for Query results so that

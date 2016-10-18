@@ -1,12 +1,14 @@
 <?php
 
-class QueryIteratorTest extends PHPUnit_Framework_TestCase
+namespace Firelit;
+
+class QueryIteratorTest extends \PHPUnit_Framework_TestCase
 {
 
     public function testQueryIterator()
     {
 
-        $qmock = $this->getMock('Firelit\Query', array('getRow'));
+        $qmock = $this->createMock('Firelit\Query', array('getRow'));
         $qmock
             ->method('getRow')
             ->will($this->onConsecutiveCalls(
@@ -22,7 +24,7 @@ class QueryIteratorTest extends PHPUnit_Framework_TestCase
             ));
 
 
-        $sut = new Firelit\QueryIterator($qmock);
+        $sut = new QueryIterator($qmock);
 
         $sut->rewind();
 

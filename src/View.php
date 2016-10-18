@@ -4,11 +4,12 @@ namespace Firelit;
 
 class View
 {
-    
+
     static public $viewFolder = 'views/';
     static public $assetDirectory = '/assets/';
 
-    public $layout = false, $template = false;
+    public $layout = false;
+    public $template = false;
     public $data = array();
 
     public function __construct($template = false, $layout = false)

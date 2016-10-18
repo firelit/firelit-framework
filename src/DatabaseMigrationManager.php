@@ -5,8 +5,12 @@ namespace Firelit;
 class DatabaseMigrationManager
 {
 
-    protected $current, $target = false, $direction, $migrations = array();
-    protected $preCallback = false, $postCallback = false;
+    protected $current;
+    protected $target = false;
+    protected $direction;
+    protected $migrations = array();
+    protected $preCallback = false;
+    protected $postCallback = false;
 
     /**
      * Constructor

@@ -1,12 +1,17 @@
 <?php
 
-class DatabaseMigrationMockTemplate extends Firelit\DatabaseMigration
+namespace Firelit;
+
+// @codingStandardsIgnoreStart
+class DatabaseMigrationMockTemplate extends DatabaseMigration
 {
     public static $upCount = 0, $downCount = 0;
+
     public function up()
     {
         static::$upCount++;
     }
+
     public function down()
     {
         static::$downCount++;
@@ -30,8 +35,10 @@ class DatabaseMigrationMock_3 extends DatabaseMigrationMockTemplate
     public static $upCount = 0, $downCount = 0;
     static public $version = '5.0.1';
 }
+// @codingStandardsIgnoreEnd
 
-class DatabaseMigrationManagerTest extends PHPUnit_Framework_TestCase
+// @codingStandardsIgnoreLine (ignoring multiple classes in a file)
+class DatabaseMigrationManagerTest extends \PHPUnit_Framework_TestCase
 {
 
     public function testSimple()
@@ -39,7 +46,7 @@ class DatabaseMigrationManagerTest extends PHPUnit_Framework_TestCase
 
         $mock = new DatabaseMigrationMock_1();
 
-        $manager = new Firelit\DatabaseMigrationManager('4.4.12');
+        $manager = new DatabaseMigrationManager('4.4.12');
 
         $manager->submitMigration($mock);
 
@@ -53,7 +60,7 @@ class DatabaseMigrationManagerTest extends PHPUnit_Framework_TestCase
         $mock2 = new DatabaseMigrationMock_2();
         $mock3 = new DatabaseMigrationMock_3();
 
-        $manager = new Firelit\DatabaseMigrationManager('4.4.12', 'up', '5.0');
+        $manager = new DatabaseMigrationManager('4.4.12', 'up', '5.0');
 
         $manager->submitMigration($mock1);
         $this->assertEquals(1, $manager->count());
@@ -71,7 +78,7 @@ class DatabaseMigrationManagerTest extends PHPUnit_Framework_TestCase
         $mock1 = new DatabaseMigrationMock_1();
         $mock2 = new DatabaseMigrationMock_2();
 
-        $manager = new Firelit\DatabaseMigrationManager('5.0', 'down', '4.5.1');
+        $manager = new DatabaseMigrationManager('5.0', 'down', '4.5.1');
 
         $manager->submitMigration($mock1);
         $manager->submitMigration($mock2);
@@ -82,11 +89,11 @@ class DatabaseMigrationManagerTest extends PHPUnit_Framework_TestCase
     public function testSortAndCallback()
     {
 
-        $manager = new Firelit\DatabaseMigrationManager('4.4');
+        $manager = new DatabaseMigrationManager('4.4');
 
-        $manager->submitMigration('DatabaseMigrationMock_2');
-        $manager->submitMigration('DatabaseMigrationMock_3');
-        $manager->submitMigration('DatabaseMigrationMock_1');
+        $manager->submitMigration('Firelit\DatabaseMigrationMock_2');
+        $manager->submitMigration('Firelit\DatabaseMigrationMock_3');
+        $manager->submitMigration('Firelit\DatabaseMigrationMock_1');
 
         $this->assertEquals(3, $manager->count());
 

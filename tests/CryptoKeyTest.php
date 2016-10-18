@@ -1,8 +1,8 @@
 <?PHP
 
-use Firelit\CryptoKey;
+namespace Firelit;
 
-class CryptoKeyTest extends PHPUnit_Framework_TestCase
+class CryptoKeyTest extends \PHPUnit_Framework_TestCase
 {
 
     public function testGeneration()

@@ -14,7 +14,7 @@
 			<file>./tests/DatabaseMigrationTest.php</file>
 			<file>./tests/DatabaseObjectTest.php</file>
 			<file>./tests/InputValidatorTest.php</file>
-			<!-- <file>./tests/QueryTest.php</file> -->
+			<file>./tests/QueryTest.php</file>
 			<file>./tests/RegistryTest.php</file>
 			<file>./tests/RequestTest.php</file>
 			<file>./tests/ResponseTest.php</file>

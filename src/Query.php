@@ -4,7 +4,7 @@ namespace Firelit;
 
 class Query
 {
-    
+
     /* Global connection & state variables */
     private static $pdo = false;
     private static $database = false;
@@ -15,7 +15,7 @@ class Query
 
     /* Object variables */
     private $res;
-    
+
     public function __construct($sql = false, $binders = array())
     {
 
@@ -29,7 +29,7 @@ class Query
 
         $this->query($sql, $binders);
     }
-    
+
     public static function connect()
     {
 
@@ -65,7 +65,7 @@ class Query
 
         return self::$pdo;
     }
-    
+
     public function query($sql, $binders = array())
     {
 
@@ -73,7 +73,7 @@ class Query
             trigger_error('QUERY ERROR LIMIT REACHED', E_USER_ERROR);
             exit(1);
         }
- 
+
         if (is_string($sql)) {
             $this->cleanBinders($binders, $sql);
         }
@@ -93,12 +93,17 @@ class Query
             self::$errorCount++;
             throw new \Exception('Invalid parameter supplied to query method.');
         }
-        
+
         foreach ($binders as $name => $value) {
             // Fixes issue with innodb not interpreting false correctly (converts to empty string)
             if (gettype($value) == 'boolean') {
                 $binders[$name] = intval($value);
             }
+        }
+
+        if (!$this->sql instanceof \PDOStatement) {
+            $errorInfo = self::$pdo->errorInfo();
+            throw new \Exception('Could not instantiate PDOStatement object ('. $errorInfo[2] .')');
         }
 
         $this->res = $this->sql->execute($binders);
@@ -110,7 +115,7 @@ class Query
 
         return $this->res;
     }
-    
+
     public function cleanBinders(&$binder, $sql)
     {
         foreach ($binder as $name => $value) {
@@ -169,7 +174,7 @@ class Query
     {
         return $this->res;
     }
-    
+
     public function getAll()
     {
         if (!$this->res) {
@@ -185,7 +190,7 @@ class Query
         }
         return $this->sql->fetch(\PDO::FETCH_ASSOC);
     }
-    
+
     public function getObject($className)
     {
         if (!$this->res) {
@@ -198,19 +203,19 @@ class Query
     {
         return self::$pdo->lastInsertId();
     }
-    
+
     public function getAffected()
     {
         return $this->sql->rowCount();
     }
-    
+
     public function getNumRows()
     {
         // May not always return the correct number of rows
         // See note at http://php.net/manual/en/pdostatement.rowcount.php
         return $this->sql->rowCount();
     }
-    
+
     public function getError()
     {
         $e = self::$pdo->errorInfo();
@@ -219,7 +224,7 @@ class Query
         }
         return $e[2]; // Driver specific error message.
     }
-    
+
     public function getErrorCode()
     {
         $e = self::$pdo->errorInfo();
@@ -238,7 +243,7 @@ class Query
     {
         return $this->res;
     }
-    
+
     public function insert($table, $array)
     {
         // Preform an insert on the table
@@ -251,15 +256,15 @@ class Query
         list($statementArray, $binderArray) = self::splitArray($array);
 
         $this->sql = self::$pdo->prepare("INSERT INTO `". $table ."` ". self::toSQL('INSERT', $statementArray));
-        
+
         return $this->query($this->sql, $binderArray);
     }
-    
+
     public function replace($table, $array)
     {
         // Preform an replace on the table
         // Enter an associative array for $array with column names as keys
-        
+
         if (!self::$pdo) {
             static::connect();
         }
@@ -267,19 +272,19 @@ class Query
         list($statementArray, $binderArray) = self::splitArray($array);
 
         $this->sql = self::$pdo->prepare("REPLACE INTO `". $table ."` ". self::toSQL('REPLACE', $statementArray));
-        
+
         return $this->query($this->sql, $binderArray);
     }
-    
+
     public function update($table, $array, $whereSql, $whereBinder = array())
     {
         // Preform an update on the table
         // Enter an associative array for $array with column names as keys
-        
+
         if (!self::$pdo) {
             static::connect();
         }
-        
+
         list($statementArray, $binderArray) = self::splitArray($array);
 
         // Look for binder conflicts
@@ -293,9 +298,9 @@ class Query
                 $whereSql = preg_replace('/'.preg_quote($placeholder).'\b/', $newPlaceholder, $whereSql);
             }
         }
-        
+
         $this->sql = self::$pdo->prepare("UPDATE `". $table ."` SET ". self::toSQL('UPDATE', $statementArray) ." WHERE ". preg_replace('/^\s?WHERE\s/', '', $whereSql));
-        
+
         return $this->query($this->sql, array_merge($binderArray, $whereBinder));
     }
 
@@ -339,13 +344,13 @@ class Query
     public static function toSQL($verb, $assocArray)
     {
         // $assocArray should be an array of 'raw' items (not yet escaped for database)
-        
+
         $verb = strtoupper($verb);
 
         if (($verb == 'INSERT') || ($verb == 'REPLACE')) {
             $sql1 = '';
             $sql2 = '';
-            
+
             foreach ($assocArray as $key => $value) {
                 $sql1 .= ', `'. str_replace('`', '', $key) .'`';
                 $sql2 .= ", ". $value;
@@ -354,17 +359,17 @@ class Query
             return '('. substr($sql1, 2) . ') VALUES ('. substr($sql2, 2) .')';
         } elseif ($verb == 'UPDATE') {
             $sql = '';
-            
+
             foreach ($assocArray as $key => $value) {
                 $sql .= ', `'. str_replace('`', '', $key) .'`='. $value;
             }
-            
+
             return substr($sql, 2);
         } else {
             throw new \Exception("Invalid verb for toSQL();");
         }
     }
-    
+
     public static function escapeLike($sql)
     {
         return preg_replace('/([%_])/', '\\\\\\1', $sql);

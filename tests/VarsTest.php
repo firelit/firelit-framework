@@ -1,6 +1,8 @@
 <?PHP
 
-class VarsTest extends PHPUnit_Framework_TestCase
+namespace Firelit;
+
+class VarsTest extends \PHPUnit_Framework_TestCase
 {
 
     private static $store = array();
@@ -8,17 +10,17 @@ class VarsTest extends PHPUnit_Framework_TestCase
     public function setup()
     {
 
-        Firelit\Vars::init(array('type' => Firelit\Vars::TYPE_OTHER));
+        Vars::init(array('type' => Vars::TYPE_OTHER));
 
         // Setting custom getter/setter functions for DB-less testing
-        Firelit\Vars::$getter = function ($name) {
+        Vars::$getter = function ($name) {
             if (!isset(static::$store[$name])) {
                 return null;
             }
             return static::$store[$name];
         };
 
-        Firelit\Vars::$setter = function ($name, $value) {
+        Vars::$setter = function ($name, $value) {
             static::$store[$name] = $value;
         };
     }
@@ -26,7 +28,7 @@ class VarsTest extends PHPUnit_Framework_TestCase
     public function testVars()
     {
 
-        $vars = Firelit\Vars::init();
+        $vars = Vars::init();
 
         $this->assertEquals(null, $vars->smith); // Null for not-set
         $this->assertEquals(false, isset($vars->smith));

@@ -1,8 +1,8 @@
 <?php
 
-use Firelit\Countries;
+namespace Firelit;
 
-class CountriesTest extends PHPUnit_Framework_TestCase
+class CountriesTest extends \PHPUnit_Framework_TestCase
 {
 
     public function testGetName()

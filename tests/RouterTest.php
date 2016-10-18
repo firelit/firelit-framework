@@ -1,23 +1,29 @@
 <?PHP
 
-class ExpectedException extends Exception
+namespace Firelit;
+
+// @codingStandardsIgnoreStart
+class ExpectedException extends \Exception
 {
 
 }
-class UnexpectedException extends Exception
+
+class UnexpectedException extends \Exception
 {
 
 }
+// @codingStandardsIgnoreEnd
 
-class RouterTest extends PHPUnit_Framework_TestCase
+// @codingStandardsIgnoreLine (ignoring multiple classes in a file)
+class RouterTest extends \PHPUnit_Framework_TestCase
 {
-    
+
     public function testAdd()
     {
 
-        $this->setExpectedException('ExpectedException');
+        $this->setExpectedException('Firelit\ExpectedException');
 
-        $r = new Firelit\Router(new Firelit\Request());
+        $r = new Router(new Request());
 
         $r->add('POST', '/.*/', function () {
             // Bad
@@ -29,16 +35,16 @@ class RouterTest extends PHPUnit_Framework_TestCase
             throw new ExpectedException();
         });
 
-        Firelit\Registry::clear();
+        Registry::clear();
         unset($r);
     }
 
     public function testDefault()
     {
 
-        $this->setExpectedException('ExpectedException');
+        $this->setExpectedException('Firelit\ExpectedException');
 
-        $r = new Firelit\Router(new Firelit\Request());
+        $r = new Router(new Request());
 
         $r->defaultRoute(function () {
             // Good!
@@ -55,22 +61,22 @@ class RouterTest extends PHPUnit_Framework_TestCase
             throw new UnexpectedException();
         });
 
-        Firelit\Registry::clear();
+        Registry::clear();
         unset($r);
     }
 
     public function testError()
     {
 
-        $this->setExpectedException('ExpectedException');
+        $this->setExpectedException('Firelit\ExpectedException');
 
-        $r = new Firelit\Router(new Firelit\Request());
+        $r = new Router(new Request());
 
         $r->errorRoute(500, function () {
             // Good!
             throw new ExpectedException();
         });
-        
+
         $r->errorRoute(404, function () {
             // Bad
             throw new UnexpectedException();
@@ -83,10 +89,10 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $r->add('*', false, function () {
             // Should take this route
-            throw new Firelit\RouteToError(500);
+            throw new RouteToError(500);
         });
 
-        Firelit\Registry::clear();
+        Registry::clear();
         unset($r);
     }
 }

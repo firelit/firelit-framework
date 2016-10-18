@@ -17,8 +17,9 @@ class CryptoKey
     const   TYPE_SYMMETRIC = 'SYMMETRIC',
             TYPE_PRIVATE = 'PRIVATE';
 
-    private $type, $key, $bits;
-
+    private $type;
+    private $key;
+    private $bits;
 
     public function setKey($key, $type)
     {

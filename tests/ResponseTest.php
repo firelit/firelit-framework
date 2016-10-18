@@ -1,14 +1,16 @@
 <?PHP
 
-class ResponseTest extends PHPUnit_Framework_TestCase
+namespace Firelit;
+
+class ResponseTest extends \PHPUnit_Framework_TestCase
 {
-    
+
     public function testBufferClear()
     {
 
         ob_start();
 
-        $r = Firelit\Response::init();
+        $r = Response::init();
 
         echo 'Should be cleared';
 
@@ -16,7 +18,7 @@ class ResponseTest extends PHPUnit_Framework_TestCase
         $r->endBuffer();
 
         unset($r);
-        Firelit\Response::destruct();
+        Response::destruct();
 
         $output = ob_get_contents();
         ob_end_clean();
@@ -29,7 +31,7 @@ class ResponseTest extends PHPUnit_Framework_TestCase
 
         ob_start();
 
-        $r = Firelit\Response::init();
+        $r = Response::init();
         $r->setCallback(function (&$out) {
             $out = preg_replace('/not/', 'NOT', $out);
         });
@@ -37,7 +39,7 @@ class ResponseTest extends PHPUnit_Framework_TestCase
         echo 'Should not be cleared';
 
         unset($r);
-        Firelit\Response::destruct();
+        Response::destruct();
 
         $output = ob_get_contents();
         ob_end_clean();

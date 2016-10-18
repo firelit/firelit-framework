@@ -1,6 +1,8 @@
 <?PHP
 
-class CryptoTest extends PHPUnit_Framework_TestCase
+namespace Firelit;
+
+class CryptoTest extends \PHPUnit_Framework_TestCase
 {
 
     private $secret;
@@ -14,15 +16,15 @@ class CryptoTest extends PHPUnit_Framework_TestCase
     public function testSymmetric()
     {
 
-        $key = Firelit\CryptoKey::newSymmetricKey(256);
+        $key = CryptoKey::newSymmetricKey(256);
 
-        $crypto = new Firelit\Crypto($key);
+        $crypto = new Crypto($key);
         $ciphertext = $crypto->encrypt($this->secret);
 
         $this->assertTrue(strlen($ciphertext) > 20);
         $this->assertNotEquals($ciphertext, $this->secret);
 
-        $crypto = new Firelit\Crypto($key);
+        $crypto = new Crypto($key);
         $back = $crypto->decrypt($ciphertext);
 
         $this->assertEquals($this->secret, $back);
@@ -31,30 +33,30 @@ class CryptoTest extends PHPUnit_Framework_TestCase
     public function testPublicKey()
     {
 
-        $key = Firelit\CryptoKey::newPrivateKey(1024);
+        $key = CryptoKey::newPrivateKey(1024);
 
-        $crypto = new Firelit\Crypto($key);
+        $crypto = new Crypto($key);
         $ciphertext = $crypto->encrypt($this->secret)->with($crypto::PUBLIC_KEY);
 
         $this->assertTrue(strlen($ciphertext) > 20);
         $this->assertNotEquals($ciphertext, $this->secret);
 
-        $crypto = new Firelit\Crypto($key);
+        $crypto = new Crypto($key);
         $back = $crypto->decrypt($ciphertext)->with($crypto::PRIVATE_KEY);
 
         $this->assertEquals($this->secret, $back);
 
         // Now let's try it the other way around
 
-        $key = Firelit\CryptoKey::newPrivateKey(1024);
+        $key = CryptoKey::newPrivateKey(1024);
 
-        $crypto = new Firelit\Crypto($key);
+        $crypto = new Crypto($key);
         $ciphertext = $crypto->encrypt($this->secret)->with($crypto::PRIVATE_KEY);
 
         $this->assertTrue(strlen($ciphertext) > 20);
         $this->assertNotEquals($ciphertext, $this->secret);
 
-        $crypto = new Firelit\Crypto($key);
+        $crypto = new Crypto($key);
         $back = $crypto->decrypt($ciphertext)->with($crypto::PUBLIC_KEY);
 
         $this->assertEquals($this->secret, $back);

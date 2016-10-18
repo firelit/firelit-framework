@@ -4,14 +4,24 @@ namespace Firelit;
 
 class Router extends Singleton
 {
-    
-    protected $method, $uri, $match = false, $default, $error = array(), $exceptionHandler = false;
+
+    protected $method;
+    protected $uri;
+    protected $match = false;
+    protected $default;
+    protected $error = array();
+    protected $exceptionHandler = false;
     protected $testMode = false;
 
-    public $request, $response, $parameters = array();
-    
-    public static $proto = 'http', $domain = 'localhost', $rootPath = '/', $catchExceptions = false;
-    
+    public $request;
+    public $response;
+    public $parameters = array();
+
+    public static $proto = 'http';
+    public static $domain = 'localhost';
+    public static $rootPath = '/';
+    public static $catchExceptions = false;
+
     public function __construct(Request $request = null)
     {
 
@@ -19,22 +29,22 @@ class Router extends Singleton
         if (is_null($request)) {
             $request = Registry::get('Router');
         }
-    
+
         $this->request = $request;
-        
+
         $this->method = $request->method;
-        
+
         $rootPath = self::$rootPath;
         if (preg_match('!/$!', $rootPath)) {
             $rootPath = substr($rootPath, 0, -1);
         }
-        
+
         $this->uri = preg_replace('!^'. preg_quote($rootPath) .'!', '', $request->path);
         if (strpos($this->uri, '?')) {
             $this->uri = substr($this->uri, 0, strpos($this->uri, '?'));
         }
     }
-    
+
     public function __destruct()
     {
 
@@ -79,18 +89,18 @@ class Router extends Singleton
      */
     public function add($filterMethod, $regExpUrlMatch, $execute)
     {
-        
+
         if (!is_array($filterMethod)) {
             $filterMethod = array($filterMethod);
         }
-        
+
         // (1) Does the request method match?
         if (!in_array('*', $filterMethod) && !in_array($this->method, $filterMethod)) {
             return;
         }
-        
+
         $params = array();
-         
+
         // (2) Does the URI match? (set $regExpUrlMatch to false to skip)
         if ($regExpUrlMatch && ($this->method == 'CLI')) {
             return;
@@ -98,20 +108,20 @@ class Router extends Singleton
         if ($regExpUrlMatch && !preg_match($regExpUrlMatch, $this->uri, $params)) {
             return;
         }
-        
+
         // Method and URI match!
         $this->match = true;
 
         // Remove the full text match from the match array
         array_shift($params);
-        
+
         try {
             // Go!
             $execute($params);
         } catch (RouteToError $e) {
             $this->triggerError($e->getCode(), $e->getMessage());
         }
-        
+
         // End execution
         exit;
     }

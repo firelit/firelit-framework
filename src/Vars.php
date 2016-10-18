@@ -9,7 +9,8 @@ class Vars
             TYPE_OTHER = 'TYPE_OTHER';
 
     public static $config = array();
-    public static $setter, $getter;
+    public static $setter;
+    public static $getter;
 
     public static function init($config = array())
     {

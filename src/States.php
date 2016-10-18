@@ -4,7 +4,7 @@ namespace Firelit;
 
 class States
 {
-        
+
     static public $list = array(
         "US" => array(
             "AL" => "Alabama",
@@ -121,15 +121,11 @@ class States
         )
     );
 
-    function __construct()
-    {
-    }
-    
     /*
 	Useage Example:
-		
+
 		States::display( 'US', create_function('$abbrv,$name', 'return "<option value=\"". $abbrv ."\">". $name ."</option>";') );
-	
+
 	*/
     public static function display($country, $callback, $subset = false)
     {
@@ -137,32 +133,32 @@ class States
         // $callback is the anonymous function for formating the data
         // $subset should be an array of ok abbreviations, set to false for all states
         // Returns [true] on success, [false] if no states to display
-        
+
         if (!is_callable($callback)) {
             throw new Exception('Callback function is not callable.');
         }
         if ($subset && !is_array($subset)) {
             throw new Exception('Subset must be false or an array of acceptable country abbreviations.');
         }
-        
+
         if (class_exists('Countries') && !Countries::check($country)) {
             return false;
         }
         if (!isset(self::$list[$country])) {
             return false;
         }
-        
+
         foreach (self::$list[$country] as $abbrv => $name) {
             if ($subset && !in_array($abbrv, $subset)) {
                 continue;
             }
-            
+
             echo $callback($abbrv, $name);
         }
-        
+
         return true;
     }
-    
+
     public static function check($country, $stateAbbrv)
     {
         // Check if a state abbrevation is valid
@@ -177,15 +173,15 @@ class States
         if (!isset(self::$list[$country][$stateAbbrv])) {
             return false;
         }
-        
+
         return true;
     }
-    
+
     public static function getName($country, $stateAbbrv, $html = true)
     {
         // Get a states's name from its abbrevation
         // Returns the state name [string] if available, [false] if not available
-        
+
         if (self::check($country, $stateAbbrv)) {
             return false;
         }

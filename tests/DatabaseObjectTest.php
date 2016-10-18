@@ -1,6 +1,9 @@
 <?PHP
 
-class TestObject extends Firelit\DatabaseObject
+namespace Firelit;
+
+// @codingStandardsIgnoreStart
+class TestObject extends DatabaseObject
 {
 
     // To Use: Extend this class and replace the following values
@@ -11,14 +14,16 @@ class TestObject extends Firelit\DatabaseObject
     protected static $colsSerialize = array('serialize'); // Columns that should be automatically php-serialized when using
     protected static $colsJson = array('jsonize'); // Columns that should be automatically JSON-encoded/decoded when using
 }
+// @codingStandardsIgnoreEnd
 
-class DatabaseObjectTest extends PHPUnit_Framework_TestCase
+// @codingStandardsIgnoreLine (ignoring multiple classes in a file)
+class DatabaseObjectTest extends \PHPUnit_Framework_TestCase
 {
 
     public function testSaveNew()
     {
 
-        $queryStub = $this->getMock('Firelit\Query', array('insert', 'getNewId'));
+        $queryStub = $this->createMock('Firelit\Query', array('insert', 'getNewId'));
 
         $queryStub->expects($this->once())
                 ->method('insert');
@@ -27,7 +32,7 @@ class DatabaseObjectTest extends PHPUnit_Framework_TestCase
                 ->method('getNewId')
                 ->will($this->returnValue($newId = mt_rand(100, 1000)));
 
-        $do = new Firelit\DatabaseObject(array(
+        $do = new DatabaseObject(array(
             'test' => '123'
         ));
 
@@ -43,12 +48,12 @@ class DatabaseObjectTest extends PHPUnit_Framework_TestCase
     public function testNewFlag()
     {
 
-        $queryStub = $this->getMock('Firelit\Query', array('update'));
+        $queryStub = $this->createMock('Firelit\Query', array('update'));
 
         $queryStub->expects($this->once())
                 ->method('update');
 
-        $do = new Firelit\DatabaseObject(array(
+        $do = new DatabaseObject(array(
             'id' => 3,
             'test' => '123'
         ));
@@ -67,7 +72,7 @@ class DatabaseObjectTest extends PHPUnit_Framework_TestCase
     public function testDirty()
     {
 
-        $do = new Firelit\DatabaseObject(array(
+        $do = new DatabaseObject(array(
             'name' => 'John Doe',
             'age' => 28,
             'sex' => 'M'
@@ -101,7 +106,7 @@ class DatabaseObjectTest extends PHPUnit_Framework_TestCase
 
         $to = new TestObject(array(
             'test' => '123',
-            'serialize' => $class = new stdClass(),
+            'serialize' => $class = new \stdClass(),
             'jsonize' => array(4, 5, 6)
         ));
 
@@ -114,7 +119,7 @@ class DatabaseObjectTest extends PHPUnit_Framework_TestCase
     public function testFindBy()
     {
 
-        $queryStub = $this->getMock('Firelit\Query', array('query', 'getObject'));
+        $queryStub = $this->createMock('Firelit\Query', array('query', 'getObject'));
 
         $queryStub->expects($this->once())
                 ->method('query')
@@ -140,7 +145,7 @@ class DatabaseObjectTest extends PHPUnit_Framework_TestCase
 
         $queryStub->expects($this->once())
                 ->method('getObject')
-                ->with($this->equalTo('TestObject'))
+                ->with($this->equalTo('Firelit\TestObject'))
                 ->will($this->returnValue(new TestObject()));
 
         TestObject::setQueryObject($queryStub);
@@ -151,7 +156,7 @@ class DatabaseObjectTest extends PHPUnit_Framework_TestCase
 
         // Test with arrays:
 
-        $queryStub = $this->getMock('Firelit\Query', array('query', 'getObject'));
+        $queryStub = $this->createMock('Firelit\Query', array('query', 'getObject'));
 
         $queryStub->expects($this->once())
                 ->method('query')
@@ -183,7 +188,7 @@ class DatabaseObjectTest extends PHPUnit_Framework_TestCase
 
         $queryStub->expects($this->once())
                 ->method('getObject')
-                ->with($this->equalTo('TestObject'))
+                ->with($this->equalTo('Firelit\TestObject'))
                 ->will($this->returnValue(new TestObject()));
 
         TestObject::setQueryObject($queryStub);
@@ -195,7 +200,7 @@ class DatabaseObjectTest extends PHPUnit_Framework_TestCase
         try {
             $to = TestObject::findBy(array('test', 'test2'), 'nope');
             $exception = false;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $exception = true;
         }
 
@@ -205,7 +210,7 @@ class DatabaseObjectTest extends PHPUnit_Framework_TestCase
     public function testFind()
     {
 
-        $queryStub = $this->getMock('Firelit\Query', array('query', 'getObject'));
+        $queryStub = $this->createMock('Firelit\Query', array('query', 'getObject'));
 
         $queryStub->expects($this->once())
                 ->method('query')
@@ -228,7 +233,7 @@ class DatabaseObjectTest extends PHPUnit_Framework_TestCase
 
         $queryStub->expects($this->once())
                 ->method('getObject')
-                ->with($this->equalTo('TestObject'))
+                ->with($this->equalTo('Firelit\TestObject'))
                 ->will($this->returnValue(new TestObject()));
 
         TestObject::setQueryObject($queryStub);
@@ -240,7 +245,7 @@ class DatabaseObjectTest extends PHPUnit_Framework_TestCase
         try {
             $to = TestObject::find(array(1, 2));
             $exception = false;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $exception = true;
         }
 

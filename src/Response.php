@@ -4,7 +4,7 @@ namespace Firelit;
 
 class Response extends Singleton
 {
-    
+
     protected $callback = false;
 
     // Static to prevent mutliple, tangled, nested output buffers
@@ -17,7 +17,7 @@ class Response extends Singleton
 
     // Global config - if to throw exception when headers already sent and update can't be made
     static public $exceptOnHeaders = false;
-    
+
     /**
      * Construct
      * @param Bool $ob Enable output buffer
@@ -37,21 +37,21 @@ class Response extends Singleton
         } elseif (self::$exceptOnHeaders) {
             throw new \Exception('Headers already sent. Multi-byte output cannot be enabled.');
         }
-        
+
         // Will not turn off or on if already on
         if ($ob && !self::$outputBuffering) {
             // Ouput buffer by default to prevent unforseen errors from printing to the page,
             // to make possible a special 500 error page if something comes up during processing,
             // to prevent flushing in strange places and partial page loads if a internal processes take too long,
             // and ability to redirect at any time if there is an issue
-            
+
             self::$outputBuffering = $ob;
 
             // Run output through muli-byte filter to match the above-specified (via mb_http_output) output encoding
             ob_start("mb_output_handler");
         }
     }
-    
+
     /**
      * Most likely called at end of execution, outputs data as needed
      */
@@ -109,7 +109,7 @@ class Response extends Singleton
      */
     public function contentType($type = false)
     {
-            
+
         if (headers_sent()) {
             if (self::$exceptOnHeaders) {
                 throw new \Exception('Headers already sent. Content-type cannot be changed.');
@@ -117,15 +117,15 @@ class Response extends Singleton
                 return;
             }
         }
-        
+
         if (!$type) {
             $type = "text/html";
         }
-        
+
         self::$contentType = $type ."; charset=". strtolower(self::$charset);
         header("Content-Type: ". self::$contentType);
     }
-    
+
     /**
      * Set the HTTP response code
      * @param Mixed $code The response code to use or false to return current value
@@ -133,7 +133,7 @@ class Response extends Singleton
      */
     public function code($code = false)
     {
-        
+
         if (!$code) {
             return http_response_code();
         }
@@ -145,7 +145,7 @@ class Response extends Singleton
                 return;
             }
         }
-        
+
         self::$code = $code;
         http_response_code(self::$code);
     }
@@ -162,7 +162,7 @@ class Response extends Singleton
         // 301 = Moved permanently
         // 302 = Temporary redirect
         // 303 = Perform GET at new location (instead of POST)
-        
+
         if (headers_sent()) {
             if (self::$exceptOnHeaders) {
                 throw new \Exception('Headers already sent. Redirect cannot be initiated.');
@@ -170,19 +170,19 @@ class Response extends Singleton
                 return;
             }
         }
-        
+
         if (self::$outputBuffering) {
             $this->cleanBuffer();
         }
 
         $this->code($type);
         header('Location: '. $path);
-        
+
         if ($end) {
             exit;
         }
     }
-    
+
     /**
      * Flush the output buffer (but leave enabled)
      */
@@ -193,7 +193,7 @@ class Response extends Singleton
             ob_flush();
         }
     }
-    
+
     /**
      * Clean the output buffer
      */
@@ -201,10 +201,15 @@ class Response extends Singleton
     {
         // Empty buffer
         if (self::$outputBuffering) {
-            ob_clean();
+            if (headers_sent()) {
+                // Mute warnings if headers sent
+                @ob_clean();
+            } else {
+                ob_clean();
+            }
         }
     }
-    
+
     /**
      * Clear the output buffer, alias to cleanBuffer() method
      */

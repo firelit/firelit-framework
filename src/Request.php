@@ -6,8 +6,23 @@ class Request extends Singleton
 {
 
     // All properties accessible via magic getter method
-    private $ip, $proxies, $host, $path, $method, $secure, $referer, $protocol, $cli, $headers, $uri, $body;
-    private $put, $post, $get, $cookie;
+    private $ip;
+    private $proxies;
+    private $host;
+    private $path;
+    private $method;
+    private $secure;
+    private $referer;
+    private $protocol;
+    private $cli;
+    private $headers;
+    private $uri;
+    private $body;
+
+    private $put;
+    private $post;
+    private $get;
+    private $cookie;
 
     // If load-balanced, look for appropriate headers
     public static $loadBalanced = false;
@@ -96,14 +111,19 @@ class Request extends Singleton
                 switch ($jsonErr) {
                     case JSON_ERROR_DEPTH:
                         $jsonErrMsg = 'Maximum stack depth exceeded.';
+                        break;
                     case JSON_ERROR_STATE_MISMATCH:
                         $jsonErrMsg = 'Underflow or the modes mismatch.';
+                        break;
                     case JSON_ERROR_CTRL_CHAR:
                         $jsonErrMsg = 'Unexpected control character found.';
+                        break;
                     case JSON_ERROR_SYNTAX:
                         $jsonErrMsg = 'Syntax error, malformed data.';
+                        break;
                     case JSON_ERROR_UTF8:
                         $jsonErrMsg = 'Malformed UTF-8 characters, possibly incorrectly encoded.';
+                        break;
                     default:
                         $jsonErrMsg = 'Generic error.';
                 }

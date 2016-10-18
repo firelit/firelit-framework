@@ -1,8 +1,8 @@
 <?PHP
 
-use Firelit\InputValidator;
+namespace Firelit;
 
-class InputValidatorTest extends PHPUnit_Framework_TestCase
+class InputValidatorTest extends \PHPUnit_Framework_TestCase
 {
 
     public function testStatic()

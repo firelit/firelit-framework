@@ -4,7 +4,7 @@ namespace Firelit;
 
 class Countries
 {
-    
+
     static public $list = array(
         "AF" => "Afghanistan",
         "AX" => "Åland Islands",
@@ -254,77 +254,73 @@ class Countries
         "ZM" => "Zambia",
         "ZW" => "Zimbabwe"
     );
-    
-    function __construct()
-    {
-    }
-    
+
     /*
 	Useage Example:
-		
+
 		Countries::display( create_function('$abbrv,$name', 'return "<option value=\"". $abbrv ."\">". $name ."</option>";') );
-	
+
 	*/
     public static function display($callback, $subset = false)
     {
         // $callback is the anonymous function for formating the data
         // $subset should be an array of ok abbreviations, set to false for all countries
         // returns true on success
-        
+
         if (!is_callable($callback)) {
             throw new Exception('Callback function is not callable.');
         }
         if ($subset && !is_array($subset)) {
             throw new Exception('Subset must be false or an array of acceptable country abbreviations.');
         }
-        
+
         foreach (self::$list as $abbrv => $name) {
             if ($subset && !in_array($abbrv, $subset)) {
                 continue;
             }
-            
+
             echo $callback($abbrv, $name);
         }
-        
+
         return true;
     }
-    
+
     public static function check($countryAbbrv)
     {
         // Check if a country abbrevation is valid
-        
+
         if (isset(self::$list[$countryAbbrv])) {
             return true;
         }
         return false;
     }
-    
+
     public static function getName($countryAbbrv, $html = true)
     {
         // Get a country's name from its abbrevation
-        
+
         if (!self::check($countryAbbrv)) {
             return false;
         }
 
         $ret = self::$list[$countryAbbrv];
-        
+
         if ($html) {
             $find = array(
                 'Å',
                 'ô',
                 'é'
             );
-            
+
             $replace = array(
                 '&Aring;',
                 '&ocirc;',
                 '&eacute;'
             );
-            
+
             $ret = str_replace($find, $replace, $ret);
         }
-        
+
         return $ret;
     }
 }

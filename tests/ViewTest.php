@@ -1,11 +1,13 @@
 <?PHP
 
-class ViewTest extends PHPUnit_Framework_TestCase
+namespace Firelit;
+
+class ViewTest extends \PHPUnit_Framework_TestCase
 {
-    
+
     public function testLayoutTemplate()
     {
-        $view = new Firelit\View();
+        $view = new View();
         $view->setLayout('Test');
         $view->setTemplate('Temp');
 
@@ -15,13 +17,13 @@ class ViewTest extends PHPUnit_Framework_TestCase
 
     public function testAssetAdder()
     {
-        Firelit\View::$assetDirectory = '/assets/';
-        Firelit\View::$viewFolder = __DIR__.'/';
+        View::$assetDirectory = '/assets/';
+        View::$viewFolder = __DIR__.'/';
 
-        $view = new Firelit\View('ViewTestTemplate');
+        $view = new View('ViewTestTemplate');
 
         ob_start();
-        
+
         $view->render(); // Runs code in ViewTestTemplate.php
 
         $output = trim(ob_get_contents());

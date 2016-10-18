@@ -1,30 +1,35 @@
 <?PHP
 
-class RegistryTest extends PHPUnit_Framework_TestCase
+namespace Firelit;
+
+class RegistryTest extends \PHPUnit_Framework_TestCase
 {
-    
-    private $encrypted, $password, $iv, $unencrypted;
-    
+
+    private $encrypted;
+    private $password;
+    private $iv;
+    private $unencrypted;
+
     protected function setUp()
     {
-        
-        Firelit\Registry::set('test', 'value');
+
+        Registry::set('test', 'value');
     }
-    
+
     public function testGet()
     {
 
-        Firelit\Registry::set('boolean', true);
+        Registry::set('boolean', true);
 
-        $this->assertEquals('value', Firelit\Registry::get('test'));
+        $this->assertEquals('value', Registry::get('test'));
 
-        $this->assertTrue(Firelit\Registry::get('boolean'));
+        $this->assertTrue(Registry::get('boolean'));
     }
 
     public function testSet()
     {
 
-        $r = new Firelit\Registry();
+        $r = new Registry();
 
         $r->set('Peter', 'Piper');
         $r->set('Red', 'Herring');

@@ -1,6 +1,9 @@
 <?PHP
 
-class DatabaseMigrationMock extends Firelit\DatabaseMigration
+namespace Firelit;
+
+// @codingStandardsIgnoreStart
+class DatabaseMigrationMock extends DatabaseMigration
 {
 
     static protected $version = '5.0.5';
@@ -8,12 +11,15 @@ class DatabaseMigrationMock extends Firelit\DatabaseMigration
     public function up()
     {
     }
+
     public function down()
     {
     }
 }
+// @codingStandardsIgnoreEnd
 
-class DatabaseMigrationTest extends PHPUnit_Framework_TestCase
+// @codingStandardsIgnoreLine (ignoring multiple classes in a file)
+class DatabaseMigrationTest extends \PHPUnit_Framework_TestCase
 {
 
     public function testGetVersion()
