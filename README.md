@@ -52,12 +52,6 @@ $resp = Firelit\Response::init();
 $reqs = Firelit\Request::init();
 $router = Firelit\Router::init($reqs);
 
-$router->exceptionHandler(function($e) use ($resp) {
-    $resp->setCode(500);
-    echo $e->getMessage();
-    exit;
-});
-
 $router->add('GET', '!^/Hello$!', function() {
 	// Simple route, you'd go to http://example.com/Hello and get this:
     echo 'World!';
@@ -78,11 +72,23 @@ $router->add('GET', '!^/groups/([^0-9]+)$!', function($matches) {
 	echo 'You selected group #'. $matches[0];
 });
 
+// You can nest routes to keep things organized
+$myNestedRoutes = require_once('routes/api.php');
+$router->add('GET', '!^/api/!', $myNestedRoutes);
+
 $router->defaultRoute(function() use ($resp) {
 	// A default route is a backstop, catching any routes that don't match
     $resp->code(404);
     echo 'Sorry, no can do';
 });
+
+$router->exceptionHandler(function($e) use ($resp) {
+    $resp->setCode(500);
+    echo $e->getMessage();
+    exit;
+});
+
+$router->go();
 ```
 
 Note that this setup is considered single-entry so there must be a slight modification to web server to force it to use the main script (e.g., index.php) for all HTTP requests. Here's an example `.htaccess` (from the WordPress project) that will configure Apache to route all requests to a single entry script.
