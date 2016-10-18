@@ -161,11 +161,11 @@ if (Firelit\Cache::$cacheHit)
 Firelit\Cache::set('randomValue', null);
 ```
 
-### Crypto & CryptoKey
+### Crypto Classes
 
-A encryption/decryption helper classes using OpenSSL (used in lieu of mcrypt based on [this article](https://paragonie.com/blog/2015/05/if-you-re-typing-word-mcrypt-into-your-code-you-re-doing-it-wrong)). These classes can generate cryptographically secure secure keys and encrypt and decrypt using industry-standard symmetric encryption (RSA) and private key encryption (AES) schemes.
+Crypto, CryptoKey and CryptoPackage are encryption/decryption helper classes using OpenSSL (used in lieu of mcrypt based on [this article](https://paragonie.com/blog/2015/05/if-you-re-typing-word-mcrypt-into-your-code-you-re-doing-it-wrong)). These classes can generate cryptographically secure secure keys and encrypt and decrypt using industry-standard symmetric encryption (RSA) and private key encryption (AES) schemes.
 
-Note that AES encryption will not work for large strings (80 characters or more, depending on key bit size) due to the amount of processing power it takes -- it quickly becomes inefficient. For larger strings, the plain text should be encrypted with RSA and the encryption key should be encrypted with AES.
+Note that AES encryption will not work for large strings (80 characters or more, depending on key bit size) due to the amount of processing power it takes -- it quickly becomes inefficient. For larger strings, the plain text should be encrypted with RSA and the encryption key should be encrypted with AES. This is exactly what CryptoPackage does for you on top of serializing/unserializing the subject to quickly store and retrieve variables of any type (string, object, array, etc) in an encrypted store.
 
 Example encryption/decryption usage:
 ```php
@@ -189,6 +189,18 @@ $ciphertext = $crypto->encrypt($mySecret);
 
 $plaintext = $crypto->decrypt($ciphertext);
 
+// Robust, mixed-type private key encryption
+$key = Firelit\CryptoKey::newPrivateKey(); // Can be 128, 192 or 256-bit
+$crypto = new Firelit\CryptoPackage($key);
+
+$object = (object) array(
+	'test' => true,
+	'string' => $mySecret . $mySecret . $mySecret
+);
+
+$ciphertext = $crypto->encrypt($object)->with(Firelit\Crypto::PUBLIC_KEY);
+
+$objectBack = $crypto->decrypt($ciphertext)->with(Firelit\Crypto::PRIVATE_KEY);
 ```
 
 ### HttpRequest

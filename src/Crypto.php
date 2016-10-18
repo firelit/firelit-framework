@@ -16,10 +16,10 @@ class Crypto
 
     const   DEFAULT_AES_MODE = 'CFB';
 
-    private $key;
-    private $subject;
-    private $action;
-    private $aesMode;
+    protected $key;
+    protected $subject;
+    protected $action;
+    protected $aesMode;
 
     /**
      * Constructor
@@ -58,10 +58,10 @@ class Crypto
 
     /**
      *  Returns decrypted data if using symmetric key, otherwise returns $this for chaining to with() method
-     *  @param $plainText Data/string to encrypt
+     *  @param $subject Data/string to encrypt
      *  @return $this (with private key) or decrypted data (with symmetric key)
      */
-    public function decrypt($cryptogram)
+    public function decrypt($subject)
     {
 
         if ($this->key->getType() == CryptoKey::TYPE_SYMMETRIC) {
@@ -69,13 +69,13 @@ class Crypto
             $method = 'AES-'. $bitLen .'-'. $this->aesMode;
             $encryptionKey = $this->key->getKey(CryptoKey::FORMAT_RAW);
             $ivLen = openssl_cipher_iv_length($method);
-            $iv = substr($cryptogram, 0, $ivLen);
+            $iv = substr($subject, 0, $ivLen);
 
-            return openssl_decrypt(substr($cryptogram, $ivLen), $method, $encryptionKey, OPENSSL_RAW_DATA, $iv);
+            return openssl_decrypt(substr($subject, $ivLen), $method, $encryptionKey, OPENSSL_RAW_DATA, $iv);
         }
 
         $this->action = self::ACTION_DECRYPT;
-        $this->subject = $cryptogram;
+        $this->subject = $subject;
 
         return $this;
     }

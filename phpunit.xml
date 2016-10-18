@@ -10,6 +10,7 @@
 			<file>./tests/CacheTest.php</file>
 			<file>./tests/CryptoKeyTest.php</file>
 			<file>./tests/CryptoTest.php</file>
+			<file>./tests/CryptoPackageTest.php</file>
 			<file>./tests/DatabaseMigrationManagerTest.php</file>
 			<file>./tests/DatabaseMigrationTest.php</file>
 			<file>./tests/DatabaseObjectTest.php</file>

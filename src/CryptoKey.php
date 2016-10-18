@@ -21,6 +21,14 @@ class CryptoKey
     private $key;
     private $bits;
 
+    public function __construct($key = false, $type = false)
+    {
+
+        if ($key && $type) {
+            $this->setKey($key, $type);
+        }
+    }
+
     public function setKey($key, $type)
     {
 
@@ -66,7 +74,7 @@ class CryptoKey
         if (!$format) {
             // Default formats for given type:
             if ($this->type == static::TYPE_SYMMETRIC) {
-                $format = self::FORMAT_BASE64;
+                $format = self::FORMAT_RAW;
             }
 
             if ($this->type == static::TYPE_PRIVATE) {
