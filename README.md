@@ -22,13 +22,13 @@ The easiest way to use this library is to use [Composer](http://getcomposer.org/
 Here is an example of how you'd add this package to your `composer.json` under the require key:
 ```js
     "require": {
-        "firelit/framework": "^1.0"
+        "firelit/framework": "^2.0"
     }
 ```
 
 You could also add it from the command line as follows:
 ```
-php composer.phar require firelit/framework "^1.0"
+php composer.phar require firelit/framework "^2.0"
 ```
 
 Alternatively, you could go the manual way and setup your own autoloader and copy the project files from `lib/` into your project directory.
@@ -42,7 +42,48 @@ This framework comes with classes to support building apps with the MVC architec
 - `Firelit\DatabaseObject` (i.e., model) class
 - `Firelit\Router` class
 
-TODO: More documentation here!
+An example implementation using these classes in a single entry web app:
+
+```
+<?php
+
+// Setup
+$resp = Firelit\Response::init();
+$reqs = Firelit\Request::init();
+$router = Firelit\Router::init($reqs);
+
+$router->add('POST', '!^/Hello$!', function() {
+    echo 'World!';
+});
+
+$router->add('GET', '!^/redirect$!', function() use ($resp) {
+    $resp->redirect('/to/here');
+});
+
+$router->add('POST', '!^/forms!', function() {
+    // Process the post in a controller
+    Controller::handoff('Controller\Forms', 'process');
+});
+
+$router->add('GET', '!^/groups/([^0-9]+)$!', function($matches) {
+	// Match URL parts with regular expressions to extract information
+	echo 'You selected group #'. $matches[0];
+});
+
+```
+
+Note that this setup is considered single-entry so there must be a slight modification to web server to force it to use the main script (e.g., index.php) for all HTTP requests. Here's an example `.htaccess` (from the WordPress project) that will configure Apache to route all requests to a single entry script.
+
+```
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
+```
 
 Classes Included
 ----------------
