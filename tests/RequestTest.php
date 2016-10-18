@@ -1,114 +1,116 @@
 <?PHP
 
-class RequestTest extends PHPUnit_Framework_TestCase {
+class RequestTest extends PHPUnit_Framework_TestCase
+{
 
-	public function testConstructor() {
+    public function testConstructor()
+    {
 
-		$_POST = $orig = array(
-			'test' => true,
-			'tester' => array(
-				0 => 'value0',
-				1 => 'value1'
-			)
-		);
+        $_POST = $orig = array(
+            'test' => true,
+            'tester' => array(
+                0 => 'value0',
+                1 => 'value1'
+            )
+        );
 
-		$_GET = array();
-		$_COOKIE = array();
+        $_GET = array();
+        $_COOKIE = array();
 
-		$sr = new Firelit\Request();
+        $sr = new Firelit\Request();
 
-		$this->assertEquals( $orig, $sr->post, '$_POST should be copied into internal property.' );
+        $this->assertEquals($orig, $sr->post, '$_POST should be copied into internal property.');
+    }
 
-	}
+    public function testUnset()
+    {
 
-	public function testUnset() {
+        $_POST = $orig = array(
+            'test' => true,
+            'tester' => array(
+                0 => 'value0',
+                1 => 'value1'
+            )
+        );
 
-		$_POST = $orig = array(
-			'test' => true,
-			'tester' => array(
-				0 => 'value0',
-				1 => 'value1'
-			)
-		);
+        $_GET = array();
+        $_COOKIE = array();
 
-		$_GET = array();
-		$_COOKIE = array();
+        $sr = new Firelit\Request(function (&$val) {
+            Firelit\Strings::cleanUTF8($val);
+        });
 
-		$sr = new Firelit\Request(function(&$val) {
-			Firelit\Strings::cleanUTF8($val);
-		});
+        $this->assertEquals($orig, $sr->post, '$_POST was not copied by Request object.');
+        $this->assertNull($_POST, '$_POST was not set to null by Request object.');
+    }
 
-		$this->assertEquals( $orig, $sr->post, '$_POST was not copied by Request object.' );
-		$this->assertNull( $_POST, '$_POST was not set to null by Request object.' );
+    public function testJson()
+    {
 
-	}
+        $data = array(
+            'test' => true,
+            'test_array' => array(
+                0 => 'value22',
+                1 => 'value33'
+            )
+        );
 
-	public function testJson() {
+        Firelit\Request::$dataInput = json_encode($data);
+        Firelit\Request::$methodInput = 'POST';
 
-		$data = array(
-			'test' => true,
-			'test_array' => array(
-				0 => 'value22',
-				1 => 'value33'
-			)
-		);
+        $sut = new Firelit\Request(false, 'json');
 
-		Firelit\Request::$dataInput = json_encode($data);
-		Firelit\Request::$methodInput = 'POST';
+        $this->assertEquals($data, $sut->post, 'Post JSON data was not correctly made available.');
 
-		$sut = new Firelit\Request(false, 'json');
+        Firelit\Request::$dataInput = '{"json":"invalid",:}';
+        Firelit\Request::$methodInput = 'PUT';
 
-		$this->assertEquals( $data, $sut->post, 'Post JSON data was not correctly made available.' );
+        try {
+            $sut = new Firelit\Request(false, 'json');
 
-		Firelit\Request::$dataInput = '{"json":"invalid",:}';
-		Firelit\Request::$methodInput = 'PUT';
+            $this->assertTrue(false, 'Invalid JSON data was not caught.');
+        } catch (Firelit\InvalidJsonException $e) {
+            $this->assertTrue(true, 'Invalid JSON data was not caught.');
+        }
 
-		try {
-			$sut = new Firelit\Request(false, 'json');
+        Firelit\Request::$dataInput = null;
+        Firelit\Request::$methodInput = null;
+    }
 
-			$this->assertTrue( false, 'Invalid JSON data was not caught.' );
+    public function testFilter()
+    {
 
-		} catch (Firelit\InvalidJsonException $e) {
-			$this->assertTrue( true, 'Invalid JSON data was not caught.' );
-		}
+        $_POST = array();
 
-		Firelit\Request::$dataInput = null;
-		Firelit\Request::$methodInput = null;
+        $_GET = $orig = array(
+            'nested' => array(
+                'deep' => array(
+                    'deeper' => 'bad',
+                    'other' => 'good'
+                )
+            ),
+            'shallow' => 'bad'
+        );
 
-	}
+        $_COOKIE = array();
 
-	public function testFilter() {
+        $sr = new Firelit\Request(function (&$val) {
+            if ($val == 'bad') {
+                $val = 'clean';
+            }
+        });
 
-		$_POST = array();
+        $this->assertNotEquals($orig, $sr->get, '$_GET value remains unchanged.');
+        $this->assertEquals('clean', $sr->get['nested']['deep']['deeper'], 'Deep array value not cleaned.');
+        $this->assertEquals('good', $sr->get['nested']['deep']['other'], 'Deep array value mistakenly cleaned.');
+        $this->assertEquals('clean', $sr->get['shallow'], 'Shallow array value not cleaned.');
+    }
 
-		$_GET = $orig = array(
-			'nested' => array(
-				'deep' => array(
-					'deeper' => 'bad',
-					'other' => 'good'
-				)
-			),
-			'shallow' => 'bad'
-		);
+    public function testCliDetection()
+    {
 
-		$_COOKIE = array();
+        $sr = new Firelit\Request();
 
-		$sr = new Firelit\Request(function(&$val) {
-			if ($val == 'bad') $val = 'clean';
-		});
-
-		$this->assertNotEquals( $orig, $sr->get, '$_GET value remains unchanged.' );
-		$this->assertEquals( 'clean', $sr->get['nested']['deep']['deeper'], 'Deep array value not cleaned.' );
-		$this->assertEquals( 'good', $sr->get['nested']['deep']['other'], 'Deep array value mistakenly cleaned.' );
-		$this->assertEquals( 'clean', $sr->get['shallow'], 'Shallow array value not cleaned.' );
-
-	}
-
-	public function testCliDetection() {
-
-		$sr = new Firelit\Request();
-
-		$this->assertEquals('CLI', $sr->method);
-
-	}
+        $this->assertEquals('CLI', $sr->method);
+    }
 }

@@ -20,6 +20,8 @@
 		}
 	],
     "require-dev": {
-        "squizlabs/php_codesniffer": "*"
+        "squizlabs/php_codesniffer": "2.*",
+        "phpunit/phpunit": "5.5.*",
+        "symfony/console": "3.*"
     }
 }

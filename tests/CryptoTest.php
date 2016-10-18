@@ -1,62 +1,62 @@
 <?PHP
 
-class CryptoTest extends PHPUnit_Framework_TestCase {
+class CryptoTest extends PHPUnit_Framework_TestCase
+{
 
-	private $secret;
+    private $secret;
 
-	protected function setUp() {
+    protected function setUp()
+    {
 
-		$this->secret = 'This is a secret phrase!';
+        $this->secret = 'This is a secret phrase!';
+    }
 
-	}
+    public function testSymmetric()
+    {
 
-	public function testSymmetric() {
+        $key = Firelit\CryptoKey::newSymmetricKey(256);
 
-		$key = Firelit\CryptoKey::newSymmetricKey(256);
+        $crypto = new Firelit\Crypto($key);
+        $ciphertext = $crypto->encrypt($this->secret);
 
-		$crypto = new Firelit\Crypto($key);
-		$ciphertext = $crypto->encrypt($this->secret);
+        $this->assertTrue(strlen($ciphertext) > 20);
+        $this->assertNotEquals($ciphertext, $this->secret);
 
-		$this->assertTrue(strlen($ciphertext) > 20);
-		$this->assertNotEquals($ciphertext, $this->secret);
+        $crypto = new Firelit\Crypto($key);
+        $back = $crypto->decrypt($ciphertext);
 
-		$crypto = new Firelit\Crypto($key);
-		$back = $crypto->decrypt($ciphertext);
+        $this->assertEquals($this->secret, $back);
+    }
 
-		$this->assertEquals($this->secret, $back);
+    public function testPublicKey()
+    {
 
-	}
+        $key = Firelit\CryptoKey::newPrivateKey(1024);
 
-	public function testPublicKey() {
+        $crypto = new Firelit\Crypto($key);
+        $ciphertext = $crypto->encrypt($this->secret)->with($crypto::PUBLIC_KEY);
 
-		$key = Firelit\CryptoKey::newPrivateKey(1024);
+        $this->assertTrue(strlen($ciphertext) > 20);
+        $this->assertNotEquals($ciphertext, $this->secret);
 
-		$crypto = new Firelit\Crypto($key);
-		$ciphertext = $crypto->encrypt($this->secret)->with($crypto::PUBLIC_KEY);
+        $crypto = new Firelit\Crypto($key);
+        $back = $crypto->decrypt($ciphertext)->with($crypto::PRIVATE_KEY);
 
-		$this->assertTrue(strlen($ciphertext) > 20);
-		$this->assertNotEquals($ciphertext, $this->secret);
+        $this->assertEquals($this->secret, $back);
 
-		$crypto = new Firelit\Crypto($key);
-		$back = $crypto->decrypt($ciphertext)->with($crypto::PRIVATE_KEY);
+        // Now let's try it the other way around
 
-		$this->assertEquals($this->secret, $back);
+        $key = Firelit\CryptoKey::newPrivateKey(1024);
 
- 		// Now let's try it the other way around
+        $crypto = new Firelit\Crypto($key);
+        $ciphertext = $crypto->encrypt($this->secret)->with($crypto::PRIVATE_KEY);
 
-		$key = Firelit\CryptoKey::newPrivateKey(1024);
+        $this->assertTrue(strlen($ciphertext) > 20);
+        $this->assertNotEquals($ciphertext, $this->secret);
 
-		$crypto = new Firelit\Crypto($key);
-		$ciphertext = $crypto->encrypt($this->secret)->with($crypto::PRIVATE_KEY);
+        $crypto = new Firelit\Crypto($key);
+        $back = $crypto->decrypt($ciphertext)->with($crypto::PUBLIC_KEY);
 
-		$this->assertTrue(strlen($ciphertext) > 20);
-		$this->assertNotEquals($ciphertext, $this->secret);
-
-		$crypto = new Firelit\Crypto($key);
-		$back = $crypto->decrypt($ciphertext)->with($crypto::PUBLIC_KEY);
-
-		$this->assertEquals($this->secret, $back);
-
-	}
-
+        $this->assertEquals($this->secret, $back);
+    }
 }

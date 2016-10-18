@@ -1,47 +1,47 @@
 <?PHP
 
-class ResponseTest extends PHPUnit_Framework_TestCase {
-	
-	public function testBufferClear() {
+class ResponseTest extends PHPUnit_Framework_TestCase
+{
+    
+    public function testBufferClear()
+    {
 
-		ob_start();
+        ob_start();
 
-		$r = Firelit\Response::init();
+        $r = Firelit\Response::init();
 
-		echo 'Should be cleared';
+        echo 'Should be cleared';
 
-		$r->clearBuffer();
-		$r->endBuffer();
+        $r->clearBuffer();
+        $r->endBuffer();
 
-		unset($r);
-		Firelit\Response::destruct();
+        unset($r);
+        Firelit\Response::destruct();
 
-		$output = ob_get_contents();
-		ob_end_clean();
+        $output = ob_get_contents();
+        ob_end_clean();
 
-		$this->assertEquals('', $output);
+        $this->assertEquals('', $output);
+    }
 
-	}
+    public function testBufferFlush()
+    {
 
-	public function testBufferFlush() {
+        ob_start();
 
-		ob_start();
+        $r = Firelit\Response::init();
+        $r->setCallback(function (&$out) {
+            $out = preg_replace('/not/', 'NOT', $out);
+        });
 
-		$r = Firelit\Response::init();
-		$r->setCallback(function(&$out) {
-			$out = preg_replace('/not/', 'NOT', $out);
-		});
+        echo 'Should not be cleared';
 
-		echo 'Should not be cleared';
+        unset($r);
+        Firelit\Response::destruct();
 
-		unset($r);
-		Firelit\Response::destruct();
+        $output = ob_get_contents();
+        ob_end_clean();
 
-		$output = ob_get_contents();
-		ob_end_clean();
-
-		$this->assertEquals('Should NOT be cleared', $output);
-
-	}
-
+        $this->assertEquals('Should NOT be cleared', $output);
+    }
 }
