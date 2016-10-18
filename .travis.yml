@@ -9,6 +9,5 @@ before_script:
   - composer --version
   - composer install
 
-test:
-  override:
-    - php build.php app:validate
+script:
+  - php build.php app:validate
