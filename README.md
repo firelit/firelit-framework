@@ -190,7 +190,7 @@ $ciphertext = $crypto->encrypt($mySecret);
 $plaintext = $crypto->decrypt($ciphertext);
 
 // Robust, mixed-type private key encryption
-$key = Firelit\CryptoKey::newPrivateKey(); // Can be 128, 192 or 256-bit
+$key = Firelit\CryptoKey::newPrivateKey(); // Can be 1024, 2048 or 3072-bit
 $crypto = new Firelit\CryptoPackage($key);
 
 $object = (object) array(
