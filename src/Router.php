@@ -12,6 +12,7 @@ class Router extends Singleton
     protected $error = array();
     protected $exceptionHandler = false;
     protected $testMode = false;
+    protected $routes = array();
 
     public $request;
     public $response;
@@ -94,36 +95,69 @@ class Router extends Singleton
             $filterMethod = array($filterMethod);
         }
 
-        // (1) Does the request method match?
-        if (!in_array('*', $filterMethod) && !in_array($this->method, $filterMethod)) {
+        if (!is_callable($execute) && !$execute instanceof Router) {
+            throw new \Exception('The last parameter to Router::add must be a callable function or an instance of the Firelit\Router class');
+        }
+
+        $this->routes[] = array(
+            'method' => $filterMethod,
+            'matcher' => $regExpUrlMatch,
+            'function' => $execute
+        );
+
+    }
+
+    public function go($uri = false) {
+
+        if (empty($uri)) {
+            $uri = $this->uri;
+        }
+
+        foreach ($this->routes as $route) {
+
+            $filterMethod = $route['method'];
+            $regExpUrlMatch = $route['matcher'];
+            $execute = $route['function'];
+
+            // (1) Does the request method match?
+            if (!in_array('*', $filterMethod) && !in_array($this->method, $filterMethod)) {
+                continue;
+            }
+
+            $params = array();
+
+            // (2) Does the URI match? (set $regExpUrlMatch to false to skip)
+            if ($regExpUrlMatch && ($this->method == 'CLI')) {
+                continue;
+            }
+            if ($regExpUrlMatch && !preg_match($regExpUrlMatch, $uri, $params)) {
+                continue;
+            }
+
+            // Method and URI match!
+            $this->match = true;
+
+            // Remove the full text match from the match array
+            array_shift($params);
+
+            try {
+                // Go!
+                if ($execute instanceof Router) {
+                    $subUri = preg_replace($regExpUrlMatch, '', $uri);
+                    $execute->go($subUri);
+                } else {
+                    $execute($params);
+                }
+
+            } catch (RouteToError $e) {
+                $this->triggerError($e->getCode(), $e->getMessage());
+                // If not exited, throw it back up (could be caught by another nested route)
+                throw $e;
+            }
+
+            // We had a match: No more checking routes!
             return;
         }
-
-        $params = array();
-
-        // (2) Does the URI match? (set $regExpUrlMatch to false to skip)
-        if ($regExpUrlMatch && ($this->method == 'CLI')) {
-            return;
-        }
-        if ($regExpUrlMatch && !preg_match($regExpUrlMatch, $this->uri, $params)) {
-            return;
-        }
-
-        // Method and URI match!
-        $this->match = true;
-
-        // Remove the full text match from the match array
-        array_shift($params);
-
-        try {
-            // Go!
-            $execute($params);
-        } catch (RouteToError $e) {
-            $this->triggerError($e->getCode(), $e->getMessage());
-        }
-
-        // End execution
-        exit;
     }
 
     /**
@@ -139,6 +173,7 @@ class Router extends Singleton
         if (!is_array($errorCode)) {
             $errorCode = array($errorCode);
         }
+
         foreach ($errorCode as $thisCode) {
             $this->error[$thisCode] = $execute;
         }
@@ -189,7 +224,8 @@ class Router extends Singleton
             if (isset($this->error[0]) && is_callable($this->error[0])) {
                 $callError = 0;
             } else {
-                exit($errorCode);
+                // Nothing set to handle this error!
+                return;
             }
         }
 
