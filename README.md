@@ -2,7 +2,7 @@ Firelit-Framework
 ===============
 [![Build Status](https://travis-ci.org/firelit/firelit-framework.png?branch=master)](https://travis-ci.org/firelit/firelit-framework)
 
-Firelit's standard PHP framework provides a set of helpful classes for developing a website. They are created and namespaced so that they can easily be used with an auto-loader, following the [PSR-0 standard](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md).
+Firelit's standard PHP framework provides a set of helpful classes for developing a website. They are created and namespaced so that they can easily be used with an auto-loader, following the [PSR-4 standard](http://www.php-fig.org/psr/psr-4/).
 
 Requirements
 ------------
@@ -44,7 +44,7 @@ This framework comes with classes to support building apps with the MVC architec
 
 An example implementation using these classes in a single entry web app:
 
-```
+```php
 <?php
 
 // Setup
@@ -52,17 +52,25 @@ $resp = Firelit\Response::init();
 $reqs = Firelit\Request::init();
 $router = Firelit\Router::init($reqs);
 
-$router->add('POST', '!^/Hello$!', function() {
+$router->exceptionHandler(function($e) use ($resp) {
+    $resp->setCode(500);
+    echo $e->getMessage();
+    exit;
+});
+
+$router->add('GET', '!^/Hello$!', function() {
+	// Simple route, you'd go to http://example.com/Hello and get this:
     echo 'World!';
 });
 
 $router->add('GET', '!^/redirect$!', function() use ($resp) {
+	// Redirect example
     $resp->redirect('/to/here');
 });
 
 $router->add('POST', '!^/forms!', function() {
-    // Process the post in a controller
-    Controller::handoff('Controller\Forms', 'process');
+    // Process the POST request in a controller
+    Firelit\Controller::handoff('Controller\Forms', 'process');
 });
 
 $router->add('GET', '!^/groups/([^0-9]+)$!', function($matches) {
@@ -70,11 +78,16 @@ $router->add('GET', '!^/groups/([^0-9]+)$!', function($matches) {
 	echo 'You selected group #'. $matches[0];
 });
 
+$router->defaultRoute(function() use ($resp) {
+	// A default route is a backstop, catching any routes that don't match
+    $resp->code(404);
+    echo 'Sorry, no can do';
+});
 ```
 
 Note that this setup is considered single-entry so there must be a slight modification to web server to force it to use the main script (e.g., index.php) for all HTTP requests. Here's an example `.htaccess` (from the WordPress project) that will configure Apache to route all requests to a single entry script.
 
-```
+```apache
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteBase /
