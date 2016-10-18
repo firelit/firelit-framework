@@ -11,9 +11,9 @@ class Vars
     public static $config = array();
     public static $setter, $getter;
 
-    public static function init($config = array()) {
+    public static function init($config = array())
+    {
         if (!empty($config) || empty(static::$config)) {
-
             $default = array(
                 'type' => static::TYPE_DB,
                 'table' => 'Vars',
@@ -24,18 +24,16 @@ class Vars
             static::$config = array_merge($config, static::$config, $default);
 
             if (static::$config['type'] == static::TYPE_DB) {
-
-                static::$setter = function($name, $value) {
+                static::$setter = function ($name, $value) {
 
                     $q = new Query();
                     $q->replace(static::$config['table'], array(
                         static::$config['col_name'] => $name,
                         static::$config['col_value'] => $value
                     ));
-
                 };
 
-                static::$getter = function($name) {
+                static::$getter = function ($name) {
 
                     $q = new Query();
                     $q->query("SELECT :col_value AS `value` FROM :table WHERE :col_name = :name LIMIT 1", array(
@@ -47,15 +45,12 @@ class Vars
 
                     $result = $q->getRow();
                     return (!empty($result) ? $result['value'] : null);
-
                 };
-
             }
         }
 
         $name = get_called_class();
         return new $name();
-
     }
 
     public function __construct()

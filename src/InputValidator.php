@@ -57,11 +57,9 @@ class InputValidator
             case self::NAME:
             case self::ORG_NAME:
             case self::CITY:
-
                 return Strings::nameFix($this->value);
 
             case self::ADDRESS:
-
                 return Strings::addressFix($this->value);
 
             case self::STATE:
@@ -385,5 +383,4 @@ class InputValidator
 
         return (($sum % 10) === 0);
     }
-
 }

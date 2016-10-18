@@ -1,151 +1,144 @@
 <?php
 /**
- *	A general class for holding keys for both symmetric and private key encryption.
- *	Assuming that AES is used for symmetric key encryption.
- *	Assuming that RSA is used for private key encryption.
+ *  A general class for holding keys for both symmetric and private key encryption.
+ *  Assuming that AES is used for symmetric key encryption.
+ *  Assuming that RSA is used for private key encryption.
  */
 namespace Firelit;
 
 class CryptoKey
 {
 
-	const 	FORMAT_RAW = 'RAW',
-			FORMAT_BASE64 = 'BASE64',
-			FORMAT_HEX = 'HEX',
-			FORMAT_PEM = 'PEM';
+    const   FORMAT_RAW = 'RAW',
+            FORMAT_BASE64 = 'BASE64',
+            FORMAT_HEX = 'HEX',
+            FORMAT_PEM = 'PEM';
 
-	const 	TYPE_SYMMETRIC = 'SYMMETRIC',
-			TYPE_PRIVATE = 'PRIVATE';
+    const   TYPE_SYMMETRIC = 'SYMMETRIC',
+            TYPE_PRIVATE = 'PRIVATE';
 
-	private $type, $key, $bits;
+    private $type, $key, $bits;
 
 
-	public function setKey($key, $type) {
+    public function setKey($key, $type)
+    {
 
-		if ($type == static::TYPE_SYMMETRIC) {
+        if ($type == static::TYPE_SYMMETRIC) {
+            $len = strlen($key);
+            $this->bits = $len * 8;
+            $this->key = $key;
+        } elseif ($type == static::TYPE_PRIVATE) {
+            if (gettype($key) == 'resource') {
+                // Store the key resource
+                $this->key = $key;
+            } elseif (gettype($key) == 'string') {
+                // Import the given key
+                $this->key = openssl_pkey_get_private($key);
+            } else {
+                throw new \Exception('Private key given in unsupported format (must be PEM encoded string or a key resource)');
+            }
 
-			$len = strlen($key);
-			$this->bits = $len * 8;
-			$this->key = $key;
+            $details = openssl_pkey_get_details($this->key);
+            $this->bits = $details['bits'];
+        } else {
+            throw new \Exception('Invalid key type');
+        }
 
-		} elseif ($type == static::TYPE_PRIVATE) {
+        $this->type = $type;
+    }
 
-			if (gettype($key) == 'resource') {
-				// Store the key resource
-				$this->key = $key;
+    public function getType()
+    {
 
-			} elseif (gettype($key) == 'string') {
-				// Import the given key
-				$this->key = openssl_pkey_get_private($key);
+        return $this->type;
+    }
 
-			} else {
-				throw new \Exception('Private key given in unsupported format (must be PEM encoded string or a key resource)');
-			}
+    public function getBitLength()
+    {
 
-			$details = openssl_pkey_get_details($this->key);
-			$this->bits = $details['bits'];
+        return $this->bits;
+    }
 
-		} else {
-			throw new \Exception('Invalid key type');
-		}
+    public function getKey($format = false)
+    {
 
-		$this->type = $type;
+        if (!$format) {
+            // Default formats for given type:
+            if ($this->type == static::TYPE_SYMMETRIC) {
+                $format = self::FORMAT_BASE64;
+            }
 
-	}
+            if ($this->type == static::TYPE_PRIVATE) {
+                $format = self::FORMAT_PEM;
+            }
+        }
 
-	public function getType() {
+        switch ($format) {
+            case self::FORMAT_RAW:
+                return $this->key;
 
-		return $this->type;
+            case self::FORMAT_BASE64:
+                if ($this->type != static::TYPE_SYMMETRIC) {
+                    throw new \Exception('Invalid formatting for symmetric key');
+                }
 
-	}
+                return base64_encode($this->key);
 
-	public function getBitLength() {
+            case self::FORMAT_HEX:
+                if ($this->type != static::TYPE_SYMMETRIC) {
+                    throw new \Exception('Invalid formatting for symmetric key');
+                }
 
-		return $this->bits;
+                return unpack('H*', $this->key);
 
-	}
+            case self::FORMAT_PEM:
+                if ($this->type != static::TYPE_PRIVATE) {
+                    throw new \Exception('Invalid formatting for private key');
+                }
 
-	public function getKey($format = false) {
+                $out = '';
+                openssl_pkey_export($this->key, $out, null, array(
+                    'config' => dirname(__DIR__) .'/config/openssl.cnf'
+                ));
+                return $out;
 
-		if (!$format) {
-			// Default formats for given type:
-			if ($this->type == static::TYPE_SYMMETRIC) {
-				$format = self::FORMAT_BASE64;
-			}
+            default:
+                throw new \Exception('Invalid format');
+        }
+    }
 
-			if ($this->type == static::TYPE_PRIVATE) {
-				$format = self::FORMAT_PEM;
-			}
-		}
+    public function getPublicKey($format = self::FORMAT_RAW)
+    {
+        if ($this->type != static::TYPE_PRIVATE) {
+            throw new \Exception('Public keys can only be generated from private key');
+        }
 
-		switch ($format) {
-			case self::FORMAT_RAW:
+        $pubKey = openssl_pkey_get_details($this->key);
+        $pubKey = $pubKey['key'];
 
-				return $this->key;
+        switch ($format) {
+            case self::FORMAT_RAW:
+                return openssl_pkey_get_public($pubKey);
 
-			case self::FORMAT_BASE64:
-				if ($this->type != static::TYPE_SYMMETRIC) {
-					throw new \Exception('Invalid formatting for symmetric key');
-				}
+            case self::FORMAT_PEM:
+                return $pubKey;
 
-				return base64_encode($this->key);
+            default:
+                throw new \Exception('Invalid format');
+        }
+    }
 
-			case self::FORMAT_HEX:
-				if ($this->type != static::TYPE_SYMMETRIC) {
-					throw new \Exception('Invalid formatting for symmetric key');
-				}
+    public static function newSymmetricKey($bits = 256)
+    {
 
-				return unpack('H*', $this->key);
+        if (!in_array($bits, array(128, 192, 256))) {
+            throw new \Exception('Invalid key length: '. $bits .' bits');
+        }
 
-			case self::FORMAT_PEM:
-				if ($this->type != static::TYPE_PRIVATE) {
-					throw new \Exception('Invalid formatting for private key');
-				}
+        $keyclass = get_called_class();
+        $ckey = new $keyclass;
 
-				$out = '';
-				openssl_pkey_export($this->key, $out, null, array(
-        			'config' => dirname(__DIR__) .'/config/openssl.cnf'
-        		));
-				return $out;
-
-			default:
-				throw new \Exception('Invalid format');
-		}
-
-	}
-
-	public function getPublicKey($format = self::FORMAT_RAW) {
-		if ($this->type != static::TYPE_PRIVATE) {
-			throw new \Exception('Public keys can only be generated from private key');
-		}
-
-		$pubKey = openssl_pkey_get_details( $this->key );
-		$pubKey = $pubKey['key'];
-
-		switch ($format) {
-			case self::FORMAT_RAW:
-
-				return openssl_pkey_get_public($pubKey);
-
-			case self::FORMAT_PEM:
-
-				return $pubKey;
-
-			default:
-				throw new \Exception('Invalid format');
-		}
-	}
-
-	public static function newSymmetricKey($bits = 256) {
-
-		if (!in_array($bits, array(128, 192, 256))) {
-			throw new \Exception('Invalid key length: '. $bits .' bits');
-		}
-
-		$keyclass = get_called_class();
-		$ckey = new $keyclass;
-
-		$success = false;
+        $success = false;
 
         $rand = openssl_random_pseudo_bytes($bits / 8, $success);
 
@@ -153,37 +146,36 @@ class CryptoKey
             throw new \Exception('Could not generate a secure key');
         }
 
-		$ckey->setKey( $rand, static::TYPE_SYMMETRIC );
+        $ckey->setKey($rand, static::TYPE_SYMMETRIC);
 
-		return $ckey;
+        return $ckey;
+    }
 
-	}
+    public static function newPrivateKey($bits = 2048)
+    {
 
-	public static function newPrivateKey($bits = 2048) {
+        if (!in_array($bits, array(1024, 2048, 3072))) {
+            throw new \Exception('Invalid key length: '. $bits .' bits');
+        }
 
-		if (!in_array($bits, array(1024, 2048, 3072))) {
-			throw new \Exception('Invalid key length: '. $bits .' bits');
-		}
+        $keyclass = get_called_class();
+        $ckey = new $keyclass;
 
-		$keyclass = get_called_class();
-		$ckey = new $keyclass;
-
-		$success = false;
+        $success = false;
 
         $key = openssl_pkey_new(array(
-        	'config' => dirname(__DIR__) .'/config/openssl.cnf',
-        	'private_key_bits' => $bits,
-        	'private_key_type' => OPENSSL_KEYTYPE_RSA,
-        	'encrypt_key' => false
+            'config' => dirname(__DIR__) .'/config/openssl.cnf',
+            'private_key_bits' => $bits,
+            'private_key_type' => OPENSSL_KEYTYPE_RSA,
+            'encrypt_key' => false
         ));
 
         if ($key === false) {
             throw new \Exception('Could not generate a key ('. openssl_error_string() .')');
         }
 
-		$ckey->setKey( $key, static::TYPE_PRIVATE );
+        $ckey->setKey($key, static::TYPE_PRIVATE);
 
-		return $ckey;
-
-	}
+        return $ckey;
+    }
 }
