@@ -37,10 +37,10 @@ MVC Architecture
 ----------------
 
 This framework comes with classes to support building apps with the MVC architecture.
-- `Firelit\View` class
-- `Firelit\Controller` class
-- `Firelit\DatabaseObject` (i.e., model) class
-- `Firelit\Router` class
+- [`Firelit\View`](#View) class
+- [`Firelit\Controller`](#Controller) class
+- [`Firelit\DatabaseObject`](#DatabaseObject) (i.e., model) class
+- `Firelit\Router` class (see example below)
 
 An example implementation using these classes in a single entry web app:
 
@@ -167,6 +167,33 @@ if (Firelit\Cache::$cacheHit)
 Firelit\Cache::set('randomValue', null);
 ```
 
+### Controller
+
+A minimal class to wrap controller logic. Extend to add additional controller-common methods and static data. It also has a "handoff" function call to simplify invocations to Controller objects.
+
+Handoff syntax:
+`Firelit\Controller::handoff(ControllerClassName [, OptionalMethodName [, MethodParamater1 [, ... ]]])`
+
+```php
+<?php
+
+class DashboardController extends Firelit\Controller
+{
+
+	public function show($userName)
+	{
+		// This skelton controller method retrieves a view template, populates and renders
+		$data = GetMyData::now();
+
+		Firelit\View::quickRender('DashboardView', 'LoggedinLayout', array('name' => $userName));
+	}
+
+}
+
+// You could invoke this as you would any class, but the handoff method makes it a one-liner:
+Firelit\Controller::handoff('DashboardController', 'show', $userName);
+```
+
 ### Crypto Classes
 
 Crypto, CryptoKey and CryptoPackage are encryption/decryption helper classes using OpenSSL (used in lieu of mcrypt based on [this article](https://paragonie.com/blog/2015/05/if-you-re-typing-word-mcrypt-into-your-code-you-re-doing-it-wrong)). These classes can generate cryptographically secure secure keys and encrypt and decrypt using industry-standard symmetric encryption (RSA) and private key encryption (AES) schemes.
@@ -216,7 +243,8 @@ This class is a schema-less, active record-like class for creating, retrieving a
 ```php
 <?php
 
-class Person extends Firelit\DatabaseObject {
+class Person extends Firelit\DatabaseObject
+{
 
     protected static $tableName = 'People'; // The table name
     protected static $primaryKey = 'id'; // The primary key for table (array for multiple keys, false if n/a)
@@ -231,12 +259,12 @@ class Person extends Firelit\DatabaseObject {
 }
 
 // Create a new person
-$newPerson = Person::create(
+$newPerson = Person::create(array(
 	'name' => 'Sally',
 	'email' => 'sally@example.com',
 	'nicknames' => array('Sal'),
 	'created' => new DateTime()
-);
+));
 
 // Find by the primary key
 $person = Person::find(23);
@@ -251,9 +279,10 @@ $person->nicknames = array(
 	'William'
 );
 
+// Easily save to database (uses primary key set during retrieval)
 $person->save();
 
-// Or find by another column(s)
+// Or find rows by other columns
 $persons = Person::findBy('email', 'test@test.com');
 
 // DatabaseObject::findBy returns an iterable object (Firelit\QueryIterator) for search results
@@ -358,7 +387,8 @@ Example usage:
 ```php
 <?php
 
-function demo() {
+function demo()
+{
 
 	$q = new Firelit\Query($type);
 
@@ -505,4 +535,50 @@ $vars->maintenanceMode = true;
 
 // Read a persistent application variable
 if ($vars->maintenanceMode) die('Sorry, under construction.');
+```
+
+### View
+
+A class for managing views: View templates, view layouts (which wraps around a view template), partials (part of a view that is extracted for use elsewhere) and asset management (auto-inserting of required assets into the HTML <head>).
+
+Layouts are like view templates in which view templates reside. They typically contain the repeating HTML wrappers around the more view-specific elements. Layouts are an optional component. If no layout is specified, the view template is rendered on its own.
+
+An example layout, saved to `views\layouts\main.php`:
+
+```php
+<?php if (!is_object($this)) die; ?> <!-- Prevent direct calls to layout files -->
+<html>
+	<head>
+		<title>Example Layout</title>
+	</head>
+	<body>
+		<?php $this->yieldNow(); ?> <!-- Firelit\View::yieldNow() specifies the place for the view template -->
+	</body>
+</html>
+```
+
+Now an example view file, saved to `views\templates\dashboard.php`:
+
+```php
+<?php if (!is_object($this)) die; ?> <!-- Prevent direct calls to layout files -->
+<div id="user-info">
+	<?=htmlentities($name); ?>
+</div>
+<div id="main">
+	<h1>Dashboard</h1>
+	<p>Lorem Ipsum</p>
+	<?php $this->includePart('partials\stuff'); ?> <!-- Firelit\View::includePart() brings in other view templates -->
+</div>
+```
+
+When the view is invoked, the data used in the view (see `$name` above as an example) is specified using an associative array.
+
+```php
+<?php
+// The view folder can be changed with a static property. The php extension is added if not supplied.
+$view = new Firelit\View('templates\dashboard', 'layouts\main');
+
+// Here the view is sent to the client
+// The data to be available in the view is given as an array
+$view->render(array('name' => 'John'));
 ```
