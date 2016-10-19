@@ -8,6 +8,7 @@ Requirements
 ------------
 
 - PHP version 5.4.0 or higher
+- PHP version 5.6.0 or higher for testing
 
 External PHP Extensions:
 - OpenSSL extension (required for `Crypto` and `CryptoKey` class)
