@@ -37,9 +37,9 @@ MVC Architecture
 ----------------
 
 This framework comes with classes to support building apps with the MVC architecture.
-- [`Firelit\View`](#View) class
-- [`Firelit\Controller`](#Controller) class
-- [`Firelit\DatabaseObject`](#DatabaseObject) (i.e., model) class
+- [`Firelit\View`](#view) class
+- [`Firelit\Controller`](#controller) class
+- [`Firelit\DatabaseObject`](#databaseobject) (i.e., model) class
 - `Firelit\Router` class (see example below)
 
 An example implementation using these classes in a single entry web app:
