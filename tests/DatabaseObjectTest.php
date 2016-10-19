@@ -126,20 +126,23 @@ class DatabaseObjectTest extends \PHPUnit_Framework_TestCase
                 ->with(
                     $this->stringContains('SELECT * FROM `TableName` WHERE `email`'),
                     $this->callback(function ($subject) {
-                            // Make sure the 2nd param is an array
+                        // Make sure the 2nd param is an array
                         if (!is_array($subject)) {
                             return false;
                         }
+
                         if (sizeof($subject) != 1) {
                             return false;
                         }
-                            // Make sure the primary key value is in the 2nd param
-                            $key = key($subject);
+                        // Make sure the primary key value is in the 2nd param
+                        $key = key($subject);
+
                         if ($subject[$key] != 'test@test.com') {
                             return false;
                         }
-                            // All good
-                            return true;
+
+                        // All good
+                        return true;
                     })
                 );
 
@@ -152,7 +155,12 @@ class DatabaseObjectTest extends \PHPUnit_Framework_TestCase
 
         $to = TestObject::findBy('email', 'test@test.com');
 
-        $this->assertTrue($to instanceof TestObject);
+        $this->assertTrue($to instanceof QueryIterator);
+
+        foreach ($to as $oneTo) {
+            $this->assertTrue($oneTo instanceof TestObject);
+            break;
+        }
 
         // Test with arrays:
 
@@ -195,7 +203,12 @@ class DatabaseObjectTest extends \PHPUnit_Framework_TestCase
 
         $to = TestObject::findBy(array('name', 'email'), array('john', 'test@test.com'));
 
-        $this->assertTrue($to instanceof TestObject);
+        $this->assertTrue($to instanceof QueryIterator);
+
+        foreach ($to as $oneTo) {
+            $this->assertTrue($oneTo instanceof TestObject);
+            break;
+        }
 
         try {
             $to = TestObject::findBy(array('test', 'test2'), 'nope');

@@ -241,14 +241,8 @@ $newPerson = Person::create(
 // Find by the primary key
 $person = Person::find(23);
 
-// Or find by another column(s)
-$person = Person::findBy('email', 'test@test.com');
-
 // Returns FALSE if not found
 if (!$person) die('Not found');
-
-// DateTime columns are converted to DateTime objects on retrieval
-echo 'Created: '. $person->created->format('n/j/y');
 
 // Serialized columns are serialized before being saved and unserialized on retrieval
 $person->nicknames = array(
@@ -258,6 +252,15 @@ $person->nicknames = array(
 );
 
 $person->save();
+
+// Or find by another column(s)
+$persons = Person::findBy('email', 'test@test.com');
+
+// DatabaseObject::findBy returns an iterable object (Firelit\QueryIterator) for search results
+foreach ($persons as $person) {
+	// DateTime columns are converted to DateTime objects on retrieval
+	echo $person->name .' was created '. $person->created->format('n/j/y') . PHP_EOL;
+}
 
 ```
 

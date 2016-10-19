@@ -104,17 +104,16 @@ class Router extends Singleton
             'matcher' => $regExpUrlMatch,
             'function' => $execute
         );
-
     }
 
-    public function go($uri = false) {
+    public function go($uri = false)
+    {
 
         if (empty($uri)) {
             $uri = $this->uri;
         }
 
         foreach ($this->routes as $route) {
-
             $filterMethod = $route['method'];
             $regExpUrlMatch = $route['matcher'];
             $execute = $route['function'];
@@ -148,7 +147,6 @@ class Router extends Singleton
                 } else {
                     $execute($params);
                 }
-
             } catch (RouteToError $e) {
                 $this->triggerError($e->getCode(), $e->getMessage());
                 // If not exited, throw it back up (could be caught by another nested route)

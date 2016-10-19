@@ -313,10 +313,10 @@ class DatabaseObject
             throw new \Exception('Cannot perform find without a primary key.');
         }
 
-        return static::findBy(static::$primaryKey, $searchValue);
+        return static::findBy(static::$primaryKey, $searchValue, 1);
     }
 
-    public static function findBy($column, $searchValue)
+    public static function findBy($column, $searchValue, $limit = false)
     {
 
         if (is_array($searchValue) != is_array($column)) {
@@ -337,6 +337,10 @@ class DatabaseObject
 
         $sql = "SELECT * FROM `". static::$tableName ."` ". $whereSql;
 
+        if (!empty($limit)) {
+            $sql .= ' LIMIT '. $limit;
+        }
+
         if (static::$query) {
             $q = static::$query;
         } else {
@@ -345,6 +349,10 @@ class DatabaseObject
 
         $q->query($sql, $whereBinder);
 
-        return $q->getObject(get_called_class());
+        if ($limit === 1) {
+            return $q->getObject(get_called_class());
+        } else {
+            return new QueryIterator($q, get_called_class());
+        }
     }
 }
