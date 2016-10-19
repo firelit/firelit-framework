@@ -209,6 +209,58 @@ $ciphertext = $crypto->encrypt($object)->with(Firelit\Crypto::PUBLIC_KEY);
 $objectBack = $crypto->decrypt($ciphertext)->with(Firelit\Crypto::PRIVATE_KEY);
 ```
 
+### DatabaseObject
+
+This class is a schema-less, active record-like class for creating, retrieving and manipulating a database row as an object. To set it up, extend the class for each table, specifing the primary key row and other special-value rows (e.g., serialized rows, date/time rows, etc.) to enable built-in pre-store and post-retrieval value manipulation.
+
+```php
+<?php
+
+class Person extends Firelit\DatabaseObject {
+
+    protected static $tableName = 'People'; // The table name
+    protected static $primaryKey = 'id'; // The primary key for table (array for multiple keys, false if n/a)
+
+    // Columns that should be automatically php-serialized when using
+    protected static $colsSerialize = array('nicknames');
+    // Columns that should be automatically JSON-encoded/decoded when using
+    protected static $colsJson = array();
+    // Columns that should be a DateTime object when loaded from DB
+    protected static $colsDateTime = array('created');
+
+}
+
+// Create a new person
+$newPerson = Person::create(
+	'name' => 'Sally',
+	'email' => 'sally@example.com',
+	'nicknames' => array('Sal'),
+	'created' => new DateTime()
+);
+
+// Find by the primary key
+$person = Person::find(23);
+
+// Or find by another column(s)
+$person = Person::findBy('email', 'test@test.com');
+
+// Returns FALSE if not found
+if (!$person) die('Not found');
+
+// DateTime columns are converted to DateTime objects on retrieval
+echo 'Created: '. $person->created->format('n/j/y');
+
+// Serialized columns are serialized before being saved and unserialized on retrieval
+$person->nicknames = array(
+	'Bill',
+	'Will',
+	'William'
+);
+
+$person->save();
+
+```
+
 ### HttpRequest
 
 A class to manage new HTTP requests to external web services and websites. Includes file-based cookie support.
