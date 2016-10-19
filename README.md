@@ -387,10 +387,10 @@ Example usage:
 ```php
 <?php
 
-function demo()
+function demo($type)
 {
 
-	$q = new Firelit\Query($type);
+	$q = new Firelit\Query();
 
 	$q->query("SELECT * FROM `TableName` WHERE `type`=:type", array('type' => $type));
 
