@@ -546,7 +546,7 @@ Layouts are like view templates in which view templates reside. They typically c
 An example layout, saved to `views\layouts\main.php`:
 
 ```php
-<?php if (!is_object($this)) die; ?> <!-- Prevent direct calls to layout files -->
+<?php if (!is_object($this)) die; ?> <!-- Prevent direct calls to view files -->
 <html>
 	<head>
 		<title>Example Layout</title>
@@ -560,7 +560,7 @@ An example layout, saved to `views\layouts\main.php`:
 Now an example view file, saved to `views\templates\dashboard.php`:
 
 ```php
-<?php if (!is_object($this)) die; ?> <!-- Prevent direct calls to layout files -->
+<?php if (!is_object($this)) die; ?> <!-- Prevent direct calls to view files -->
 <div id="user-info">
 	<?=htmlentities($name); ?>
 </div>
