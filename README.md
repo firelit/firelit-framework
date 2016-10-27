@@ -513,7 +513,7 @@ $out = Firelit\Strings::html('You & I Rock'); // $out == 'You &amp; I Rock'
 $out = Firelit\Strings::xml('You & I Rock'); // $out == 'You &#38; I Rock'
 
 // Format the string as a CSV cell value (escaping quotes with a second quote)
-$out = Firelit\Strings::cleanUTF8('John "Hairy" Smith'); // $out == '"John ""Hairy"" Smith"'
+$out = Firelit\Strings::csv('John "Hairy" Smith'); // $out == '"John ""Hairy"" Smith"'
 
 // Multi-byte safe string case maniuplation
 $out = Firelit\Strings::upper('this started lower'); // $out == 'THIS STARTED LOWER'
