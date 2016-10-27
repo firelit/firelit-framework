@@ -1,15 +1,16 @@
 <?php
 
-use Firelit\Countries;
+namespace Firelit;
 
-class CountriesTest extends PHPUnit_Framework_TestCase {
+class CountriesTest extends \PHPUnit_Framework_TestCase
+{
 
-	public function testGetName() {
+    public function testGetName()
+    {
 
-		$this->assertEquals( 'United States', Countries::getName('US') );
-		$this->assertEquals( 'Canada', Countries::getName('CA') );
-		$this->assertEquals( 'Åland Islands', Countries::getName('AX', false) );
-		$this->assertEquals( '&Aring;land Islands', Countries::getName('AX', true) );
-
-	}
+        $this->assertEquals('United States', Countries::getName('US'));
+        $this->assertEquals('Canada', Countries::getName('CA'));
+        $this->assertEquals('Åland Islands', Countries::getName('AX', false));
+        $this->assertEquals('&Aring;land Islands', Countries::getName('AX', true));
+    }
 }

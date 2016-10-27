@@ -1,94 +1,95 @@
 <?PHP
 
-class ApiResponseTest extends PHPUnit_Framework_TestCase {
-	
-	public function testTemplate() {
-		
-		ob_start();
-		
-		$resp = Firelit\ApiResponse::init('JSON', false);
+namespace Firelit;
 
-		$resp->setTemplate(array('res' => true, 'message' => 'Peter picked a pack of pickels'));
-		$resp->respond(array(), false);
-		
-		unset($resp);
-		Firelit\ApiResponse::destruct();
+class ApiResponseTest extends \PHPUnit_Framework_TestCase
+{
 
-		$res = ob_get_contents();
-		ob_end_clean();
+    public function testTemplate()
+    {
 
-		$this->assertEquals('{"res":true,"message":"Peter picked a pack of pickels"}', $res);
-		
-	}
-	
-	public function testCancel() {
-		
-		ob_start();
-		
-		$resp = Firelit\ApiResponse::init('JSON', false);
+        ob_start();
 
-		$resp->setTemplate(array('res' => true, 'message' => 'Peter picked a pack of pickels'));
+        $resp = ApiResponse::init('JSON', false);
 
-		$resp->cancel();
+        $resp->setTemplate(array('res' => true, 'message' => 'Peter picked a pack of pickels'));
+        $resp->respond(array(), false);
 
-		echo '<HTML>';
-		
-		unset($resp);
-		Firelit\ApiResponse::destruct();
+        unset($resp);
+        ApiResponse::destruct();
 
-		$res = ob_get_contents();
-		ob_end_clean();
+        $res = ob_get_contents();
+        ob_end_clean();
 
-		$this->assertEquals('<HTML>', $res);
-		
-	}
-	
-	public function testJsonCallbackWrap() {
-		
-		ob_start();
-		
-		$resp = Firelit\ApiResponse::init('JSON', false);
+        $this->assertEquals('{"res":true,"message":"Peter picked a pack of pickels"}', $res);
+    }
 
-		$resp->setJsonCallbackWrap('test_function');
-		
-		$resp->setTemplate(array('res' => false, 'message' => 'Peter picked a pack of pickels'));
-		$resp->respond(array(), false);
+    public function testCancel()
+    {
 
-		unset($resp);
-		Firelit\ApiResponse::destruct();
+        ob_start();
 
-		$res = ob_get_contents();
-		ob_end_clean();
+        $resp = ApiResponse::init('JSON', false);
 
-		$this->assertEquals('test_function({"res":false,"message":"Peter picked a pack of pickels"});', $res);
-		
-	}
+        $resp->setTemplate(array('res' => true, 'message' => 'Peter picked a pack of pickels'));
 
-	
-	public function testApiCallback() {
-		
-		ob_start();
-		
-		$resp = Firelit\ApiResponse::init('JSON', false);
+        $resp->cancel();
 
-		$resp->setApiCallback(function(&$response) {
+        echo '<HTML>';
 
-			unset($response['data']);
-			$response['new'] = true;
+        unset($resp);
+        ApiResponse::destruct();
 
-		});
+        $res = ob_get_contents();
+        ob_end_clean();
 
-		$resp->setTemplate(array('res' => true, 'message' => 'Peter picked a pack of pickels', 'data' => 'erase me'));
-		$resp->respond(array(), false);
-		
-		unset($resp);
-		Firelit\ApiResponse::destruct();
+        $this->assertEquals('<HTML>', $res);
+    }
 
-		$res = ob_get_contents();
-		ob_end_clean();
+    public function testJsonCallbackWrap()
+    {
 
-		$this->assertEquals('{"res":true,"message":"Peter picked a pack of pickels","new":true}', $res);
-		
-	}
+        ob_start();
 
+        $resp = ApiResponse::init('JSON', false);
+
+        $resp->setJsonCallbackWrap('test_function');
+
+        $resp->setTemplate(array('res' => false, 'message' => 'Peter picked a pack of pickels'));
+        $resp->respond(array(), false);
+
+        unset($resp);
+        ApiResponse::destruct();
+
+        $res = ob_get_contents();
+        ob_end_clean();
+
+        $this->assertEquals('test_function({"res":false,"message":"Peter picked a pack of pickels"});', $res);
+    }
+
+
+    public function testApiCallback()
+    {
+
+        ob_start();
+
+        $resp = ApiResponse::init('JSON', false);
+
+        $resp->setApiCallback(function (&$response) {
+
+            unset($response['data']);
+            $response['new'] = true;
+        });
+
+        $resp->setTemplate(array('res' => true, 'message' => 'Peter picked a pack of pickels', 'data' => 'erase me'));
+        $resp->respond(array(), false);
+
+        unset($resp);
+        ApiResponse::destruct();
+
+        $res = ob_get_contents();
+        ob_end_clean();
+
+        $this->assertEquals('{"res":true,"message":"Peter picked a pack of pickels","new":true}', $res);
+    }
 }

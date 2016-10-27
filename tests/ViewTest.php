@@ -1,34 +1,38 @@
 <?PHP
 
-class ViewTest extends PHPUnit_Framework_TestCase {
-	
-	public function testLayoutTemplate() {
-		$view = new Firelit\View();
-		$view->setLayout('Test');
-		$view->setTemplate('Temp');
+namespace Firelit;
 
-		$this->assertEquals('Test', $view->layout);
-		$this->assertEquals('Temp', $view->template);
-	}
+class ViewTest extends \PHPUnit_Framework_TestCase
+{
 
-	public function testAssetAdder() {
-		Firelit\View::$assetDirectory = '/assets/';
-		Firelit\View::$viewFolder = __DIR__.'/';
+    public function testLayoutTemplate()
+    {
+        $view = new View();
+        $view->setLayout('Test');
+        $view->setTemplate('Temp');
 
-		$view = new Firelit\View('ViewTestTemplate');
+        $this->assertEquals('Test', $view->layout);
+        $this->assertEquals('Temp', $view->template);
+    }
 
-		ob_start();
-		
-		$view->render(); // Runs code in ViewTestTemplate.php
+    public function testAssetAdder()
+    {
+        View::$assetDirectory = '/assets/';
+        View::$viewFolder = __DIR__.'/';
 
-		$output = trim( ob_get_contents() );
-		ob_end_clean();
+        $view = new View('ViewTestTemplate');
 
-		$this->assertRegExp('!^<script(.*)</script>$!', $output);
+        ob_start();
 
-		$this->assertRegExp('!type="text/javascript"!', $output);
+        $view->render(); // Runs code in ViewTestTemplate.php
 
-		$this->assertRegExp('!src="/assets/test\.js!', $output);
+        $output = trim(ob_get_contents());
+        ob_end_clean();
 
-	}
+        $this->assertRegExp('!^<script(.*)</script>$!', $output);
+
+        $this->assertRegExp('!type="text/javascript"!', $output);
+
+        $this->assertRegExp('!src="/assets/test\.js!', $output);
+    }
 }

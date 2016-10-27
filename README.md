@@ -2,17 +2,18 @@ Firelit-Framework
 ===============
 [![Build Status](https://travis-ci.org/firelit/firelit-framework.png?branch=master)](https://travis-ci.org/firelit/firelit-framework)
 
-Firelit's standard PHP framework provides a set of helpful classes for developing a website. They are created and namespaced so that they can easily be used with an auto-loader, following the [PSR-0 standard](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md).
+Firelit's standard PHP framework provides a set of helpful classes for developing a website. They are created and namespaced so that they can easily be used with an auto-loader, following the [PSR-4 standard](http://www.php-fig.org/psr/psr-4/).
 
 Requirements
 ------------
 
-- PHP version 5.4.0 and higher
-- MultiByte PHP extension
-- Mcrypt PHP extension (required for `Crypto` class)
-- cURL PHP extension (required for `HttpRequest` class)
-- PDO PHP extension (required for `Query` class)
-- SQLite PHP extension (required for `Query` class unit tests)
+- PHP version 5.4.0 or higher
+- PHP version 5.6.0 or higher for testing
+
+External PHP Extensions:
+- OpenSSL extension (required for `Crypto` and `CryptoKey` class)
+- cURL extension (required for `HttpRequest` class)
+- Database-specific PDO extension (e.g., `pdo-mysql`, required for `Query` class)
 
 How to Use
 ----------
@@ -22,13 +23,13 @@ The easiest way to use this library is to use [Composer](http://getcomposer.org/
 Here is an example of how you'd add this package to your `composer.json` under the require key:
 ```js
     "require": {
-        "firelit/framework": "^1.0"
+        "firelit/framework": "^2.0"
     }
 ```
 
 You could also add it from the command line as follows:
 ```
-php composer.phar require firelit/framework "^1.0"
+php composer.phar require firelit/framework "^2.0"
 ```
 
 Alternatively, you could go the manual way and setup your own autoloader and copy the project files from `lib/` into your project directory.
@@ -37,12 +38,72 @@ MVC Architecture
 ----------------
 
 This framework comes with classes to support building apps with the MVC architecture.
-- `Firelit\View` class
-- `Firelit\Controller` class
-- `Firelit\DatabaseObject` (i.e., model) class
-- `Firelit\Router` class
+- [`Firelit\View`](#view) class
+- [`Firelit\Controller`](#controller) class
+- [`Firelit\DatabaseObject`](#databaseobject) (i.e., model) class
+- `Firelit\Router` class (see example below)
 
-TODO: More documentation here!
+An example implementation using these classes in a single entry web app:
+
+```php
+<?php
+
+// Setup
+$resp = Firelit\Response::init();
+$reqs = Firelit\Request::init();
+$router = Firelit\Router::init($reqs);
+
+$router->add('GET', '!^/Hello$!', function() {
+	// Simple route, you'd go to http://example.com/Hello and get this:
+    echo 'World!';
+});
+
+$router->add('GET', '!^/redirect$!', function() use ($resp) {
+	// Redirect example
+    $resp->redirect('/to/here');
+});
+
+$router->add('POST', '!^/forms!', function() {
+    // Process the POST request in a controller
+    Firelit\Controller::handoff('Controller\Forms', 'process');
+});
+
+$router->add('GET', '!^/groups/([^0-9]+)$!', function($matches) {
+	// Match URL parts with regular expressions to extract information
+	echo 'You selected group #'. $matches[0];
+});
+
+// You can nest routes to keep things organized
+$myNestedRoutes = require_once('routes/api.php');
+$router->add('GET', '!^/api/!', $myNestedRoutes);
+
+$router->defaultRoute(function() use ($resp) {
+	// A default route is a backstop, catching any routes that don't match
+    $resp->code(404);
+    echo 'Sorry, no can do';
+});
+
+$router->exceptionHandler(function($e) use ($resp) {
+    $resp->setCode(500);
+    echo $e->getMessage();
+    exit;
+});
+
+$router->go();
+```
+
+Note that this setup is considered single-entry so there must be a slight modification to web server to force it to use the main script (e.g., index.php) for all HTTP requests. Here's an example `.htaccess` (from the WordPress project) that will configure Apache to route all requests to a single entry script.
+
+```apache
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
+```
 
 Classes Included
 ----------------
@@ -107,19 +168,130 @@ if (Firelit\Cache::$cacheHit)
 Firelit\Cache::set('randomValue', null);
 ```
 
-### Crypto
+### Controller
 
-A symmetrical-key encryption/decryption helper class (uses MCRYPT_RIJNDAEL_256 aka AES) with HMAC and automatic initialization vector creation.
+A minimal class to wrap controller logic. Extend to add additional controller-common methods and static data. It also has a "handoff" function call to simplify invocations to Controller objects.
+
+Handoff syntax:
+`Firelit\Controller::handoff(ControllerClassName [, OptionalMethodName [, MethodParamater1 [, ... ]]])`
+
+```php
+<?php
+
+class DashboardController extends Firelit\Controller
+{
+
+	public function show($userName)
+	{
+		// This skelton controller method retrieves a view template, populates and renders
+		$data = GetMyData::now();
+
+		Firelit\View::quickRender('DashboardView', 'LoggedinLayout', array('name' => $userName));
+	}
+
+}
+
+// You could invoke this as you would any class, but the handoff method makes it a one-liner:
+Firelit\Controller::handoff('DashboardController', 'show', $userName);
+```
+
+### Crypto Classes
+
+Crypto, CryptoKey and CryptoPackage are encryption/decryption helper classes using OpenSSL (used in lieu of mcrypt based on [this article](https://paragonie.com/blog/2015/05/if-you-re-typing-word-mcrypt-into-your-code-you-re-doing-it-wrong)). These classes can generate cryptographically secure secure keys and encrypt and decrypt using industry-standard symmetric encryption (RSA) and private key encryption (AES) schemes.
+
+Note that AES encryption will not work for large strings (80 characters or more, depending on key bit size) due to the amount of processing power it takes -- it quickly becomes inefficient. For larger strings, the plain text should be encrypted with RSA and the encryption key should be encrypted with AES. This is exactly what CryptoPackage does for you on top of serializing/unserializing the subject to quickly store and retrieve variables of any type (string, object, array, etc) in an encrypted store.
 
 Example encryption/decryption usage:
 ```php
 <?php
 
-$mySecretPassword = 'Super secret!';
+$mySecret = 'Super secret!';
 
-$encrypted = Firelit\Crypto::package('Super secret text', $mySecretPassword);
+// Private key encryption
+$key = Firelit\CryptoKey::newPrivateKey(); // Can be 1024, 2048 or 3072-bit
+$crypto = new Firelit\Crypto($key);
 
-$decrypted = Firelit\Crypto::unpackage($encrypted, $mySecretPassword);
+$ciphertext = $crypto->encrypt($mySecret)->with(Firelit\Crypto::PUBLIC_KEY);
+
+$plaintext = $crypto->decrypt($ciphertext)->with(Firelit\Crypto::PRIVATE_KEY);
+
+// Symmetric key encryption
+$key = Firelit\CryptoKey::newSymmetricKey(); // Can be 128, 192 or 256-bit
+$crypto = new Firelit\Crypto($key);
+
+$ciphertext = $crypto->encrypt($mySecret);
+
+$plaintext = $crypto->decrypt($ciphertext);
+
+// Robust, mixed-type private key encryption
+$key = Firelit\CryptoKey::newPrivateKey(); // Can be 1024, 2048 or 3072-bit
+$crypto = new Firelit\CryptoPackage($key);
+
+$object = (object) array(
+	'test' => true,
+	'string' => $mySecret . $mySecret . $mySecret
+);
+
+$ciphertext = $crypto->encrypt($object)->with(Firelit\Crypto::PUBLIC_KEY);
+
+$objectBack = $crypto->decrypt($ciphertext)->with(Firelit\Crypto::PRIVATE_KEY);
+```
+
+### DatabaseObject
+
+This class is a schema-less, active record-like class for creating, retrieving and manipulating a database row as an object. To set it up, extend the class for each table, specifing the primary key row and other special-value rows (e.g., serialized rows, date/time rows, etc.) to enable built-in pre-store and post-retrieval value manipulation.
+
+```php
+<?php
+
+class Person extends Firelit\DatabaseObject
+{
+
+    protected static $tableName = 'People'; // The table name
+    protected static $primaryKey = 'id'; // The primary key for table (array for multiple keys, false if n/a)
+
+    // Columns that should be automatically php-serialized when using
+    protected static $colsSerialize = array('nicknames');
+    // Columns that should be automatically JSON-encoded/decoded when using
+    protected static $colsJson = array();
+    // Columns that should be a DateTime object when loaded from DB
+    protected static $colsDateTime = array('created');
+
+}
+
+// Create a new person
+$newPerson = Person::create(array(
+	'name' => 'Sally',
+	'email' => 'sally@example.com',
+	'nicknames' => array('Sal'),
+	'created' => new DateTime()
+));
+
+// Find by the primary key
+$person = Person::find(23);
+
+// Returns FALSE if not found
+if (!$person) die('Not found');
+
+// Serialized columns are serialized before being saved and unserialized on retrieval
+$person->nicknames = array(
+	'Bill',
+	'Will',
+	'William'
+);
+
+// Easily save to database (uses primary key set during retrieval)
+$person->save();
+
+// Or find rows by other columns
+$persons = Person::findBy('email', 'test@test.com');
+
+// DatabaseObject::findBy returns an iterable object (Firelit\QueryIterator) for search results
+foreach ($persons as $person) {
+	// DateTime columns are converted to DateTime objects on retrieval
+	echo $person->name .' was created '. $person->created->format('n/j/y') . PHP_EOL;
+}
+
 ```
 
 ### HttpRequest
@@ -225,9 +397,10 @@ Example usage:
 ```php
 <?php
 
-function demo() {
+function demo($type)
+{
 
-	$q = new Firelit\Query($type);
+	$q = new Firelit\Query();
 
 	$q->query("SELECT * FROM `TableName` WHERE `type`=:type", array('type' => $type));
 
@@ -325,23 +498,97 @@ A set of string helper functions wrapped into a class.
 Example usage:
 ```php
 <?php
+// Check if an email is valid
+$valid = Firelit\Strings::validEmail('test@test.com'); // $valid == true
 
-Firelit\Strings::cleanUTF8($_POST);
+// Clean the strings in the array for all valid UTF8
+Firelit\Strings::cleanUTF8($_POST); // The parameter is passed by reference and directly filtered
+
+// Normalize the formatting on a name or address
+$out = Firelit\Strings::nameFix('JOHN P.  DePrez SR'); // $out == 'John P. DePrez Sr.'
+$out = Firelit\Strings::addressFix('po box 3484'); // $out == 'PO Box 3484'
+
+// Multi-byte HTML and XML escaping
+$out = Firelit\Strings::html('You & I Rock'); // $out == 'You &amp; I Rock'
+$out = Firelit\Strings::xml('You & I Rock'); // $out == 'You &#38; I Rock'
+
+// Format the string as a CSV cell value (escaping quotes with a second quote)
+$out = Firelit\Strings::cleanUTF8('John "Hairy" Smith'); // $out == '"John ""Hairy"" Smith"'
+
+// Multi-byte safe string case maniuplation
+$out = Firelit\Strings::upper('this started lower'); // $out == 'THIS STARTED LOWER'
+$out = Firelit\Strings::lower('THIS STARTED UPPER'); // $out == 'this started upper'
+$out = Firelit\Strings::title('this STARTED mixed'); // $out == 'This Started Mixed'
+$out = Firelit\Strings::ucwords('this STARTED mixed'); // $out == 'This STARTED Mixed'
+
 ```
 
 ### Vars
 
-A class for managing application-level, persistent variables. Vars is implemented through magic setters and getters so you can use any name you want. Storage is maintained by the VarsStore abstract class and data can be held in a file or in a database. For VarsStoreDB, each set or get is equal to one database SQL statement so this can get costly very quick if you are doing a lot of read/writes. Roll your own VarsStore by extending the class.
+A class for managing application-level, persistent variables. Vars is implemented through magic setters and getters so you can use any name you want for your vars and any type of persistant data store. The store can be custom defined by creating custom getter and setter functions (e.g., for reading/writing the values to a file) or you can leave it to the default (which stores the values in a database).
 
 Example usage:
 ```php
 <?php
+// Configuration
+new Firelit\Vars::init(array(
+	'table' => 'Vars',
+	'col_name' => 'Name',
+	'col_value' => 'Value'
+));
 
-$vars = new Firelit\Vars( Firelit\VarsStore::init('DB') );
+// Later usage
+$vars = new Firelit\Vars::init();
 
-// Set a persistent application variable
+// Set a persistent application variable with any name accepted by your store
 $vars->maintenanceMode = true;
 
 // Read a persistent application variable
 if ($vars->maintenanceMode) die('Sorry, under construction.');
+```
+
+### View
+
+A class for managing views: View templates, view layouts (which wraps around a view template), partials (part of a view that is extracted for use elsewhere) and asset management (auto-inserting of required assets into the HTML <head>).
+
+Layouts are like view templates in which view templates reside. They typically contain the repeating HTML wrappers around the more view-specific elements. Layouts are an optional component. If no layout is specified, the view template is rendered on its own.
+
+An example layout, saved to `views\layouts\main.php`:
+
+```php
+<?php if (!is_object($this)) die; ?> <!-- Prevent direct calls to view files -->
+<html>
+	<head>
+		<title>Example Layout</title>
+	</head>
+	<body>
+		<?php $this->yieldNow(); ?> <!-- Firelit\View::yieldNow() specifies the place for the view template -->
+	</body>
+</html>
+```
+
+Now an example view file, saved to `views\templates\dashboard.php`:
+
+```php
+<?php if (!is_object($this)) die; ?> <!-- Prevent direct calls to view files -->
+<div id="user-info">
+	<?=htmlentities($name); ?>
+</div>
+<div id="main">
+	<h1>Dashboard</h1>
+	<p>Lorem Ipsum</p>
+	<?php $this->includePart('partials\stuff'); ?> <!-- Firelit\View::includePart() brings in other view templates -->
+</div>
+```
+
+When the view is invoked, the data used in the view (see `$name` above as an example) is specified using an associative array.
+
+```php
+<?php
+// The view folder can be changed with a static property. The php extension is added if not supplied.
+$view = new Firelit\View('templates\dashboard', 'layouts\main');
+
+// Here the view is sent to the client
+// The data to be available in the view is given as an array
+$view->render(array('name' => 'John'));
 ```
